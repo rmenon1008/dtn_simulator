@@ -7,14 +7,14 @@ from agent_peripherals import *
 MAX_SPEED = 5
 
 class RoverAgent(mesa.Agent):
-    def __init__(self, unique_id, model, type="mobile"):
+    def __init__(self, unique_id, model, type="mobile", radio_noise=0.1, radio_detection_range=200, radio_connection_range=40):
         super().__init__(unique_id, model)
         self.type = type
         self.history = []
 
         # Peripherals
         self.hdtn = HDTN(self, model)
-        self.radio = Radio(self, model)
+        self.radio = Radio(self, model, radio_noise, radio_detection_range, radio_connection_range)
 
     def update_history(self):
         self.history.append({
@@ -73,17 +73,24 @@ class RoverAgent(mesa.Agent):
             rssis = []
             for h in self.history:
                 if "neighborhood" in h["radio"]:
-                    for n in h["radio"]["neighborhood"]:
-                        if n["id"] == self.hdtn.current_target:
-                            rssis.append(n["rssi"])
-                            positions.append(h["pos"])
-                            break
+                    if self.hdtn.current_target == "all":
+                        rssis.append(h["radio"]["best_rssi"])
+                        positions.append(h["pos"])
+                    else:
+                        for n in h["radio"]["neighborhood"]:
+                            if n["id"] == self.hdtn.current_target:
+                                if n["rssi"] < -900:
+                                    continue
+                                rssis.append(n["rssi"])
+                                positions.append(h["pos"])
+                                break
+
             positions = np.array(positions)
             rssis = np.array(rssis)
 
-
-            print(positions.shape)
-            print(rssis.shape)
+            # Cap the number of positions to 100
+            positions = positions[-100:]
+            rssis = rssis[-100:]
 
             if (positions.shape[0] < 3):
                 move_random()
@@ -106,8 +113,6 @@ class RoverAgent(mesa.Agent):
                 move_random()
                 return
 
-            print("a: {}, b: {}".format(a, b))
-
             # 4. Move towards (a, b)
             dx = a - self.pos[0]
             dy = b - self.pos[1]
@@ -117,6 +122,5 @@ class RoverAgent(mesa.Agent):
             # Fixed agents don't move
             return
         elif self.type == "mobile":
-            # move_random()
             if self.hdtn.has_data:
                 find_best_location()

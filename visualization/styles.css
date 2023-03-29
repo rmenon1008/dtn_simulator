@@ -1,0 +1,45 @@
+.node {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.tooltip {
+    transform: translate(15px, 15px);
+    background-color: #333;
+    border-radius: 8px;
+    padding: 18px 18px 8px 18px;
+    display: none;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.tooltip .json-formatter-row {
+    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
+        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace !important;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.tooltip .json-formatter-row.json-formatter-open > .json-formatter-children:not(.json-formatter-empty) {
+    margin-bottom: 10px;
+}
+
+.tooltip .json-formatter-children:not(.json-formatter-empty) {
+    margin-left: 2px;
+    border-left: #666 1px solid;
+}
+
+.node:hover {
+    width: unset;
+}
+
+.node:hover .tooltip,
+.tooltip:hover {
+    display: block;
+}
+
+.tooltip h3 {
+    margin-top: 0;
+    color: white;
+}

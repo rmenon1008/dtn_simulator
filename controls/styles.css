@@ -1,0 +1,246 @@
+/* LAYOUT */
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+        "Open Sans", "Helvetica Neue", sans-serif;
+    height: 100vh;
+}
+
+.col-layout {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.col-1 {
+    flex-basis: 350px;
+    background-color: #333;
+}
+
+.col-2 {
+    flex-grow: 1;
+}
+
+/* UI ELEMENTS */
+
+button {
+    border: none;
+    padding: 7px 12px 5px 12px;
+    border-radius: 5px;
+    background-color: #ffffff20;
+    cursor: pointer;
+
+    color: #fff;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    transition: background-color 0.10s;
+}
+button:hover { background-color: #ffffff38; }
+button:active {  background-color: #ffffff55; }
+
+button.icon {
+    padding: 0px 2px;
+    background-color: transparent;
+    line-height: 80%;
+}
+button.icon:hover { background-color: #ffffff20; }
+button.icon:active {  background-color: #ffffff38; }
+button.icon svg * { fill: white; width: 2rem; height: 2rem;}
+button.icon.large svg { width: 2.75rem; height: 2.75rem; }
+
+.label {
+    display: block;
+    color: #ddd;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+hr {
+    border: none;
+    border-top: 1.5px solid #666;
+}
+
+input[type="range"] {
+    appearance: none;
+    /* width: 100%; */
+    width: 100px;
+    height: 5px;
+    background-color: #aaa;
+    border-radius: 3px;
+    margin: 7px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #fff;
+    transition: transform 0.10s;
+    overflow: visible;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Switch */
+
+input[type="checkbox"] {
+    appearance: none;
+    width: 30px;
+    height: 15px;
+    background-color: #777;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.10s;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #fff;
+}
+
+input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 13px;
+    height: 13px;
+    background-color: #aaa;
+    border-radius: 10px;
+    transition: transform 0.10s;
+}
+
+input[type="checkbox"]:checked::before {
+    transform: translateX(15px);
+}
+
+input[type="number"] {
+    border: none;
+    border-radius: 3px;
+    padding: 0 7px;
+    box-sizing: border-box;
+    width: 70px;
+    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
+        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace;
+    }
+
+
+/* CONTROL BAR */
+
+.control-bar {
+    width: 100%;
+    background-color: #444;
+    color: #fff;
+    padding: 10px 25px;
+    box-sizing: border-box;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.control-bar .buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.play-pause .play { display: none; }
+.play-pause.play .pause { display: none; }
+.play-pause.play .play { display: inline-block; }
+
+.control-bar .fps-selector {
+    width: 20%;
+    height: 40px;
+    margin-right: auto;
+}
+
+.control-bar .fps-slider {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.control-bar .frame-display {
+    width: 20%;
+    height: 40px;
+    text-align: right;
+    margin-left: auto;
+}
+
+.control-bar .frame-display .value {
+    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
+        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace;
+}
+
+/* SIDEBAR */
+.sidebar {
+    padding: 20px;
+}
+
+.options {
+    margin-top: 20px;
+}
+
+.options:first-of-type {
+    margin-bottom: 40px;
+}
+
+.option {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.option .label {
+    text-transform: none;
+    color: white;
+    font-size: 0.9rem;
+    flex-grow: 1;
+}
+
+.options .label .value-label {
+    padding-right: 7px;
+    float: right;
+    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
+        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace;
+}
+
+.option input {
+    margin-left: auto;
+}
+
+.save-params {
+    float: right;
+    width: 100%;
+}
+
+/* OTHER */
+
+.elements {
+    width: 100%;
+}
+
+
+
+/* MEDIA QUERIES */
+
+@media (max-width: 800px) {
+    body {
+        display: block;
+        height: auto;
+    }
+    .col-layout {
+        display: block;
+    }
+}

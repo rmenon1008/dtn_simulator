@@ -2,8 +2,15 @@ import json
 
 from mesa.visualization.ModularVisualization import VisualizationElement
 
+
 class LunarVis(VisualizationElement):
-    local_includes = ["js/lunar_vis.js", "js/fullscreen.js"]
+    local_includes = [
+        "visualization/lunar_vis.js",
+        "visualization/json_formatter.min.js",
+        "visualization/styles.css",
+        "controls/controls.js",
+        "controls/styles.css",
+    ]
 
     def __init__(self, simWidth, simHeight):
         self.width = simWidth

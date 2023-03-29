@@ -3,14 +3,15 @@ import logging
 
 DETECTION_RANGE = 600
 CONNECTION_RANGE = 20
-RSSI_NOISE_DBM_STDEV = 0.03
+RSSI_NOISE_DBM_STDEV = 0.1
 
 class Radio():
-    def __init__(self, agent, model, detection_range=DETECTION_RANGE, connection_range=CONNECTION_RANGE):
+    def __init__(self, agent, model, radio_noise=RSSI_NOISE_DBM_STDEV, detection_range=DETECTION_RANGE, connection_range=CONNECTION_RANGE):
         self.agent = agent
         self.model = model
         self.detection_range = detection_range
         self.connection_range = connection_range
+        self.radio_noise = radio_noise
         self.neighborhood = []
         self.best_rssi = -999
 
@@ -19,7 +20,7 @@ class Radio():
             return -999
         if distance == 0:
             return 0
-        return 10 * 2.5 * math.log10(1/distance) * self.agent.random.normalvariate(1, RSSI_NOISE_DBM_STDEV)
+        return 10 * 2.5 * math.log10(1/distance) * self.agent.random.normalvariate(1, self.radio_noise)
     
     def nodes_in_range(self, range):
         all_agents = self.model.schedule.agents
@@ -72,6 +73,11 @@ class HDTN():
     
     def refresh(self):
         if self.current_target is not None:
+            if self.current_target == "all":
+                for agent in self.agent.radio.neighborhood:
+                    if agent["connected"]:
+                        self.current_target = agent["id"]
+                        break
             if self.agent.radio.is_connected(self.current_target):
                 logging.info("Agent {} transferred data to agent {}".format(self.agent.unique_id, self.current_target))
                 for agent in self.model.schedule.agents:
