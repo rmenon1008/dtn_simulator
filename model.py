@@ -31,21 +31,7 @@ class LunarModel(mesa.Model):
             # Create a fixed agent at the center of the space.
             a = RoverAgent(99, self, "fixed", radio_noise, radio_detection_range, radio_connection_range)
             self.schedule.add(a)
-            self.space.place_agent(a, (width/2, height/2))        
-
-        # for i in range(self.num_agents):
-        #     a = RoverAgent(i, self)
-        #     self.schedule.add(a)
-        #     a.hdtn.create_data()
-        #     a.hdtn.schedule_transfer(i+1)
-        #     # Add the agent to a random spot in the space.
-        #     x = self.random.uniform(0, 1) * self.space.width
-        #     y = self.random.uniform(0, 1) * self.space.height
-        #     self.space.place_agent(a, (x, y))
-
-        self.datacollector = mesa.DataCollector(
-            model_reporters={"Gini": self.random.uniform(0, 1)},
-            agent_reporters={"Wealth": "wealth"})
+            self.space.place_agent(a, (width/2, height/2))
         
     def transfer_cb(self, other_agent):
         if self.finish_on_transfer:
