@@ -68,8 +68,9 @@ class HDTN():
     def create_data(self):
         self.has_data = True
 
-    def schedule_transfer(self, other_id):
+    def schedule_transfer(self, other_id, cb=None):
         self.current_target = other_id
+        self.cb = cb
     
     def refresh(self):
         if self.current_target is not None:
@@ -86,9 +87,13 @@ class HDTN():
                         agent.hdtn.has_data = True
                         break
 
+                if self.cb is not None:
+                    self.cb(self.current_target)
+                    self.cb = None
+
                 self.has_data = False
                 self.current_target = None
-                
+
 
     def get_state(self):
         return {

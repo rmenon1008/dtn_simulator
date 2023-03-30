@@ -4,10 +4,12 @@ from agent import RoverAgent
 class LunarModel(mesa.Model):
     """A lunar model with a number of rovers."""
 
-    def __init__(self, N, width, height, radio_noise, radio_detection_range, radio_connection_range, center_static):
+    def __init__(self, N, width, height, radio_noise, radio_detection_range, radio_connection_range, center_static, finish_on_transfer):
         self.num_agents = N
         self.space = mesa.space.ContinuousSpace(width, height, False)
         self.schedule = mesa.time.RandomActivation(self)
+        self.running = True
+        self.finish_on_transfer = finish_on_transfer
 
         if center_static:
             hdtn_target = 99
@@ -18,7 +20,7 @@ class LunarModel(mesa.Model):
         for i in range(self.num_agents):
             a = RoverAgent(i, self, "mobile", radio_noise, radio_detection_range, radio_connection_range)
             a.hdtn.create_data()
-            a.hdtn.schedule_transfer(hdtn_target)
+            a.hdtn.schedule_transfer(hdtn_target, cb=self.transfer_cb)
             self.schedule.add(a)
             # Add the agent to a random spot in the space.
             x = self.random.uniform(0, 1) * self.space.width
@@ -41,7 +43,13 @@ class LunarModel(mesa.Model):
         #     y = self.random.uniform(0, 1) * self.space.height
         #     self.space.place_agent(a, (x, y))
 
+        self.datacollector = mesa.DataCollector(
+            model_reporters={"Gini": self.random.uniform(0, 1)},
+            agent_reporters={"Wealth": "wealth"})
         
-
+    def transfer_cb(self, other_agent):
+        if self.finish_on_transfer:
+            self.running = False
+        
     def step(self):
         self.schedule.step()

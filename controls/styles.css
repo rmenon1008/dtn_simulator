@@ -51,6 +51,9 @@ button.icon:active {  background-color: #ffffff38; }
 button.icon svg * { fill: white; width: 2rem; height: 2rem;}
 button.icon.large svg { width: 2.75rem; height: 2.75rem; }
 
+button.icon.disabled svg * { fill: #666; }
+button.icon.disabled:hover { background-color: transparent; cursor: unset; }
+
 .label {
     display: block;
     color: #ddd;
@@ -156,8 +159,12 @@ input[type="number"] {
 }
 
 .play-pause .play { display: none; }
+.play-pause .finished { display: none; }
 .play-pause.play .pause { display: none; }
 .play-pause.play .play { display: inline-block; }
+.play-pause.finished .finished { display: inline-block; }
+.play-pause.finished.play .pause { display: none; }
+.play-pause.finished .play { display: none; }
 
 .control-bar .fps-selector {
     width: 20%;

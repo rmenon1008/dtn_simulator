@@ -3,6 +3,7 @@ const elements = visualizationElements;
 const stepCounter = document.getElementById("step-counter");
 const fpsSlider = document.getElementById("fps-slider");
 const fpsValue = document.getElementById("fps-value");
+const startStopButton = document.getElementById("play-pause");
 
 function ModelController() {
     this.tick = 0;
@@ -35,12 +36,19 @@ function ModelController() {
 
     this.done = () => {
         this.stop();
+        startStopButton.classList.add("play")
+        startStopButton.classList.add("finished")
+        startStopButton.classList.add("disabled")
+        
         this.finished = true;
     }
 
     this.reset = () => {
         this.tick = 0;
         this.receivedFrames = 0;
+        startStopButton.classList.remove("disabled")
+        startStopButton.classList.remove("finished")
+        this.finished = false;
         this.changeFPS(fpsSlider.value);
         visualizationElements.forEach((element) => {
             element.reset()
@@ -79,7 +87,6 @@ const changeInnerText = (element, text) => {
 }
 
 // Play/Pause button
-const startStopButton = document.getElementById("play-pause");
 startStopButton.addEventListener("click", () => {
     if (controller.finished) { return }
     if (controller.running) {

@@ -2,8 +2,9 @@ let PIXEL_MULTIPLIER = 3;
 let SCALE = 1;
 
 let showRanges = true;
-let historyFade = true;
-let showDetectionLines = true;
+let historyFade = false;
+let showDetectionLines = false;
+let showTargetLocations = true;
 
 const LunarVis = function (maxSimX, maxSimY) {
   const elements = document.getElementById("elements");
@@ -36,12 +37,21 @@ const LunarVis = function (maxSimX, maxSimY) {
     context.beginPath();
     if (shape === "circle") {
       context.arc(scale(x), scale(y), scale(size), 0, 2 * Math.PI);
+      context.fillStyle = color;
+      context.fill();
     } else if (shape === "square") {
       context.rect(scale(x - size * 1.7 / 2), scale(y - size * 1.7 / 2), scale(size * 1.7), scale(size * 1.7));
+      context.fillStyle = color;
+      context.fill();
+    } else if (shape === "X") {
+      context.moveTo(scale(x - size * 1.7 / 2), scale(y - size * 1.7 / 2));
+      context.lineTo(scale(x + size * 1.7 / 2), scale(y + size * 1.7 / 2));
+      context.moveTo(scale(x - size * 1.7 / 2), scale(y + size * 1.7 / 2));
+      context.lineTo(scale(x + size * 1.7 / 2), scale(y - size * 1.7 / 2));
+      context.lineWidth = 3 * PIXEL_MULTIPLIER * SCALE;
+      context.strokeStyle = color;
+      context.stroke();
     }
-
-    context.fillStyle = color;
-    context.fill();
 
     if (centerDot) {
       context.beginPath();
@@ -123,21 +133,40 @@ const LunarVis = function (maxSimX, maxSimY) {
     addBooleanInput("node_ranges", {
       name: "Show node ranges",
       value: showRanges
-    }, (key, value) => { showRanges = value; })
+    }, (key, value) => {
+      showRanges = value;
+      this.rerender();
+    })
   )
 
   visOptions.append(
     addBooleanInput("node_history", {
       name: "Fade node history",
       value: historyFade
-    }, (key, value) => { historyFade = value; })
+    }, (key, value) => { 
+      historyFade = value; 
+      this.rerender();
+    })
   )
 
   visOptions.append(
     addBooleanInput("radio_lines", {
       name: "Show radio lines",
       value: showDetectionLines
-    }, (key, value) => { showDetectionLines = value; })
+    }, (key, value) => {
+      showDetectionLines = value; 
+      this.rerender();
+    })
+  )
+
+  visOptions.append(
+    addBooleanInput("show_target_locations", {
+      name: "Show target locations",
+      value: showTargetLocations
+    }, (key, value) => {
+      showTargetLocations = value;
+      this.rerender();
+    })
   )
 
 
@@ -149,16 +178,18 @@ const LunarVis = function (maxSimX, maxSimY) {
 
   // Renders the current simulation state
   // Called every frame
-  this.render = function (nodes) {
-    console.log(nodes);
+  this.lastModelState = null;
+  this.render = function (modelState) {
+    this.lastModelState = modelState;
+    console.log(modelState);
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     const getNode = (id) => {
-      return nodes.find(node => node.id === id);
+      return modelState.find(node => node.id === id);
     };
 
     // Draw the historical RSSI values
-    nodes.forEach(node => {
+    modelState.forEach(node => {
       var transparency = 1;
       if (node.history.reverse()) {
         for (let i = 0; i < node.history.length - 1; i++) {
@@ -177,12 +208,12 @@ const LunarVis = function (maxSimX, maxSimY) {
 
     // Draw the detection and connection ranges as transparent circles
     if (showRanges) {
-      nodes.forEach(node => {
+      modelState.forEach(node => {
         if (node.radio.detection_range) {
           drawShape(node.pos[0], node.pos[1], node.radio.detection_range, "rgba(0, 0, 255, 0.04)");
         }
       });
-      nodes.forEach(node => {
+      modelState.forEach(node => {
         if (node.radio.connection_range) {
           drawShape(node.pos[0], node.pos[1], node.radio.connection_range, "rgba(0, 255, 0, 0.15)");
         }
@@ -190,7 +221,7 @@ const LunarVis = function (maxSimX, maxSimY) {
     }
 
     // Draw lines between nodes that have an RSSI
-    nodes.forEach(node => {
+    modelState.forEach(node => {
       if (node.radio.neighborhood) {
         node.radio.neighborhood.forEach(neighbor => {
           if (neighbor.connected || showDetectionLines) {
@@ -202,11 +233,27 @@ const LunarVis = function (maxSimX, maxSimY) {
     });
 
     // Draw all the nodes on top
-    nodes.forEach(node => {
+    modelState.forEach(node => {
       const color = colorFromSignal(node.radio.best_rssi, node.radio.detection_range);
       drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.type === "mobile" ? "circle" : "square"), node.hdtn.has_data);
       addTooltip(node);
     });
 
-  };
+    // Draw nodes target locations
+    if (showTargetLocations) {
+      modelState.forEach(node => {
+        if (node.target_location) {
+          drawShape(node.target_location[0], node.target_location[1], 5 * SCALE, "rgba(0, 0, 255, 0.5)", "X");
+        }
+      });
+    }
+  }
+
+  this.rerender = function () {
+    if (this.lastModelState) {
+      console.log("rerendering");
+      this.render(this.lastModelState);
+    }
+  }
+
 };

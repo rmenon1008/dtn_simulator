@@ -11,6 +11,7 @@ radio_noise = mesa.visualization.UserSettableParameter('slider', 'RSSI noise std
 radio_detection_range = mesa.visualization.UserSettableParameter('slider', 'Detection range', value=100, min_value=10, max_value=1000, step=10)
 radio_connection_range = mesa.visualization.UserSettableParameter('slider', 'Connection range', value=20, min_value=10, max_value=200, step=10)
 center_static = mesa.visualization.UserSettableParameter('checkbox', 'Center static node', value=True)
+finish_on_transfer = mesa.visualization.UserSettableParameter('checkbox', 'Finish on first data transfer', value=False)
 server = mesa.visualization.ModularServer(
     LunarModel,
     [vis],
@@ -23,6 +24,7 @@ server = mesa.visualization.ModularServer(
         "radio_detection_range": radio_detection_range,
         "radio_connection_range": radio_connection_range,
         "center_static": center_static,
+        "finish_on_transfer": finish_on_transfer
     })
 server.settings["template_path"] = "visualization"
 server.port = 8521 # The default

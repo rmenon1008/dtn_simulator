@@ -11,6 +11,7 @@ class RoverAgent(mesa.Agent):
         super().__init__(unique_id, model)
         self.type = type
         self.history = []
+        self.target_location = None
 
         # Peripherals
         self.hdtn = HDTN(self, model)
@@ -57,7 +58,8 @@ class RoverAgent(mesa.Agent):
             "type": self.type,
             "history": self.history,
             "hdtn": self.hdtn.get_state(),
-            "radio": self.radio.get_state()
+            "radio": self.radio.get_state(),
+            "target_location": self.target_location
         }
     
     def main_logic(self):
@@ -116,6 +118,7 @@ class RoverAgent(mesa.Agent):
             # 4. Move towards (a, b)
             dx = a - self.pos[0]
             dy = b - self.pos[1]
+            self.target_location = (a, b)
             self.move(dx, dy)
             
         if self.type == "fixed":
