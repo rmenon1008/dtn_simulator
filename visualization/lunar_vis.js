@@ -1,5 +1,5 @@
 let PIXEL_MULTIPLIER = 3;
-let SCALE = 1;
+let SCALE = 0.8;
 
 let showRanges = true;
 let historyFade = false;
@@ -27,7 +27,7 @@ const LunarVis = function (maxSimX, maxSimY) {
 
   canvasContainer.style.position = "relative";
 
-
+  
   // Scales simulation coordinates to canvas coordinates
   const scale = (mag) => { return Math.floor(mag * scaleFactor) };
 

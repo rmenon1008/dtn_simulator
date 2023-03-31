@@ -6,12 +6,21 @@ from agent_peripherals import *
 
 MAX_SPEED = 5
 
+SPIRAL_ARC = MAX_SPEED
+SPIRAL_SEPARATION = 50
+SPIRAL_CONST_B = SPIRAL_SEPARATION / (2*math.pi)
+
 class RoverAgent(mesa.Agent):
-    def __init__(self, unique_id, model, type="mobile", radio_noise=0.1, radio_detection_range=200, radio_connection_range=40):
+    def __init__(self, unique_id, model, type="mobile", radio_noise=0.1, radio_detection_range=200, radio_connection_range=40, move_spiral=True):
         super().__init__(unique_id, model)
         self.type = type
         self.history = []
         self.target_location = None
+        self.move_spiral = move_spiral
+
+        # Spiral movement
+        self.spiral_r = SPIRAL_ARC
+        self.spiral_phi = self.spiral_r / SPIRAL_CONST_B + self.random.random() * 2 * math.pi
 
         # Peripherals
         self.hdtn = HDTN(self, model)
@@ -63,11 +72,19 @@ class RoverAgent(mesa.Agent):
         }
     
     def main_logic(self):
-        def move_random():
-            # Move randomly
-            dx = self.random.randrange(-MAX_SPEED, MAX_SPEED)
-            dy = self.random.randrange(-MAX_SPEED, MAX_SPEED)
-            self.move(dx, dy)
+        def move_spiral():
+            # Move in a spiral
+            if (self.move_spiral):
+                def p2c(r, phi):
+                    return (r * math.cos(phi), r * math.sin(phi))
+
+                a, b = p2c(self.spiral_r, self.spiral_phi)
+                self.move(a, b)
+                self.spiral_phi += SPIRAL_ARC / self.spiral_r
+                self.spiral_r = SPIRAL_CONST_B * self.spiral_phi
+            else:
+                self.move(self.random.random() * 2 * MAX_SPEED - MAX_SPEED, self.random.random() * 2 * MAX_SPEED - MAX_SPEED)
+
 
         def find_best_location():
             # 1. Create a matrix with rows of of positions
@@ -94,8 +111,8 @@ class RoverAgent(mesa.Agent):
             positions = positions[-100:]
             rssis = rssis[-100:]
 
-            if (positions.shape[0] < 3):
-                move_random()
+            if (positions.shape[0] < 8):
+                move_spiral()
                 return
             
             # 2. Assume RSSI is approximately of the form
@@ -112,7 +129,7 @@ class RoverAgent(mesa.Agent):
             a, b, c = leastsq(rssi_error, (0, 0, 0))[0]
 
             if self.model.space.out_of_bounds((a, b)):
-                move_random()
+                move_spiral()
                 return
 
             # 4. Move towards (a, b)
