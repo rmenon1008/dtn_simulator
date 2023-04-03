@@ -13,11 +13,11 @@ class Radio():
         self.connection_range = connection_range
         self.radio_noise = radio_noise
         self.neighborhood = []
-        self.best_rssi = -999
+        self.best_rssi = None
 
     def rssi(self, distance):
         if distance > self.detection_range:
-            return -999
+            return None
         if distance == 0:
             return 0
         return 10 * 2.5 * math.log10(1/distance) * self.agent.random.normalvariate(1, self.radio_noise)
@@ -42,7 +42,7 @@ class Radio():
                 "rssi": self.rssi(distance),
                 "connected": distance <= self.connection_range
             })
-        self.best_rssi = max([neighbor["rssi"] for neighbor in self.neighborhood]) if len(self.neighborhood) > 0 else -999
+        self.best_rssi = max([neighbor["rssi"] for neighbor in self.neighborhood]) if len(self.neighborhood) > 0 else None
 
     def is_connected(self, other_id):
         for neighbor in self.neighborhood:

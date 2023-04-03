@@ -75,6 +75,9 @@ const LunarVis = function (maxSimX, maxSimY) {
 
   // Determines the color for an RSSI value
   const colorFromSignal = (rssi, maxRange = 300, opacity = 1.0) => {
+    if (rssi === null) {
+      return "red";
+    }
     const val = Math.exp(-0.0921034 * rssi) / maxRange;
     let red = Math.round(255 * val);
     let green = Math.round(255 * (1 - val));
