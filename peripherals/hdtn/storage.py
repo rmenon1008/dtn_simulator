@@ -1,9 +1,9 @@
 """
-Contains the FauxStorage class, which is a simplified version of HDTN Storage.
+Contains the Storage class, which is a simplified version of HDTN Storage.
 """
 
 
-class FauxStorage:
+class Storage:
 
     def __init__(self):
         # initialize dictionary to store bundles.
