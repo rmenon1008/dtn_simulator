@@ -11,20 +11,18 @@ SPIRAL_SEPARATION = 50
 SPIRAL_CONST_B = SPIRAL_SEPARATION / (2*math.pi)
 
 class RoverAgent(mesa.Agent):
-    def __init__(self, unique_id, model, type="mobile", radio_noise=0.1, radio_detection_range=200, radio_connection_range=40, move_spiral=True):
-        super().__init__(unique_id, model)
-        self.type = type
+    def __init__(self, model, node_options):
+        super().__init__(node_options["id"], model)
+        self.behavior = node_options["behavior"]
         self.history = []
-        self.target_location = None
-        self.move_spiral = move_spiral
 
         # Spiral movement
         self.spiral_r = SPIRAL_ARC
         self.spiral_phi = self.spiral_r / SPIRAL_CONST_B + self.random.random() * 2 * math.pi
 
         # Peripherals
-        self.hdtn = HDTN(self, model)
-        self.radio = Radio(self, model, radio_noise, radio_detection_range, radio_connection_range)
+        self.hdtn = HDTN(self, model, node_options["hdtn"])
+        self.radio = Radio(self, model, node_options["radio"])
 
     def update_history(self):
         self.history.append({
@@ -34,7 +32,7 @@ class RoverAgent(mesa.Agent):
         })
 
     def move(self, dx, dy):
-        if self.type == "fixed":
+        if self.behavior == "fixed":
             logging.warning("Fixed agent {} tried to move".format(self.unique_id))
             return
 
@@ -52,8 +50,8 @@ class RoverAgent(mesa.Agent):
         self.model.space.move_agent(self, new_pos)
 
     def refresh_and_log(self):
-        self.radio.refresh()
-        self.hdtn.refresh()
+        # self.radio.refresh()
+        # self.hdtn.refresh()
         self.update_history()
 
     def step(self):
@@ -64,11 +62,10 @@ class RoverAgent(mesa.Agent):
         return {
             "id": self.unique_id,
             "pos": self.pos,
-            "type": self.type,
+            "behavior": self.behavior,
             "history": self.history,
             "hdtn": self.hdtn.get_state(),
             "radio": self.radio.get_state(),
-            "target_location": self.target_location
         }
     
     def main_logic(self):
@@ -135,12 +132,13 @@ class RoverAgent(mesa.Agent):
             # 4. Move towards (a, b)
             dx = a - self.pos[0]
             dy = b - self.pos[1]
-            self.target_location = (a, b)
             self.move(dx, dy)
             
-        if self.type == "fixed":
+        if self.behavior == "fixed":
             # Fixed agents don't move
             return
-        elif self.type == "mobile":
-            if self.hdtn.has_data:
-                find_best_location()
+        elif self.behavior == "mobile":
+            # if self.hdtn.has_data:
+                # find_best_location()
+            self.move(5,5)
+            return

@@ -6,14 +6,13 @@ CONNECTION_RANGE = 20
 RSSI_NOISE_DBM_STDEV = 0.1
 
 class Radio():
-    def __init__(self, agent, model, radio_noise=RSSI_NOISE_DBM_STDEV, detection_range=DETECTION_RANGE, connection_range=CONNECTION_RANGE):
+    def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model
-        self.detection_range = detection_range
-        self.connection_range = connection_range
-        self.radio_noise = radio_noise
+        print(options)
+        self.detection_range = options["detection_range"]
+        self.connection_range = options["connection_range"]
         self.neighborhood = []
-        self.best_rssi = None
 
     def rssi(self, distance):
         if distance > self.detection_range:
@@ -42,8 +41,7 @@ class Radio():
                 "rssi": self.rssi(distance),
                 "connected": distance <= self.connection_range
             })
-        self.best_rssi = max([neighbor["rssi"] for neighbor in self.neighborhood]) if len(self.neighborhood) > 0 else None
-
+    
     def is_connected(self, other_id):
         for neighbor in self.neighborhood:
             if neighbor["id"] == other_id:
@@ -55,11 +53,10 @@ class Radio():
             "detection_range": self.detection_range,
             "connection_range": self.connection_range,
             "neighborhood": self.neighborhood,
-            "best_rssi": self.best_rssi
         }
 
 class HDTN():
-    def __init__(self, agent, model):
+    def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model
         self.has_data = False
