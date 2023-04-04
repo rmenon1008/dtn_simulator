@@ -1,0 +1,25 @@
+{
+    "contacts": [
+       {
+            "contact": 0,
+            "source": 1,
+            "dest": 3,
+            "startTime": 10,
+            "endTime": 20,
+            "rate": "1000",
+            "confidence": 1,
+            "owlt": 1
+        },
+        {
+            "contact": 1,
+            "source": 1,
+            "dest": 2,
+            "startTime": 30,
+            "endTime": 40,
+            "rate": "1000",
+            "confidence": 1,
+            "owlt": 1
+        }
+
+    ]
+}

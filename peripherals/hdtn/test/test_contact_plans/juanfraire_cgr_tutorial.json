@@ -1,0 +1,165 @@
+{
+    "contacts": [
+       {
+            "contact": 1,
+            "source": "A",
+            "dest": "B",
+	        "startTime": 0,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 2,
+            "source": "B",
+            "dest": "A",
+	        "startTime": 0,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 3,
+            "source": "B",
+            "dest": "C",
+	        "startTime": 0,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 4,
+            "source": "C",
+            "dest": "B",
+	        "startTime": 0,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 5,
+            "source": "A",
+            "dest": "C",
+	        "startTime": 0,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 6,
+            "source": "C",
+            "dest": "A",
+	        "startTime": 0,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 7,
+            "source": "C",
+            "dest": "D",
+	        "startTime": 0,
+            "endTime": 30,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 8,
+            "source": "D",
+            "dest": "C",
+	        "startTime": 0,
+            "endTime": 30,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 9,
+            "source": "A",
+            "dest": "E",
+	        "startTime": 10,
+            "endTime": 20,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 10,
+            "source": "E",
+            "dest": "A",
+	        "startTime": 10,
+            "endTime": 20,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 11,
+            "source": "D",
+            "dest": "E",
+	        "startTime": 0,
+            "endTime": 10,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 12,
+            "source": "E",
+            "dest": "D",
+	        "startTime": 0,
+            "endTime": 10,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 13,
+            "source": "D",
+            "dest": "E",
+	        "startTime": 30,
+            "endTime": 40,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 14,
+            "source": "E",
+            "dest": "D",
+	        "startTime": 30,
+            "endTime": 40,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 15,
+            "source": "D",
+            "dest": "E",
+	        "startTime": 50,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        },
+	    {
+            "contact": 16,
+            "source": "E",
+            "dest": "D",
+	        "startTime": 50,
+            "endTime": 60,
+            "rate": 1,
+            "confidence": 1,
+            "owlt": 1
+        }
+    ]
+}
+
