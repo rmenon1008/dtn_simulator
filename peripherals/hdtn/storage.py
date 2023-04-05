@@ -35,15 +35,18 @@ class Storage:
     """
     def get_next_bundle_for_id(self, dest_id, last_bundle=None):
 
-        # if we have no bundle on-hand for the specified ID, return "None".
-        # (this is if there is no list on-hand for the specified key _or_ the stored list is empty)
-        if dest_id not in self.stored_message_dict or not self.stored_message_dict[dest_id]:
+        # if we have no list of bundles on-hand for the specified ID, return "None".
+        if dest_id not in self.stored_message_dict:
             return None
 
         # if last_bundle was provided and last_bundle == front of the list,
         # remove the front of the list.
         if self.stored_message_dict[dest_id][0] == last_bundle:
             self.stored_message_dict[dest_id].pop(0)
+
+        # if no bundles exist in the list, return None.
+        if not self.stored_message_dict[dest_id]:
+            return None
 
         # return the bundle at the front of the list.
         return self.stored_message_dict[dest_id][0]

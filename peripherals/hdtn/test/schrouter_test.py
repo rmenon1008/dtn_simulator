@@ -2,7 +2,9 @@ import sys
 
 from peripherals.hdtn.schrouter import Schrouter
 
-
+"""
+Tests that the Schrouter can load contact plans from JSONs + successfully compute routes from them.
+"""
 def test_simple_contact_plan_routing():
     # construct the Schrouter from a file.
     schrouter = Schrouter("peripherals/hdtn/test/test_contact_plans/contactPlan.json")
@@ -19,7 +21,7 @@ def test_simple_contact_plan_routing():
     assert schrouter.check_any_availability(2)
 
     # get a dijkstra-computed route from source=10 to dest=1
-    route = schrouter.get_best_route_dijkstra(10, 1)
+    route = schrouter.get_best_route_dijkstra(10, 1, 0)
 
     # assert that the route is a simple one-hop route
     assert len(route.hops) == 1
@@ -28,7 +30,9 @@ def test_simple_contact_plan_routing():
     assert route.from_time == 10
     assert route.to_time == 20
 
-
+"""
+Tests that links can be successfully added to the Schrouter.
+"""
 def test_add_link_routing():
     # construct a Schrouter.
     schrouter = Schrouter()
@@ -43,7 +47,10 @@ def test_add_link_routing():
     # verify that the link to node 1 exists
     schrouter.check_link_availability(0, 1)
 
-
+"""
+Tests that links can be successfully removed from the Schrouter + that removing links can adjust
+path computation.
+"""
 def test_remove_link_routing():
     # construct a Schrouter.
     schrouter = Schrouter()
@@ -56,7 +63,7 @@ def test_remove_link_routing():
                        dest=1,
                        start_time=sys.maxsize - 1,
                        end_time=sys.maxsize,
-                       rate=1)
+                       rate=100)
     schrouter.add_link(source=0,
                        dest=2,
                        start_time=0,
@@ -74,7 +81,7 @@ def test_remove_link_routing():
     assert schrouter.check_link_availability(2, 1)
 
     # obtain a route for 0->1.  it should route through 2 due to the early start_times.
-    route_1 = schrouter.get_best_route_dijkstra(0, 1)
+    route_1 = schrouter.get_best_route_dijkstra(0, 1, 0)
     assert len(route_1.hops) == 2
     assert route_1.hops[1].frm == 2
     assert route_1.hops[1].to == 1
@@ -87,7 +94,52 @@ def test_remove_link_routing():
 
     # recompute the route from 0->1.  Since the 0->2 link was removed, the fastest
     # route should now be 0->1 instead of 0->2->1.
-    route_2 = schrouter.get_best_route_dijkstra(0, 1)
+    route_2 = schrouter.get_best_route_dijkstra(0, 1, 0)
+    assert len(route_2.hops) == 1
+    assert route_2.hops[0].frm == 0
+    assert route_2.hops[0].to == 1
+
+"""
+Tests that the router adjusts route computation based upon the provided starting timestamp.
+"""
+def test_routing_with_later_timestamp_use_faster_route():
+    # construct a Schrouter.
+    schrouter = Schrouter()
+
+    # add three links to the Schrouter:
+    # - 0->1 w/ start_time of 3.
+    # - 0->2 w/ start_time of 0.
+    # - 2->1 w/ start_time of 0.
+    schrouter.add_link(source=0,
+                       dest=1,
+                       start_time=3,
+                       end_time=sys.maxsize,
+                       rate=100)
+    schrouter.add_link(source=0,
+                       dest=2,
+                       start_time=0,
+                       end_time=sys.maxsize,
+                       rate=100)
+    schrouter.add_link(source=2,
+                       dest=1,
+                       start_time=0,
+                       end_time=sys.maxsize,
+                       rate=100)
+
+    # verify that the links were successfully added to the Schrouter.
+    assert schrouter.check_link_availability(0, 1)
+    assert schrouter.check_link_availability(0, 2)
+    assert schrouter.check_link_availability(2, 1)
+
+    # obtain a route for 0->1 w/ timestamp == 0.  It should route through 2 due to the early start_times.
+    route_1 = schrouter.get_best_route_dijkstra(0, 1, 0)
+    assert len(route_1.hops) == 2
+    assert route_1.hops[1].frm == 2
+    assert route_1.hops[1].to == 1
+
+    # recompute the route from 0->1 w/ timestamp == 3.  Since we're computing with a later timestamp, the fastest
+    # route should now be 0->1 instead of 0->2->1.
+    route_2 = schrouter.get_best_route_dijkstra(0, 1, 3)
     assert len(route_2.hops) == 1
     assert route_2.hops[0].frm == 0
     assert route_2.hops[0].to == 1

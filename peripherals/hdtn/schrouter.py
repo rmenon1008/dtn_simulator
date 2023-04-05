@@ -93,19 +93,24 @@ class Schrouter:
 
     """
     Returns the best route for the specified contact_id in the stored contact plan as calculated via Dijkstra's.
+    
+    curr_timestamp = the timestamp at which we're computing the route.
     """
     def get_best_route_dijkstra(self, root_node_id, destination_node_id, curr_timestamp) -> Route:
         # create root_contact object to use for dijkstra's.
-        root_contact = Contact(start=curr_timestamp,
+        root_contact = Contact(start=0,
                     end=sys.maxsize,
                     frm=root_node_id,
                     to=root_node_id,
                     rate=100,
                     id=-1)
-        root_contact.arrival_time = 0
+        root_contact.arrival_time = curr_timestamp
 
-        # run dijkstra's, return the best route.
-        return cgr_dijkstra(root_contact, destination_node_id, self.contact_plan)
+        # run dijkstra's, return the best route.  if any errors are generated, just return `None`
+        try:
+            return cgr_dijkstra(root_contact, destination_node_id, self.contact_plan)
+        except:
+            return None
 
     """
     Returns the best route for the specified contact_id in the stored contact plan as calculated via OCGR.

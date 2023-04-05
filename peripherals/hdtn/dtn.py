@@ -30,7 +30,7 @@ class Dtn:
     
     This effectively behaves akin to the `ingress` + `egress` modules in HDTN.
     """
-    def receive_bundle(self, bundle: Bundle):
+    def handle_bundle(self, bundle: Bundle):
         # Ingress
         # Process received bundle.
 
@@ -114,4 +114,4 @@ class Dtn:
     """
     def __send_bundle(self, bundle: Bundle, dest_id):
         dest_dtn_node = self.dtn_dict[dest_id]
-        dest_dtn_node.receive_bundle(bundle)
+        dest_dtn_node.handle_bundle(bundle)
