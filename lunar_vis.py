@@ -4,8 +4,8 @@ from mesa.visualization.ModularVisualization import VisualizationElement
 class LunarVis(VisualizationElement):
     local_includes = [
         "visualization/lunar_vis.js",
-        "visualization/json_formatter.min.js",
         "visualization/styles.css",
+        "controls/json_formatter.min.js",
         "controls/controls.js",
         "controls/styles.css",
     ]

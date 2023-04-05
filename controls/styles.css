@@ -2,9 +2,14 @@
 
 body {
     margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-        "Open Sans", "Helvetica Neue", sans-serif;
+    font-family: var(--font);
     height: 100vh;
+    background-color: #444;
+
+    --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+        "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
+        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace;
 }
 
 .col-layout {
@@ -16,6 +21,8 @@ body {
 .col-1 {
     flex-basis: 350px;
     background-color: #333;
+    overflow: auto;
+    padding-bottom: 25px;
 }
 
 .col-2 {
@@ -36,23 +43,43 @@ button {
     letter-spacing: 1px;
     text-transform: uppercase;
 
-    transition: background-color 0.10s;
+    transition: background-color 0.1s;
 }
-button:hover { background-color: #ffffff38; }
-button:active {  background-color: #ffffff55; }
+button:hover {
+    background-color: #ffffff38;
+}
+button:active {
+    background-color: #ffffff55;
+}
 
 button.icon {
     padding: 0px 2px;
     background-color: transparent;
     line-height: 80%;
 }
-button.icon:hover { background-color: #ffffff20; }
-button.icon:active {  background-color: #ffffff38; }
-button.icon svg * { fill: white; width: 2rem; height: 2rem;}
-button.icon.large svg { width: 2.75rem; height: 2.75rem; }
+button.icon:hover {
+    background-color: #ffffff20;
+}
+button.icon:active {
+    background-color: #ffffff38;
+}
+button.icon svg * {
+    fill: white;
+    width: 2rem;
+    height: 2rem;
+}
+button.icon.large svg {
+    width: 2.75rem;
+    height: 2.75rem;
+}
 
-button.icon.disabled svg * { fill: #666; }
-button.icon.disabled:hover { background-color: transparent; cursor: unset; }
+button.icon.disabled svg * {
+    fill: #666;
+}
+button.icon.disabled:hover {
+    background-color: transparent;
+    cursor: unset;
+}
 
 .label {
     display: block;
@@ -84,7 +111,7 @@ input[type="range"]::-webkit-slider-thumb {
     height: 15px;
     border-radius: 50%;
     background-color: #fff;
-    transition: transform 0.10s;
+    transition: transform 0.1s;
     overflow: visible;
     cursor: pointer;
 }
@@ -103,7 +130,7 @@ input[type="checkbox"] {
     border-radius: 10px;
     position: relative;
     cursor: pointer;
-    transition: background-color 0.10s;
+    transition: background-color 0.1s;
 }
 
 input[type="checkbox"]:checked {
@@ -119,7 +146,7 @@ input[type="checkbox"]::before {
     height: 13px;
     background-color: #aaa;
     border-radius: 10px;
-    transition: transform 0.10s;
+    transition: transform 0.1s;
 }
 
 input[type="checkbox"]:checked::before {
@@ -132,10 +159,20 @@ input[type="number"] {
     padding: 0 7px;
     box-sizing: border-box;
     width: 70px;
-    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
-        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace;
-    }
+    font-family: var(--font-mono);
+}
 
+div.json-input {
+    font-family: var(--font-mono);
+    white-space: pre; /* css-3 */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
+    overflow: auto;
+    background-color: #444;
+    color: #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
 
 /* CONTROL BAR */
 
@@ -158,13 +195,27 @@ input[type="number"] {
     gap: 15px;
 }
 
-.play-pause .play { display: none; }
-.play-pause .finished { display: none; }
-.play-pause.play .pause { display: none; }
-.play-pause.play .play { display: inline-block; }
-.play-pause.finished .finished { display: inline-block; }
-.play-pause.finished.play .pause { display: none; }
-.play-pause.finished .play { display: none; }
+.play-pause .play {
+    display: none;
+}
+.play-pause .finished {
+    display: none;
+}
+.play-pause.play .pause {
+    display: none;
+}
+.play-pause.play .play {
+    display: inline-block;
+}
+.play-pause.finished .finished {
+    display: inline-block;
+}
+.play-pause.finished.play .pause {
+    display: none;
+}
+.play-pause.finished .play {
+    display: none;
+}
 
 .control-bar .fps-selector {
     width: 20%;
@@ -186,8 +237,7 @@ input[type="number"] {
 }
 
 .control-bar .frame-display .value {
-    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
-        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace;
+    font-family: var(--font-mono);
 }
 
 /* SIDEBAR */
@@ -209,6 +259,12 @@ input[type="number"] {
     flex-wrap: nowrap;
 }
 
+.option.option-vertical {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
 .option .label {
     text-transform: none;
     color: white;
@@ -219,8 +275,7 @@ input[type="number"] {
 .options .label .value-label {
     padding-right: 7px;
     float: right;
-    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono",
-        "Ubuntu Monospace", "Source Code Pro", "Fira Mono", monospace;
+    font-family: var(--font-mono);
 }
 
 .option input {
@@ -237,8 +292,6 @@ input[type="number"] {
 .elements {
     width: 100%;
 }
-
-
 
 /* MEDIA QUERIES */
 

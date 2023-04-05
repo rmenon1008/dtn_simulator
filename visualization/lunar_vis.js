@@ -72,16 +72,26 @@ const LunarVis = function (maxSimX, maxSimY) {
     context.stroke();
   };
 
-
   // Determines the color for an RSSI value
   const colorFromSignal = (rssi, maxRange = 300, opacity = 1.0) => {
     if (rssi === null) {
-      return "red";
+      return "#777";
     }
     const val = Math.exp(-0.0921034 * rssi) / maxRange;
     let red = Math.round(255 * val);
     let green = Math.round(255 * (1 - val));
     return `rgba(${red}, ${green}, 0, ${opacity})`;
+  };
+
+  // Get the max rssi from a neighborhood
+  const getMaxRssi = (neighborhood) => {
+    let maxRssi = -999;
+    neighborhood.forEach((node) => {
+      if (node.rssi > maxRssi) {
+        maxRssi = node.rssi;
+      }
+    });
+    return maxRssi == -999 ? null : maxRssi;
   };
 
   // Adds a hoverable tooltip for a node
@@ -182,58 +192,58 @@ const LunarVis = function (maxSimX, maxSimY) {
     console.log(modelState);
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // const getNode = (id) => {
-    //   return modelState.find(node => node.id === id);
-    // };
+    const getNode = (id) => {
+      return modelState.find(node => node.id === id);
+    };
 
-    // // Draw the historical RSSI values
-    // modelState.forEach(node => {
-    //   var transparency = 1;
-    //   if (node.history.reverse()) {
-    //     for (let i = 0; i < node.history.length - 1; i++) {
-    //       const entry = node.history[i];
-    //       let color = "rgba(0, 0, 0, 0.1)";
-    //       if (entry.radio.neighborhood) {
-    //         color = colorFromSignal(entry.radio.best_rssi, node.radio.detection_range, transparency);
-    //         if (historyFade) {
-    //           transparency = Math.max(0, transparency * 0.995 - 0.001);
-    //         }
-    //       }
-    //       drawShape(entry.pos[0], entry.pos[1], 3 * SCALE, color, "circle");
-    //     }
-    //   }
-    // });
+    // Draw the historical RSSI values
+    modelState.forEach(node => {
+      var transparency = 1;
+      if (node.history.reverse()) {
+        for (let i = 0; i < node.history.length - 1; i++) {
+          const entry = node.history[i];
+          let color = "rgba(0, 0, 0, 0.1)";
+          if (entry.radio.neighborhood) {
+            color = colorFromSignal(getMaxRssi(entry.radio.neighborhood), node.radio.detection_range, transparency);
+            if (historyFade) {
+              transparency = Math.max(0, transparency * 0.995 - 0.001);
+            }
+          }
+          drawShape(entry.pos[0], entry.pos[1], 3 * SCALE, color, "circle");
+        }
+      }
+    });
 
-    // // Draw the detection and connection ranges as transparent circles
-    // if (showRanges) {
-    //   modelState.forEach(node => {
-    //     if (node.radio.detection_range) {
-    //       drawShape(node.pos[0], node.pos[1], node.radio.detection_range, "rgba(0, 0, 255, 0.04)");
-    //     }
-    //   });
-    //   modelState.forEach(node => {
-    //     if (node.radio.connection_range) {
-    //       drawShape(node.pos[0], node.pos[1], node.radio.connection_range, "rgba(0, 255, 0, 0.15)");
-    //     }
-    //   });
-    // }
+    // Draw the detection and connection ranges as transparent circles
+    if (showRanges) {
+      modelState.forEach(node => {
+        if (node.radio.detection_range) {
+          drawShape(node.pos[0], node.pos[1], node.radio.detection_range, "rgba(0, 0, 255, 0.04)");
+        }
+      });
+      modelState.forEach(node => {
+        if (node.radio.connection_range) {
+          drawShape(node.pos[0], node.pos[1], node.radio.connection_range, "rgba(0, 255, 0, 0.15)");
+        }
+      });
+    }
 
-    // // Draw lines between nodes that have an RSSI
-    // modelState.forEach(node => {
-    //   if (node.radio.neighborhood) {
-    //     node.radio.neighborhood.forEach(neighbor => {
-    //       if (neighbor.connected || showDetectionLines) {
-    //         const otherNode = getNode(neighbor.id);
-    //         drawLine(node.pos[0], node.pos[1], otherNode.pos[0], otherNode.pos[1], colorFromSignal(neighbor.rssi, node.radio.detection_range));
-    //       }
-    //     });
-    //   }
-    // });
+    // Draw lines between nodes that have an RSSI
+    modelState.forEach(node => {
+      if (node.radio.neighborhood) {
+        node.radio.neighborhood.forEach(neighbor => {
+          if (neighbor.connected || showDetectionLines) {
+            const otherNode = getNode(neighbor.id);
+            drawLine(node.pos[0], node.pos[1], otherNode.pos[0], otherNode.pos[1], colorFromSignal(neighbor.rssi, node.radio.detection_range));
+          }
+        });
+      }
+    });
 
     // Draw all the nodes on top
     modelState.forEach(node => {
-      const color = colorFromSignal(node.radio.best_rssi, node.radio.detection_range);
-      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.behavior === "mobile" ? "circle" : "square"), node.hdtn.has_data);
+      const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.detection_range);
+      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.behavior.type === "fixed" ? "square" : "circle"), node.hdtn.has_data);
       addTooltip(node);
     });
 

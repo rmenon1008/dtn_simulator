@@ -1,7 +1,13 @@
+import math
+import logging
+import json
 import mesa
+
 from agent import RoverAgent
 
+
 def merge(source, destination):
+    """Recursively merges source dict into destination dict."""
     for key, value in source.items():
         if isinstance(value, dict):
             node = destination.setdefault(key, {})
@@ -10,21 +16,31 @@ def merge(source, destination):
             destination[key] = value
     return destination
 
-class LunarModel(mesa.Model):
-    """A lunar model with a number of rovers."""
 
-    def __init__(self, model_params, initial_state):
+class LunarModel(mesa.Model):
+    """
+    A model that rover agents exist within.
+    Also provides methods for accessing neighbors.
+    """
+
+    def __init__(self, size, model_params, initial_state):
         super().__init__()
+        self.model_params = model_params
+
+        # Set up the space and schedule
         self.space = mesa.space.ContinuousSpace(
-            model_params["size"][0], model_params["size"][1], False)
+            size[0], size[1], False)
         self.schedule = mesa.time.RandomActivation(self)
+
+        # Used by mesa to know when the simulation is over
         self.running = True
 
         for agent_options in initial_state["agents"]:
 
             # Merge the node defaults with the individual node options
             # Important to copy() to avoid mutating the original
-            options = (merge(initial_state["agent_defaults"], agent_options)).copy()
+            options = agent_options.copy()
+            merge(initial_state["agent_defaults"], options)
 
             if "pos" not in options:
                 options["pos"] = (self.random.uniform(0, self.space.width),
@@ -41,3 +57,57 @@ class LunarModel(mesa.Model):
 
     def step(self):
         self.schedule.step()
+
+    def get_rssi(self, agent, other):
+        """Returns the RSSI of the agent to the other agent in dBm"""
+        distance = self.space.get_distance(agent.pos, other.pos)
+        if distance == 0:
+            return 0
+        clean_rssi = 10 * 2.5 * math.log10(1/distance)
+        noise = (self.random.gauss(0, self.model_params["rssi_noise_stdev"])
+                 * self.model_params["rssi_noise_amp"])
+        return clean_rssi + noise
+
+    def get_neighbors(self, agent):
+        """
+        Returns a list of all agents within the detection range of the agent
+        Each entry includes the agent's unique id, RSSI, and whether or not
+        the agent is connected.
+        If the agent is connected, the entry also includes a function that
+        can be called to send a bundle to the agent.
+        """
+
+        det_range = agent.radio.detection_range
+        con_range = agent.radio.connection_range
+
+        neighbors = []
+        for other in self.schedule.agents:
+            if other is not agent:
+                distance = self.space.get_distance(agent.pos, other.pos)
+                if distance <= det_range:
+                    connected = distance <= con_range
+                    neighbors.append({
+                        "id": other.unique_id,
+                        "rssi": self.get_rssi(agent, other),
+                        "connected": connected,
+                        "send_bundle": other.hdtn.receive_bundle if connected else None
+                    })
+
+        return neighbors
+    
+    def move_agent(self, agent, dx, dy):
+        """Moves the agent by the given delta x and delta y"""
+        mag = (dx**2 + dy**2)**0.5
+
+        # Give it a little bit of leeway to avoid floating point errors
+        if mag > self.model_params["model_speed_limit"] + 0.0005:
+            logging.warning("Agent {} tried to move faster than model speed limit".format(agent.unique_id))
+            return
+
+        new_pos = (agent.pos[0] + dx, agent.pos[1] + dy)
+
+        if self.space.out_of_bounds(new_pos):
+            logging.warning("Agent {} tried to move out of bounds".format(agent.unique_id))
+            return
+        
+        self.space.move_agent(agent, (agent.pos[0] + dx, agent.pos[1] + dy))
