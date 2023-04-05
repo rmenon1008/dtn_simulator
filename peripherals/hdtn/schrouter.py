@@ -94,9 +94,9 @@ class Schrouter:
     """
     Returns the best route for the specified contact_id in the stored contact plan as calculated via Dijkstra's.
     """
-    def get_best_route_dijkstra(self, root_node_id, destination_node_id) -> Route:
+    def get_best_route_dijkstra(self, root_node_id, destination_node_id, curr_timestamp) -> Route:
         # create root_contact object to use for dijkstra's.
-        root_contact = Contact(start=0,
+        root_contact = Contact(start=curr_timestamp,
                     end=sys.maxsize,
                     frm=root_node_id,
                     to=root_node_id,
