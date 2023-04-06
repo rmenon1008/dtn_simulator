@@ -9,7 +9,6 @@ SIM_HEIGHT = 550
 DEFAULT_MODEL_PARAMS = json.dumps({
     # "size": (SIM_WIDTH, SIM_HEIGHT),
     "rssi_noise_stdev": 4.5,
-    "rssi_noise_amp": 1,
     "model_speed_limit": 5,
 })
 

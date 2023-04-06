@@ -64,8 +64,7 @@ class LunarModel(mesa.Model):
         if distance == 0:
             return 0
         clean_rssi = 10 * 2.5 * math.log10(1/distance)
-        noise = (self.random.gauss(0, self.model_params["rssi_noise_stdev"])
-                 * self.model_params["rssi_noise_amp"])
+        noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
         return clean_rssi + noise
 
     def get_neighbors(self, agent):
