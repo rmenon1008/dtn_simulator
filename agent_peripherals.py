@@ -68,8 +68,7 @@ class Movement():
             self.spiral_r = None
         if not hasattr(self, "spiral_r"):
                 self.spiral_r = self.speed
-                self.spiral_phi = self.spiral_r / self.SPIRAL_CONST_B + \
-                    self.agent.random.random() * 2 * math.pi
+                self.spiral_phi = self.spiral_r / self.SPIRAL_CONST_B
             
         dx, dy = pol_to_cart(self.spiral_r, self.spiral_phi)
         self.move(dx, dy)
@@ -80,7 +79,7 @@ class Movement():
         if reset:
             self.circle_phi = None
         if not hasattr(self, "circle_phi"):
-            self.circle_phi = self.agent.random.random() * 2 * math.pi
+            self.circle_phi = 0
         
         dx, dy = pol_to_cart(self.CIRCLE_RADIUS, self.circle_phi)
         self.move(dx, dy)
