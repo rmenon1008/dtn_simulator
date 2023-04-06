@@ -6,14 +6,14 @@ import json
 SIM_WIDTH = 1000
 SIM_HEIGHT = 550
 
-DEFAULT_MODEL_PARAMS = json.dumps({
+DEFAULT_MODEL_PARAMS = {
     # "size": (SIM_WIDTH, SIM_HEIGHT),
     "max_steps": 100000,
     "rssi_noise_stdev": 4.5,
     "model_speed_limit": 5,
-})
+}
 
-DEFAULT_INITIAL_STATE = json.dumps({
+DEFAULT_INITIAL_STATE = {
     "agent_defaults": {
         # If this is provided, all nodes will have
         # these options. It can be overridden by an
@@ -48,7 +48,7 @@ DEFAULT_INITIAL_STATE = json.dumps({
             "radio": {},
         },
     ]
-})
+}
 
 vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
 
@@ -56,7 +56,7 @@ class ObjectOption(mesa.visualization.UserParam):
     def __init__(self, name="", value=None, choices=None, description=None):
         self.param_type = "object"
         self.name = name
-        self._value = value
+        self._value = json.dumps(value)
 
     @property
     def value(self):
