@@ -4,6 +4,7 @@ import math
 def pol_to_cart(r, phi):
     return (r * math.cos(phi), r * math.sin(phi))
 
+
 def makeSerializeable(obj):
     """
     Helper function to make sure an object is serializeable
@@ -26,12 +27,8 @@ def makeSerializeable(obj):
     else:
         return obj
 
+
 class Movement():
-    SPIRAL_SEPARATION = 50
-    SPIRAL_CONST_B = SPIRAL_SEPARATION / (2*math.pi)
-
-    CIRCLE_RADIUS = 200
-
     def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model
@@ -39,12 +36,12 @@ class Movement():
 
         # Move at the speed limit
         self.speed = self.model.model_params["model_speed_limit"]
-    
+
     def refresh(self):
         # This peripheral does not need to refresh because
         # it's state can not change based on the other nodes
         pass
-    
+
     def move(self, dx, dy):
         mag = (dx**2 + dy**2)**0.5
         if mag > self.speed:
@@ -52,7 +49,7 @@ class Movement():
             dy = dy / mag * self.speed
 
         self.model.move_agent(self.agent, dx, dy)
-    
+
     def move_towards(self, target_pos):
         dx = target_pos[0] - self.agent.pos[0]
         dy = target_pos[1] - self.agent.pos[1]
@@ -63,30 +60,31 @@ class Movement():
         dy = self.agent.random.random() * self.speed * 2 - self.speed
         self.move(dx, dy)
 
-    def step_spiral(self, reset=False):
+    def step_spiral(self, separation=50, reset=False):
         if reset:
             self.spiral_r = None
         if not hasattr(self, "spiral_r"):
-                self.spiral_r = self.speed
-                self.spiral_phi = self.spiral_r / self.SPIRAL_CONST_B
-            
+            self.spiral_r = self.speed
+            self.spiral_phi = self.spiral_r / (separation / (2*math.pi))
+
         dx, dy = pol_to_cart(self.spiral_r, self.spiral_phi)
         self.move(dx, dy)
         self.spiral_phi += self.speed / self.spiral_r
-        self.spiral_r = self.SPIRAL_CONST_B * self.spiral_phi
-    
-    def step_circle(self, reset=False):
+        self.spiral_r = (separation / (2*math.pi)) * self.spiral_phi
+
+    def step_circle(self, radius=100, reset=False):
         if reset:
             self.circle_phi = None
         if not hasattr(self, "circle_phi"):
             self.circle_phi = 0
-        
-        dx, dy = pol_to_cart(self.CIRCLE_RADIUS, self.circle_phi)
+
+        dx, dy = pol_to_cart(radius, self.circle_phi)
         self.move(dx, dy)
-        self.circle_phi += self.speed / self.CIRCLE_RADIUS
+        self.circle_phi += self.speed / radius
 
 
 class Radio():
+
     def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model

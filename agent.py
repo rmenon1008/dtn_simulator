@@ -4,6 +4,15 @@ import numpy as np
 from scipy.optimize import leastsq
 from agent_peripherals import *
 
+def try_getting(obj, *keys, default=None):
+    """Helper that tries to get a value from a nested dict."""
+    for key in keys:
+        if key in obj:
+            obj = obj[key]
+        else:
+            return default
+    return obj
+
 class RoverAgent(mesa.Agent):
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
@@ -33,15 +42,13 @@ class RoverAgent(mesa.Agent):
         if self.behavior["type"] == "random":
             self.movement.step_random()
         elif self.behavior["type"] == "spiral":
-            self.movement.step_spiral()
+            separation=try_getting(self.behavior, "options", "separation", default=50)
+            self.movement.step_spiral(separation)
         elif self.behavior["type"] == "circle":
-            self.movement.step_circle()
+            radius=try_getting(self.behavior, "options", "radius", default=100)
+            self.movement.step_circle(radius)
         elif self.behavior["type"] == "rssi_find_target":
-            target = "all"
-            if hasattr(self.behavior, "options"):
-                if hasattr(self.behavior["options"], "target"):
-                    target = self.behavior["options"]["target"]
-
+            target = try_getting(self.behavior, "options", "target", default="all")
             # Check if connected to target
             if self.radio.is_connected(target):
                 self.behavior["type"] = "fixed"
