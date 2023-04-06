@@ -17,8 +17,6 @@ def makeSerializeable(obj):
         return tuple(makeSerializeable(v) for v in obj)
     elif isinstance(obj, set):
         return set(makeSerializeable(v) for v in obj)
-    elif isinstance(obj, frozenset):
-        return frozenset(makeSerializeable(v) for v in obj)
     elif isinstance(obj, complex):
         return (obj.real, obj.imag)
     elif isinstance(obj, type):
@@ -37,6 +35,7 @@ class Movement():
     def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model
+        # Options are unused for now
 
         # Move at the speed limit
         self.speed = self.model.model_params["model_speed_limit"]
@@ -126,8 +125,9 @@ class HDTN():
         self.model = model
         self.options = options
 
-    def receive_bundle(self, bundle):
+    def receive_bundle(self, bundle, type="data"):
         # Receive a bundle from another agent
+        # This function can be called by another agent in connection range
         print("Agent {} received bundle {}".format(
             self.agent.unique_id, bundle))
 
