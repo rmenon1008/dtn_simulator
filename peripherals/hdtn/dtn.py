@@ -62,17 +62,17 @@ class Dtn:
         self.timestamp += 1
 
     """
-    Adds a link to contact plan used by the Schrouter.
+    Adds a contact to contact plan used by the Schrouter.
     """
-    def add_link(self,
-                 source: string,
-                 dest: string,
-                 start_time: int,
-                 end_time: int,
-                 rate: string,
-                 owlt=0,
-                 confidence=1.):
-        self.schrouter.add_link(source, dest, start_time, end_time, rate, owlt, confidence)
+    def add_contact(self,
+                    source: string,
+                    dest: string,
+                    start_time: int,
+                    end_time: int,
+                    rate: string,
+                    owlt=0,
+                    confidence=1.):
+        self.schrouter.add_contact(source, dest, start_time, end_time, rate, owlt, confidence)
 
         # check to see if the contact plan containing this new link now has a route between this node + dest.
         if self.schrouter.get_best_route_dijkstra(self.node_id, dest, self.timestamp) is not None:
@@ -81,10 +81,10 @@ class Dtn:
             self.__flush_bundles(dest)
 
     """
-    Removes all links for the given node from the Schrouter.
+    Removes all contacts for the given node from the Schrouter.
     """
-    def remove_link(self, node_id):
-        self.schrouter.remove_all_links_for_node(node_id)
+    def remove_contact(self, node_id):
+        self.schrouter.remove_all_contacts_for_node(node_id)
 
     """
     Private function used to flush-out stored Bundles for the specified destination node in the network.

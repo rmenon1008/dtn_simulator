@@ -25,7 +25,7 @@ class Schrouter:
 
             # convert the contact plan JSON data into Contact objects
             for contact in contact_jsons:
-                self.add_link(
+                self.add_contact(
                         source=contact["source"],
                         dest=contact["dest"],
                         start_time=contact["startTime"],
@@ -45,22 +45,22 @@ class Schrouter:
     """
     Returns if any path between the two specified nodes exists in the contact plan. 
     """
-    def check_link_availability(self, source_id, dest_id) -> bool:
+    def check_contact_availability(self, source_id, dest_id) -> bool:
         return len(list(filter(
             lambda contact: contact.frm == source_id and contact.to == dest_id,
             self.contact_plan))) > 0
 
     """
-    Adds a link to the contact plan.
+    Adds a contact to the contact plan.
     """
-    def add_link(self,
-                 source: string,
-                 dest: string,
-                 start_time: int,
-                 end_time: int,
-                 rate: string,
-                 owlt=0,
-                 confidence=1.):
+    def add_contact(self,
+                    source: string,
+                    dest: string,
+                    start_time: int,
+                    end_time: int,
+                    rate: string,
+                    owlt=0,
+                    confidence=1.):
         # get the next contact ID.
         contact_id = self.next_contact_id
         self.next_contact_id += 1
@@ -79,16 +79,16 @@ class Schrouter:
         self.contact_plan.append(new_contact)
 
     """
-    Removes all links associated with the passed contact_id from the contact plan.
+    Removes all contacts associated with the passed contact_id from the contact plan.
     """
-    def remove_all_links_for_node(self, node_id):
+    def remove_all_contacts_for_node(self, node_id):
         self.contact_plan = [contact for contact in self.contact_plan if contact.to != node_id and contact.frm != node_id]
 
 
     """
-    Removes all links associated with the passed contact_id from the contact plan.
+    Removes all contacts associated with the passed contact_id from the contact plan.
     """
-    def remove_link_by_contact_id(self, contact_id):
+    def remove_contact_by_contact_id(self, contact_id):
         self.contact_plan = [contact for contact in self.contact_plan if contact.id != contact_id]
 
     """

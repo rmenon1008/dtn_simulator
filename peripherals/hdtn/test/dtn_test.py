@@ -26,10 +26,10 @@ def setup():
     # 2 -> 1:  @0->inf
     # 0 -> 3:  @0->inf
     for node in dtn_dict.values():
-        node.add_link(0, 1, 3, sys.maxsize, 100)
-        node.add_link(0, 2, 0, sys.maxsize, 100)
-        node.add_link(2, 1, 0, sys.maxsize, 100)
-        node.add_link(0, 3, 0, sys.maxsize, 100)
+        node.add_contact(0, 1, 3, sys.maxsize, 100)
+        node.add_contact(0, 2, 0, sys.maxsize, 100)
+        node.add_contact(2, 1, 0, sys.maxsize, 100)
+        node.add_contact(0, 3, 0, sys.maxsize, 100)
 
     yield dtn_dict
 
@@ -96,14 +96,14 @@ def test_handle_bundle_stores_bundle_sends_once_linked(setup):
     verify(dtn_dict[4], times=0).handle_bundle(...)
 
     # link-up node 3 and node 4 in node 0 and node 3's contact plans.
-    dtn_dict[0].add_link(
+    dtn_dict[0].add_contact(
         source=3,
         dest=4,
         start_time=0,
         end_time=sys.maxsize,
         rate=100
     )
-    dtn_dict[3].add_link(
+    dtn_dict[3].add_contact(
         source=3,
         dest=4,
         start_time=0,
@@ -111,6 +111,6 @@ def test_handle_bundle_stores_bundle_sends_once_linked(setup):
         rate=100
     )
 
-    # assert that the linkings caused 4 to receive the bundle.
+    # assert that the new contact caused 4 to receive the bundle.
     verify(dtn_dict[3], times=1).handle_bundle(...)
     verify(dtn_dict[4], times=1).handle_bundle(...)

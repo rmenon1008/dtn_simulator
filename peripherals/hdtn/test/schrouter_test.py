@@ -31,54 +31,54 @@ def test_simple_contact_plan_routing():
     assert route.to_time == 20
 
 """
-Tests that links can be successfully added to the Schrouter.
+Tests that contacts can be successfully added to the Schrouter.
 """
-def test_add_link_routing():
+def test_add_contact_routing():
     # construct a Schrouter.
     schrouter = Schrouter()
 
-    # add one link to the Schrouter.
-    schrouter.add_link(source=0,
-                       dest=1,
-                       start_time=0,
-                       end_time=sys.maxsize,
-                       rate=100)
+    # add one contact to the Schrouter.
+    schrouter.add_contact(source=0,
+                          dest=1,
+                          start_time=0,
+                          end_time=sys.maxsize,
+                          rate=100)
 
-    # verify that the link to node 1 exists
-    schrouter.check_link_availability(0, 1)
+    # verify that the contact to node 1 exists
+    schrouter.check_contact_availability(0, 1)
 
 """
-Tests that links can be successfully removed from the Schrouter + that removing links can adjust
+Tests that contacts can be successfully removed from the Schrouter + that removing contacts can adjust
 path computation.
 """
-def test_remove_link_routing():
+def test_remove_contact_routing():
     # construct a Schrouter.
     schrouter = Schrouter()
 
-    # add three links to the Schrouter:
+    # add three contacts to the Schrouter:
     # - 0->1 w/ extremely late start_time.
     # - 0->2 w/ start_time of 0.
     # - 2->1 w/ start_time of 0.
-    schrouter.add_link(source=0,
-                       dest=1,
-                       start_time=sys.maxsize - 1,
-                       end_time=sys.maxsize,
-                       rate=100)
-    schrouter.add_link(source=0,
-                       dest=2,
-                       start_time=0,
-                       end_time=sys.maxsize,
-                       rate=100)
-    schrouter.add_link(source=2,
-                       dest=1,
-                       start_time=0,
-                       end_time=sys.maxsize,
-                       rate=100)
+    schrouter.add_contact(source=0,
+                          dest=1,
+                          start_time=sys.maxsize - 1,
+                          end_time=sys.maxsize,
+                          rate=100)
+    schrouter.add_contact(source=0,
+                          dest=2,
+                          start_time=0,
+                          end_time=sys.maxsize,
+                          rate=100)
+    schrouter.add_contact(source=2,
+                          dest=1,
+                          start_time=0,
+                          end_time=sys.maxsize,
+                          rate=100)
 
-    # verify that the links were successfully added to the Schrouter.
-    assert schrouter.check_link_availability(0, 1)
-    assert schrouter.check_link_availability(0, 2)
-    assert schrouter.check_link_availability(2, 1)
+    # verify that the contacts were successfully added to the Schrouter.
+    assert schrouter.check_contact_availability(0, 1)
+    assert schrouter.check_contact_availability(0, 2)
+    assert schrouter.check_contact_availability(2, 1)
 
     # obtain a route for 0->1.  it should route through 2 due to the early start_times.
     route_1 = schrouter.get_best_route_dijkstra(0, 1, 0)
@@ -86,13 +86,13 @@ def test_remove_link_routing():
     assert route_1.hops[1].frm == 2
     assert route_1.hops[1].to == 1
 
-    # remove the links from 0->2 and 2->1.
-    schrouter.remove_all_links_for_node(2)
+    # remove the contacts from 0->2 and 2->1.
+    schrouter.remove_all_contacts_for_node(2)
 
-    # verify that the link was successfully removed.
+    # verify that the contact was successfully removed.
     assert not schrouter.check_any_availability(2)
 
-    # recompute the route from 0->1.  Since the 0->2 link was removed, the fastest
+    # recompute the route from 0->1.  Since the 0->2 contact was removed, the fastest
     # route should now be 0->1 instead of 0->2->1.
     route_2 = schrouter.get_best_route_dijkstra(0, 1, 0)
     assert len(route_2.hops) == 1
@@ -106,30 +106,30 @@ def test_routing_with_later_timestamp_use_faster_route():
     # construct a Schrouter.
     schrouter = Schrouter()
 
-    # add three links to the Schrouter:
+    # add three contacts to the Schrouter:
     # - 0->1 w/ start_time of 3.
     # - 0->2 w/ start_time of 0.
     # - 2->1 w/ start_time of 0.
-    schrouter.add_link(source=0,
-                       dest=1,
-                       start_time=3,
-                       end_time=sys.maxsize,
-                       rate=100)
-    schrouter.add_link(source=0,
-                       dest=2,
-                       start_time=0,
-                       end_time=sys.maxsize,
-                       rate=100)
-    schrouter.add_link(source=2,
-                       dest=1,
-                       start_time=0,
-                       end_time=sys.maxsize,
-                       rate=100)
+    schrouter.add_contact(source=0,
+                          dest=1,
+                          start_time=3,
+                          end_time=sys.maxsize,
+                          rate=100)
+    schrouter.add_contact(source=0,
+                          dest=2,
+                          start_time=0,
+                          end_time=sys.maxsize,
+                          rate=100)
+    schrouter.add_contact(source=2,
+                          dest=1,
+                          start_time=0,
+                          end_time=sys.maxsize,
+                          rate=100)
 
-    # verify that the links were successfully added to the Schrouter.
-    assert schrouter.check_link_availability(0, 1)
-    assert schrouter.check_link_availability(0, 2)
-    assert schrouter.check_link_availability(2, 1)
+    # verify that the contacts were successfully added to the Schrouter.
+    assert schrouter.check_contact_availability(0, 1)
+    assert schrouter.check_contact_availability(0, 2)
+    assert schrouter.check_contact_availability(2, 1)
 
     # obtain a route for 0->1 w/ timestamp == 0.  It should route through 2 due to the early start_times.
     route_1 = schrouter.get_best_route_dijkstra(0, 1, 0)
