@@ -57,6 +57,9 @@ class LunarModel(mesa.Model):
 
     def step(self):
         self.schedule.step()
+        if "max_steps" in self.model_params:
+            if self.schedule.steps >= self.model_params["max_steps"] - 1:
+                self.running = False
 
     def get_rssi(self, agent, other):
         """Returns the RSSI of the agent to the other agent in dBm"""
