@@ -57,7 +57,7 @@ class LunarModel(mesa.Model):
 
     def step(self):
         self.schedule.step()
-        if "max_steps" in self.model_params:
+        if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
             if self.schedule.steps >= self.model_params["max_steps"] - 1:
                 self.running = False
 
@@ -69,6 +69,11 @@ class LunarModel(mesa.Model):
         clean_rssi = 10 * 2.5 * math.log10(1/distance)
         noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
         return clean_rssi + noise
+    
+    def get_distance(self, rssi):
+        """Returns the distance of the agent using an RSSI in dbm"""
+        distance = math.exp(-0.0921034 * rssi)
+        return distance
 
     def get_neighbors(self, agent):
         """
@@ -79,18 +84,18 @@ class LunarModel(mesa.Model):
         can be called to send a bundle to the agent.
         """
 
-        det_range = agent.radio.detection_range
-        con_range = agent.radio.connection_range
+        det_thresh = agent.radio.detection_thresh
+        con_thresh = agent.radio.connection_thresh
 
         neighbors = []
         for other in self.schedule.agents:
             if other is not agent:
-                distance = self.space.get_distance(agent.pos, other.pos)
-                if distance <= det_range:
-                    connected = distance <= con_range
+                rssi = self.get_rssi(agent, other)
+                if rssi >= det_thresh:
+                    connected = rssi >= con_thresh
                     neighbors.append({
                         "id": other.unique_id,
-                        "rssi": self.get_rssi(agent, other),
+                        "rssi": rssi,
                         "connected": connected,
                         "send_bundle": other.hdtn.receive_bundle if connected else None
                     })

@@ -88,8 +88,8 @@ class Radio():
     def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model
-        self.detection_range = options["detection_range"]
-        self.connection_range = options["connection_range"]
+        self.detection_thresh = options["detection_thresh"]
+        self.connection_thresh = options["connection_thresh"]
         self.neighborhood = []
 
     def refresh(self):
@@ -105,8 +105,10 @@ class Radio():
 
     def get_state(self):
         return {
-            "detection_range": self.detection_range,
-            "connection_range": self.connection_range,
+            "detection_thresh": self.detection_thresh,
+            "estimated_detection_range": self.model.get_distance(self.detection_thresh),
+            "connection_thresh": self.connection_thresh,
+            "estimated_connection_range": self.model.get_distance(self.connection_thresh),
             "neighborhood": makeSerializeable(self.neighborhood)
         }
 

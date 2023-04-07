@@ -19,8 +19,8 @@ DEFAULT_INITIAL_STATE = {
         # these options. It can be overridden by an
         # individual node's options.
         "radio": {
-            "detection_range": 300,
-            "connection_range": 20,
+            "detection_thresh": -60,
+            "connection_thresh": -25,
         },
         "hdtn": {},
         "movement": {}
