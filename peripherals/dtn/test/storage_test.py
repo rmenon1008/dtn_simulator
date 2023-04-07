@@ -1,7 +1,7 @@
 from random import randint
 
-from peripherals.hdtn.hdtn_bundle import Bundle
-from peripherals.hdtn.storage import Storage
+from peripherals.dtn.hdtn_bundle import Bundle
+from peripherals.dtn.storage import Storage
 
 
 def test_bundle_lifecycle():

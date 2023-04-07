@@ -3,30 +3,24 @@ Contains the Dtn class, which is a simplified implementation of HDTN.
 """
 import string
 
-from peripherals.hdtn.hdtn_bundle import Bundle
-from peripherals.hdtn.storage import Storage
-from peripherals.hdtn.schrouter import Schrouter
+from peripherals.dtn.hdtn_bundle import Bundle
+from peripherals.dtn.storage import Storage
+from peripherals.dtn.schrouter import Schrouter
+
+from model import LunarModel
 
 
 class Dtn:
 
-    def __init__(self, node_id, dtn_dict: dict, contact_plan_json_filename: string = None):
+    def __init__(self, node_id, model: LunarModel, contact_plan_json_filename: string = None):
         self.node_id = node_id
 
-        # dtn_dict = reference to a Dict which contains mappings of DTN node IDs -> DTN nodes.
-        #           since this is a sim, we can allow all nodes to be able to easily contact
-        #           each other using this.  This is the easiest way to "interconnect" the nodes.
-        #
-        #           We can then "manage" the availability of the connections + compute them in
-        #           the Schrouter.
-        self.dtn_dict = dtn_dict
+        self.model = model
 
         self.storage = Storage()
 
         # if no filename is provided, "None" will be supplied to the Schrouter and an empty Schrouter will be created.
         self.schrouter = Schrouter(contact_plan_json_filename)
-
-        self.timestamp = 0
 
     """
     Receives + handles bundles of data.
@@ -44,7 +38,7 @@ class Dtn:
         # if there exists a link by which we can route the Bundle to its destination, pass it on to the next link.
         if self.schrouter.check_any_availability(bundle.dest_id):
             # compute the route.
-            route = self.schrouter.get_best_route_dijkstra(self.node_id, bundle.dest_id, self.timestamp)
+            route = self.schrouter.get_best_route_dijkstra(self.node_id, bundle.dest_id, self.model.schedule.time)
 
             # get the ID of the next node on the route.
             next_hop_dest_id = route.hops[0].to
@@ -57,12 +51,10 @@ class Dtn:
             self.storage.store_bundle(bundle.dest_id, bundle)
 
     """
-    Increments the timestamp.
-     
-    This value is directly used by the dtn to calculate routes, so incrementing it does affect route computation.
+    Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
     """
     def refresh(self):
-        self.timestamp += 1
+        pass
 
     """
     Adds a contact to contact plan used by the Schrouter.
@@ -78,7 +70,7 @@ class Dtn:
         self.schrouter.add_contact(source, dest, start_time, end_time, rate, owlt, confidence)
 
         # check to see if the contact plan containing this new link now has a route between this node + dest.
-        if self.schrouter.get_best_route_dijkstra(self.node_id, dest, self.timestamp) is not None:
+        if self.schrouter.get_best_route_dijkstra(self.node_id, dest, self.model.schedule.time) is not None:
             # if there is a valid route between this node + dest, flush all bundles stored for dest from storage.
             # NOTE:  if this method is called while no bundles are currently stored, nothing will happen.
             self.__flush_bundles(dest)
@@ -104,7 +96,7 @@ class Dtn:
     def __flush_bundles(self, dest_id):
         # get the route to the dest_id from the Schrouter.
         # compute the route.
-        route = self.schrouter.get_best_route_dijkstra(self.node_id, dest_id, self.timestamp)
+        route = self.schrouter.get_best_route_dijkstra(self.node_id, dest_id, self.model.schedule.time)
 
         # get the ID of the next node on the route.
         next_hop_dest_id = route.hops[0].to
@@ -122,5 +114,5 @@ class Dtn:
     Private function used to send the passed Bundle to the specified node in the network.
     """
     def __send_bundle(self, bundle: Bundle, dest_id):
-        dest_dtn_node = self.dtn_dict[dest_id]
+        dest_dtn_node = self.model.get_dtn_object(dest_id)
         dest_dtn_node.handle_bundle(bundle)

@@ -38,6 +38,9 @@ class LunarModel(mesa.Model):
         # Used by mesa to know when the simulation is over
         self.running = True
 
+        # Stores references to the agents as mappings of "id"->agent
+        self.agents = {}
+
         for agent_options in initial_state["agents"]:
 
             # Merge the node defaults with the individual node options
@@ -57,6 +60,9 @@ class LunarModel(mesa.Model):
             a = RoverAgent(self, options)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
+
+            # Stash the agent in a map for easy lookup later.
+            self.agents[options["id"]] = a
 
     def step(self):
         self.schedule.step()
@@ -126,3 +132,9 @@ class LunarModel(mesa.Model):
             return
 
         self.space.move_agent(agent, (agent.pos[0] + dx, agent.pos[1] + dy))
+
+    """
+    Used to easily obtain references to other DTN objects.
+    """
+    def get_dtn_object(self, node_id):
+        return self.agents[node_id].dtn

@@ -1,5 +1,5 @@
 # The old HDTN class. Remove when replaced with Dtn
-class HDTN():
+class DummyHDTN():
     # Skeleton for the HDTN peripheral
 
     # The recevie_bundle method is called by another agent

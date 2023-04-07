@@ -22,7 +22,7 @@ DEFAULT_INITIAL_STATE = {
             "detection_thresh": -60,
             "connection_thresh": -25,
         },
-        "hdtn": {},
+        "dtn": {},
         "movement": {}
     },
     "agents": [
@@ -36,7 +36,7 @@ DEFAULT_INITIAL_STATE = {
                 "type": "fixed",
             },
             "pos": (SIM_WIDTH/2, SIM_HEIGHT/2),
-            "hdtn": {},
+            "dtn": {},
         },
         {
             "behavior": {
