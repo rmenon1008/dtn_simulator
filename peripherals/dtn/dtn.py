@@ -7,12 +7,10 @@ from peripherals.dtn.hdtn_bundle import Bundle
 from peripherals.dtn.storage import Storage
 from peripherals.dtn.schrouter import Schrouter
 
-from model import LunarModel
-
 
 class Dtn:
 
-    def __init__(self, node_id, model: LunarModel, contact_plan_json_filename: string = None):
+    def __init__(self, node_id, model, contact_plan_json_filename: string = None):
         self.node_id = node_id
 
         self.model = model
@@ -28,6 +26,9 @@ class Dtn:
     This effectively behaves akin to the `ingress` + `egress` modules in HDTN.
     """
     def handle_bundle(self, bundle: Bundle):
+        print("Agent {} received bundle {}".format(
+            self.node_id, bundle))
+
         # Ingress
         # Process received bundle.
 
@@ -55,6 +56,14 @@ class Dtn:
     """
     def refresh(self):
         pass
+
+    """
+    Called by the agent and sent to the visualization for simulation history log.
+    """
+    def get_state(self):
+        return {
+            # TODO:  Add state-representation data here as necessary.
+        }
 
     """
     Adds a contact to contact plan used by the Schrouter.

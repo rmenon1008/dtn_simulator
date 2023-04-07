@@ -10,7 +10,7 @@ class DummyHDTN():
         self.model = model
         self.options = options
 
-    def receive_bundle(self, bundle, type="data"):
+    def handle_bundle(self, bundle, type="data"):
         # Receive a bundle from another agent
         # This function can be called by another agent in connection range
         print("Agent {} received bundle {}".format(

@@ -3,6 +3,8 @@ import logging
 import numpy as np
 from scipy.optimize import leastsq
 
+from peripherals.dtn.dtn import Dtn
+
 # The old HDTN class. Remove when replaced with Dtn
 from peripherals.dummy_hdtn import DummyHDTN
 
@@ -28,7 +30,7 @@ class RoverAgent(mesa.Agent):
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
-        self.dtn = HDTN(self, model, node_options["dtn"])
+        self.dtn = Dtn(self.unique_id, model)  # HDTN(self, model, node_options["dtn"])
         self.radio = Radio(self, model, node_options["radio"])
 
     def update_history(self):

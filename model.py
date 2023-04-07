@@ -109,7 +109,7 @@ class LunarModel(mesa.Model):
                         "id": other.unique_id,
                         "rssi": rssi,
                         "connected": connected,
-                        "send_bundle": other.hdtn.receive_bundle if connected else None
+                        "send_bundle": other.dtn.handle_bundle if connected else None
                     })
 
         return neighbors
