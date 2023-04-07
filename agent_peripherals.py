@@ -1,102 +1,142 @@
 import math
-import logging
 
-DETECTION_RANGE = 600
-CONNECTION_RANGE = 20
-RSSI_NOISE_DBM_STDEV = 0.1
+
+def pol_to_cart(r, phi):
+    return (r * math.cos(phi), r * math.sin(phi))
+
+
+def makeSerializeable(obj):
+    """
+    Helper function to make sure an object is serializeable
+    to be sent to the visualization server.
+    """
+    if isinstance(obj, dict):
+        return {k: makeSerializeable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [makeSerializeable(v) for v in obj]
+    elif isinstance(obj, tuple):
+        return tuple(makeSerializeable(v) for v in obj)
+    elif isinstance(obj, set):
+        return set(makeSerializeable(v) for v in obj)
+    elif isinstance(obj, complex):
+        return (obj.real, obj.imag)
+    elif isinstance(obj, type):
+        return obj.__name__
+    elif hasattr(obj, "__dict__"):
+        return makeSerializeable(obj.__dict__)
+    else:
+        return obj
+
+
+class Movement():
+    def __init__(self, agent, model, options):
+        self.agent = agent
+        self.model = model
+        # Options are unused for now
+
+        # Move at the speed limit
+        self.speed = self.model.model_params["model_speed_limit"]
+
+    def refresh(self):
+        # This peripheral does not need to refresh because
+        # it's state can not change based on the other nodes
+        pass
+
+    def move(self, dx, dy):
+        mag = (dx**2 + dy**2)**0.5
+        if mag > self.speed:
+            dx = dx / mag * self.speed
+            dy = dy / mag * self.speed
+
+        self.model.move_agent(self.agent, dx, dy)
+
+    def move_towards(self, target_pos):
+        dx = target_pos[0] - self.agent.pos[0]
+        dy = target_pos[1] - self.agent.pos[1]
+        self.move(dx, dy)
+
+    def step_random(self):
+        dx = self.agent.random.random() * self.speed * 2 - self.speed
+        dy = self.agent.random.random() * self.speed * 2 - self.speed
+        self.move(dx, dy)
+
+    def step_spiral(self, separation=50, reset=False):
+        if reset:
+            self.spiral_r = None
+        if not hasattr(self, "spiral_r"):
+            self.spiral_r = self.speed
+            self.spiral_phi = self.spiral_r / (separation / (2*math.pi))
+
+        dx, dy = pol_to_cart(self.spiral_r, self.spiral_phi)
+        self.move(dx, dy)
+        self.spiral_phi += self.speed / self.spiral_r
+        self.spiral_r = (separation / (2*math.pi)) * self.spiral_phi
+
+    def step_circle(self, radius=100, reset=False):
+        if reset:
+            self.circle_phi = None
+        if not hasattr(self, "circle_phi"):
+            self.circle_phi = 0
+
+        dx, dy = pol_to_cart(radius, self.circle_phi)
+        self.move(dx, dy)
+        self.circle_phi += self.speed / radius
+
 
 class Radio():
-    def __init__(self, agent, model, radio_noise=RSSI_NOISE_DBM_STDEV, detection_range=DETECTION_RANGE, connection_range=CONNECTION_RANGE):
+
+    def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model
-        self.detection_range = detection_range
-        self.connection_range = connection_range
-        self.radio_noise = radio_noise
+        self.detection_thresh = options["detection_thresh"]
+        self.connection_thresh = options["connection_thresh"]
         self.neighborhood = []
-        self.best_rssi = None
 
-    def rssi(self, distance):
-        if distance > self.detection_range:
-            return None
-        if distance == 0:
-            return 0
-        return 10 * 2.5 * math.log10(1/distance) * self.agent.random.normalvariate(1, self.radio_noise)
-    
-    def nodes_in_range(self, range):
-        all_agents = self.model.schedule.agents
-        within_range = []
-        for other in all_agents:
-            if other is not self.agent:
-                distance = self.model.space.get_distance(self.agent.pos, other.pos)
-                if distance <= range:
-                    within_range.append(other)
-        return within_range
-    
     def refresh(self):
-        self.neighborhood  = []
-        other_agents = self.nodes_in_range(self.detection_range)
-        for other in other_agents:
-            distance = self.model.space.get_distance(self.agent.pos, other.pos)
-            self.neighborhood.append({
-                "id": other.unique_id,
-                "rssi": self.rssi(distance),
-                "connected": distance <= self.connection_range
-            })
-        self.best_rssi = max([neighbor["rssi"] for neighbor in self.neighborhood]) if len(self.neighborhood) > 0 else None
+        # Update the neighborhood from the model helper
+        self.neighborhood = self.model.get_neighbors(self.agent)
 
-    def is_connected(self, other_id):
-        for neighbor in self.neighborhood:
-            if neighbor["id"] == other_id:
-                return neighbor["connected"]
+    def is_connected(self, other):
+        for agent in self.neighborhood:
+            if agent["connected"]:
+                if agent["id"] == other or other == "all":
+                    return True
         return False
-    
+
     def get_state(self):
         return {
-            "detection_range": self.detection_range,
-            "connection_range": self.connection_range,
-            "neighborhood": self.neighborhood,
-            "best_rssi": self.best_rssi
+            "detection_thresh": self.detection_thresh,
+            "estimated_detection_range": self.model.get_distance(self.detection_thresh),
+            "connection_thresh": self.connection_thresh,
+            "estimated_connection_range": self.model.get_distance(self.connection_thresh),
+            "neighborhood": makeSerializeable(self.neighborhood)
         }
+
 
 class HDTN():
-    def __init__(self, agent, model):
+    # Skeleton for the HDTN peripheral
+
+    # The recevie_bundle method is called by another agent
+    # when in contact range
+
+    def __init__(self, agent, model, options):
         self.agent = agent
         self.model = model
-        self.has_data = False
-        self.current_target = None
+        self.options = options
 
-    def create_data(self):
-        self.has_data = True
-
-    def schedule_transfer(self, other_id, cb=None):
-        self.current_target = other_id
-        self.cb = cb
-    
-    def refresh(self):
-        if self.current_target is not None:
-            if self.current_target == "all":
-                for agent in self.agent.radio.neighborhood:
-                    if agent["connected"]:
-                        self.current_target = agent["id"]
-                        break
-            if self.agent.radio.is_connected(self.current_target):
-                logging.info("Agent {} transferred data to agent {}".format(self.agent.unique_id, self.current_target))
-                for agent in self.model.schedule.agents:
-                    if agent.unique_id == self.current_target:
-                        logging.info("Agent {} received data from agent {}".format(agent.unique_id, self.agent.unique_id))
-                        agent.hdtn.has_data = True
-                        break
-
-                if self.cb is not None:
-                    self.cb(self.current_target)
-                    self.cb = None
-
-                self.has_data = False
-                self.current_target = None
-
+    def receive_bundle(self, bundle, type="data"):
+        # Receive a bundle from another agent
+        # This function can be called by another agent in connection range
+        print("Agent {} received bundle {}".format(
+            self.agent.unique_id, bundle))
 
     def get_state(self):
+        # Called by the agent and sent to the visualization and added to history
         return {
-            "has_data": self.has_data,
-            "current_target": self.current_target
+            # "has_data": self.has_data,
+            # "current_target": self.current_target
         }
+
+    def refresh(self):
+        # Called every step by the agent
+        pass

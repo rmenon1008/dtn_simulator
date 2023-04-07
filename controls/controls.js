@@ -39,7 +39,7 @@ function ModelController() {
         startStopButton.classList.add("play")
         startStopButton.classList.add("finished")
         startStopButton.classList.add("disabled")
-        
+
         this.finished = true;
     }
 
@@ -209,6 +209,111 @@ const addNumberInput = (key, obj, callback) => {
     return div
 }
 
+const addChoiceInput = (key, obj, callback) => {
+    const div = document.createElement("div");
+    div.classList.add("option");
+    div.innerHTML = `
+        <span class="label">${obj.name}</span>
+        <select name="${key}" id="${key}">
+        </select>
+    `;
+    const select = div.querySelector("select");
+    for (const option of obj.choices) {
+        const optionElement = document.createElement("option");
+        optionElement.value = option;
+        optionElement.innerText = option;
+        select.appendChild(optionElement);
+    }
+    select.value = obj.value;
+    select.addEventListener("change", (e) => {
+        callback(key, e.target.value);
+    });
+    return div
+}
+
+const addObjectInput = (key, obj, callback) => {
+    // Uses a textarea to allow for JSON input
+    let lastContent = "";
+    const div = document.createElement("div");
+    div.classList.add("option");
+    div.classList.add("option-vertical");
+    div.innerHTML = `
+        <span class="label">${obj.name}</span>
+        <div 
+            class="json-input"
+            contenteditable
+            data-gramm="false"
+            spellcheck="false"
+            style="width: 100%; min-height: 100%;"
+            name="${key}"
+            id="${key}"
+        ></div>
+    `;
+    const textarea = div.querySelector("div.json-input");
+    textarea.innerText = JSON.stringify(JSON.parse(obj.value), null, 2);
+    textarea.addEventListener("focusout", (e) => {
+        stripped = e.target.innerText.replace(/\s/g, "");
+        // Check if the input is valid JSON
+        if (stripped === lastContent) {
+            return;
+        }
+        try {
+            JSON.parse(stripped);
+        } catch (e) {
+            return;
+        }
+        lastContent = stripped;
+        callback(key, stripped);
+    });
+    textarea.addEventListener("keydown", (e) => {
+        // Get the location of the cursor
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+
+        if (e.key === "Tab") {
+            e.preventDefault();
+            document.execCommand("insertHTML", false, "\u00a0\u00a0");
+        }
+        if (e.key === "Enter") {
+            const text = range.startContainer.data;
+            const line = text.substring(0, range.startOffset);
+            const indent = line.match(/^\s+/);
+            if (indent) {
+                e.preventDefault();
+                document.execCommand("insertHTML", false, "\n" + indent[0]);
+            }
+        }
+    });
+    return div
+}
+
+// const addObject2Input = (key, obj, callback) => {
+//     // Renders the object using 
+//     const value = JSON.parse(obj.value);
+//     const formatter = new JSONFormatter(value, 1, {
+//         hoverPreviewEnabled: false,
+//         hoverPreviewArrayCount: 100,
+//         hoverPreviewFieldCount: 5,
+//         theme: 'dark',
+//         animateOpen: true,
+//         animateClose: false,
+//         useToJSON: true,
+//         maxArrayItems: 100,
+//         exposePath: true
+//     });
+//     formatter.openAtDepth(3);
+
+//     const div = document.createElement("div");
+//     div.classList.add("option");
+//     div.classList.add("option-vertical");
+//     div.innerHTML = `
+//         <span class="label">${obj.name}</span>
+//     `;
+//     div.appendChild(formatter.render());
+//     return div
+// }
+
+
 const initGUI = (paramsMessage) => {
     const onSubmitCallback = (paramName, value) => {
         send({ type: "submit_params", param: paramName, value: value });
@@ -224,6 +329,12 @@ const initGUI = (paramsMessage) => {
                 break;
             case "number":
                 modelParams.appendChild(addNumberInput(paramName, obj, onSubmitCallback));
+                break;
+            case "choice":
+                modelParams.appendChild(addChoiceInput(paramName, obj, onSubmitCallback));
+                break;
+            case "object":
+                modelParams.appendChild(addObjectInput(paramName, obj, onSubmitCallback));
                 break;
         }
     }
