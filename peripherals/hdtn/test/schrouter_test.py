@@ -2,10 +2,13 @@ import sys
 
 from peripherals.hdtn.schrouter import Schrouter
 
+
 """
 Tests that the Schrouter can load contact plans from JSONs + successfully compute routes from them.
 """
 def test_simple_contact_plan_routing():
+    # NOTE:  This test will fail to find the JSON files if not run from the root directory using the `pytest` command.
+
     # construct the Schrouter from a file.
     schrouter = Schrouter("peripherals/hdtn/test/test_contact_plans/contactPlan.json")
 
@@ -30,6 +33,7 @@ def test_simple_contact_plan_routing():
     assert route.from_time == 10
     assert route.to_time == 20
 
+
 """
 Tests that contacts can be successfully added to the Schrouter.
 """
@@ -46,6 +50,7 @@ def test_add_contact_routing():
 
     # verify that the contact to node 1 exists
     schrouter.check_contact_availability(0, 1)
+
 
 """
 Tests that contacts can be successfully removed from the Schrouter + that removing contacts can adjust
@@ -98,6 +103,36 @@ def test_remove_contact_routing():
     assert len(route_2.hops) == 1
     assert route_2.hops[0].frm == 0
     assert route_2.hops[0].to == 1
+
+
+"""
+Tests that contacts can be successfully removed from the Schrouter via using a window of timestamps.
+"""
+def test_remove_contacts_in_time_window():
+    # construct a Schrouter.
+    schrouter = Schrouter()
+
+    # add a contact to the Schrouter
+    schrouter.add_contact(source=0,
+                          dest=1,
+                          start_time=0,
+                          end_time=6,
+                          rate=100)
+
+    # verify that the contacts were successfully added to the Schrouter.
+    assert schrouter.check_contact_availability_specific_time_window(0, 1, 0, 6)
+
+    # adjust the Schrouter such that there is no contact between 0 and 1 from timestamps 3->4.
+    # (this should result in two new contacts for 0-1:  one from timestamps 0->2 and one from timestamps 5->6
+    schrouter.remove_contacts_in_time_window(0, 1, 3, 4)
+
+    # verify that the original contact between 0 and 1 from timestamps 0->6 is now gone.
+    assert not schrouter.check_contact_availability_specific_time_window(0, 1, 0, 6)
+
+    # verify that there are now two contacts between 0 and 1:  one from 0->2 and another from 5->6.
+    assert schrouter.check_contact_availability_specific_time_window(0, 1, 0, 2)
+    assert schrouter.check_contact_availability_specific_time_window(0, 1, 5, 6)
+
 
 """
 Tests that the router adjusts route computation based upon the provided starting timestamp.

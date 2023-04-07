@@ -43,11 +43,20 @@ class Schrouter:
             self.contact_plan))) > 0
 
     """
-    Returns if any path between the two specified nodes exists in the contact plan. 
+    Returns if a contact between the two specified nodes exists in the contact plan. 
     """
     def check_contact_availability(self, source_id, dest_id) -> bool:
         return len(list(filter(
             lambda contact: contact.frm == source_id and contact.to == dest_id,
+            self.contact_plan))) > 0
+
+    """
+    Returns if a contact between the two specified nodes at the _exact_ specified time window exists 
+    in the contact plan. 
+    """
+    def check_contact_availability_specific_time_window(self, source_id, dest_id, start_time, end_time) -> bool:
+        return len(list(filter(
+            lambda contact: contact.frm == source_id and contact.to == dest_id and contact.start == start_time and contact.end == end_time,
             self.contact_plan))) > 0
 
     """
@@ -90,6 +99,84 @@ class Schrouter:
     """
     def remove_contact_by_contact_id(self, contact_id):
         self.contact_plan = [contact for contact in self.contact_plan if contact.id != contact_id]
+
+    """
+    Removes all contacts associated with the passed node ids within the specified window from the contact plan.
+    """
+    def remove_contacts_in_time_window(self, node_1_id, node_2_id, start_time, end_time):
+        # 0-5 exists.  We say "remove 4-8".  The 0-5 window is modified to be 0-3.
+        new_contact_plan = []
+        for contact in self.contact_plan:
+            if (contact.frm == node_1_id and contact.to == node_2_id) \
+                    or (contact.frm == node_2_id and contact.to == node_1_id):
+                # if we have found a contact for the contact_id, compute one which does not overlap with the window (if possible)
+
+                # check to see if the contact lies entirely within the time window.
+                if contact.start >= start_time and contact.end <= end_time:
+                    # skip to the next contact if so.  (this effectively throws out this contact)
+                    continue
+                elif contact.start < start_time and end_time < contact.end:
+                    # if the removal window is entirely within the contact, create + store two new contacts:
+                    # - one which is from contact.start -> start_time - 1
+                    # - one which is from end_time + 1 -> contact.end
+                    contact1 = Contact(
+                        contact.frm,
+                        contact.to,
+                        contact.start,
+                        start_time - 1,
+                        contact.rate,
+                        contact.id,
+                        contact.confidence,
+                        contact.owlt
+                    )
+                    contact2 = Contact(
+                        contact.frm,
+                        contact.to,
+                        end_time + 1,
+                        contact.end,
+                        contact.rate,
+                        contact.id,
+                        contact.confidence,
+                        contact.owlt
+                    )
+                    new_contact_plan.append(contact1)
+                    new_contact_plan.append(contact2)
+
+                elif contact.start < start_time <= end_time <= end_time:
+                    # if the end falls within the window, store an identical contact where the end is start_time - 1.
+                    contact = Contact(
+                        contact.frm,
+                        contact.to,
+                        contact.start,
+                        start_time - 1,
+                        contact.rate,
+                        contact.id,
+                        contact.confidence,
+                        contact.owlt
+                    )
+                    new_contact_plan.append(contact)
+
+                elif start_time <= contact.start <= contact.end < end_time:
+                    # if the end falls within the window, store an identical contact where the start is end_time + 1.
+                    contact = Contact(
+                        contact.frm,
+                        contact.to,
+                        end_time + 1,
+                        contact.end,
+                        contact.rate,
+                        contact.id,
+                        contact.confidence,
+                        contact.owlt
+                    )
+                    new_contact_plan.append(contact)
+
+            else:
+                # otherwise, just add the contact to the new contact plan.
+                new_contact_plan.append(contact)
+
+
+        # update the stored contact plan to be the newly-computed new_contact_plan
+        self.contact_plan = new_contact_plan
 
     """
     Returns the best route for the specified contact_id in the stored contact plan as calculated via Dijkstra's.

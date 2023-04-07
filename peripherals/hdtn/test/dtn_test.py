@@ -33,6 +33,7 @@ def setup():
 
     yield dtn_dict
 
+
 """
 Tests sending a Bundle when the best route is indirect.
 
@@ -114,3 +115,35 @@ def test_handle_bundle_stores_bundle_sends_once_linked(setup):
     # assert that the new contact caused 4 to receive the bundle.
     verify(dtn_dict[3], times=1).handle_bundle(...)
     verify(dtn_dict[4], times=1).handle_bundle(...)
+
+
+"""
+Tests that the Dtn object can successfully use the Schrouter to load contact plans from JSONs + successfully compute 
+routes from them.
+"""
+def test_construct_dtn_from_json():
+    # NOTE:  This test will fail to find the JSON files if not run from the root directory using the `pytest` command.
+
+    # construct dtns w/ the Schrouter being configured from a file.
+    dtn_dict = {}
+    dtn_dict[10] = spy(Dtn(10, dtn_dict, "peripherals/hdtn/test/test_contact_plans/contactPlan.json"))
+    dtn_dict[1] = spy(Dtn(1, dtn_dict, "peripherals/hdtn/test/test_contact_plans/contactPlan.json"))
+    dtn_dict[2] = spy(Dtn(2, dtn_dict, "peripherals/hdtn/test/test_contact_plans/contactPlan.json"))
+
+    # topology loaded from file:
+    #      1
+    #    /
+    # 10
+    #    \
+    #      2
+
+    # create a Bundle to send from 10 to 1.
+    bundle = Bundle(10, 1)
+
+    # have node 10 handle the Bundle.
+    dtn_dict[10].handle_bundle(bundle)
+
+    # assert that the bundle was sent directly from node 10 to node 1.
+    verify(dtn_dict[10], times=1).handle_bundle(...)
+    verify(dtn_dict[1], times=1).handle_bundle(...)
+    verify(dtn_dict[2], times=0).handle_bundle(...)

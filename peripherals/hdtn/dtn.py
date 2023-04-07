@@ -10,7 +10,7 @@ from peripherals.hdtn.schrouter import Schrouter
 
 class Dtn:
 
-    def __init__(self, node_id, dtn_dict: dict):
+    def __init__(self, node_id, dtn_dict: dict, contact_plan_json_filename: string = None):
         self.node_id = node_id
 
         # dtn_dict = reference to a Dict which contains mappings of DTN node IDs -> DTN nodes.
@@ -22,7 +22,10 @@ class Dtn:
         self.dtn_dict = dtn_dict
 
         self.storage = Storage()
-        self.schrouter = Schrouter()
+
+        # if no filename is provided, "None" will be supplied to the Schrouter and an empty Schrouter will be created.
+        self.schrouter = Schrouter(contact_plan_json_filename)
+
         self.timestamp = 0
 
     """
@@ -83,8 +86,14 @@ class Dtn:
     """
     Removes all contacts for the given node from the Schrouter.
     """
-    def remove_contact(self, node_id):
+    def remove_all_contacts_for_node(self, node_id):
         self.schrouter.remove_all_contacts_for_node(node_id)
+
+    """
+    Removes all contacts between the given nodes from the Schrouter which intersect the given time window.
+    """
+    def remove_contacts_in_time_window(self, node_1_id, node_2_id, start_time, end_time):
+        self.schrouter.remove_contacts_in_time_window(node_1_id, node_2_id, start_time, end_time)
 
     """
     Private function used to flush-out stored Bundles for the specified destination node in the network.
