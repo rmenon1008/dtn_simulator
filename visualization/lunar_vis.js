@@ -8,7 +8,7 @@ let showTargetLocations = true;
 
 const LunarVis = function (maxSimX, maxSimY) {
   const elements = document.getElementById("elements");
-  const width = elements.getBoundingClientRect().width;
+  let width = elements.getBoundingClientRect().width;
 
   // Create a canvas element with the correct aspect ratio
   const canvasContainer = document.createElement('div');
@@ -20,20 +20,30 @@ const LunarVis = function (maxSimX, maxSimY) {
   canvas.style.width = width + "px";
   canvas.style.height = width * maxSimY / maxSimX + "px";
 
-  const scaleFactor = canvas.width / maxSimX;
+  let scaleFactor = canvas.width / maxSimX;
 
   canvasContainer.appendChild(canvas);
   elements.appendChild(canvasContainer);
 
   canvasContainer.style.position = "relative";
 
-  
+  window.addEventListener("resize", () => {
+    width = elements.getBoundingClientRect().width;
+    canvas.width = width * PIXEL_MULTIPLIER;
+    canvas.height = width * maxSimY / maxSimX * PIXEL_MULTIPLIER;
+    canvas.style.width = width + "px";
+    canvas.style.height = width * maxSimY / maxSimX + "px";
+    scaleFactor = canvas.width / maxSimX;
+    this.rerender();
+  });
+
+
   // Scales simulation coordinates to canvas coordinates
   const scale = (mag) => { return Math.floor(mag * scaleFactor) };
 
 
   // Draws a circle or square at the given coordinates
-  const drawShape = (x, y, size, color, shape = "circle", centerDot = false, gradientEdgeColor=null) => {
+  const drawShape = (x, y, size, color, shape = "circle", centerDot = false, gradientEdgeColor = null) => {
     context.beginPath();
     if (gradientEdgeColor) {
       size = size * 1.1;
@@ -160,8 +170,8 @@ const LunarVis = function (maxSimX, maxSimY) {
     addBooleanInput("node_history", {
       name: "Fade node history",
       value: historyFade
-    }, (key, value) => { 
-      historyFade = value; 
+    }, (key, value) => {
+      historyFade = value;
       this.rerender();
     })
   )
@@ -171,7 +181,7 @@ const LunarVis = function (maxSimX, maxSimY) {
       name: "Show radio lines",
       value: showDetectionLines
     }, (key, value) => {
-      showDetectionLines = value; 
+      showDetectionLines = value;
       this.rerender();
     })
   )

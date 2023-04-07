@@ -19,13 +19,15 @@ body {
 }
 
 .col-1 {
-    flex-basis: 350px;
+    width: 350px;
     background-color: #333;
     overflow: auto;
     padding-bottom: 25px;
+    flex-shrink: 1;
 }
 
 .col-2 {
+    max-width: calc(100vw - 350px);
     flex-grow: 1;
 }
 
@@ -302,5 +304,13 @@ div.json-input {
     }
     .col-layout {
         display: block;
+    }
+    .col-layout .col-1 {
+        max-width: unset;
+        width: 100%;
+    }
+    .col-layout .col-2 {
+        max-width: unset;
+        width: 100%;
     }
 }
