@@ -30,7 +30,7 @@ DEFAULT_INITIAL_STATE = {
         # node defined here. If "id" or "pos" are
         # not provided, they will be assigned
         # randomly.
-        {   
+        {
             "id": 0,
             "behavior": {
                 "type": "fixed",
@@ -52,6 +52,7 @@ DEFAULT_INITIAL_STATE = {
 
 vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
 
+
 class ObjectOption(mesa.visualization.UserParam):
     def __init__(self, name="", value=None, choices=None, description=None):
         self.param_type = "object"
@@ -65,6 +66,7 @@ class ObjectOption(mesa.visualization.UserParam):
     @value.setter
     def value(self, value):
         self._value = value
+
 
 model_params = ObjectOption(
     "Model parameters",

@@ -20,6 +20,7 @@ def makeSerializeable(obj):
     else:
         return obj
 
+
 class Radio():
     def __init__(self, agent, model, options):
         self.agent = agent

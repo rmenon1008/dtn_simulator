@@ -1,6 +1,7 @@
 import json
 from mesa.visualization.ModularVisualization import VisualizationElement
 
+
 class LunarVis(VisualizationElement):
     local_includes = [
         "visualization/lunar_vis.js",

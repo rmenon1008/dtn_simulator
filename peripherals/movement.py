@@ -1,7 +1,9 @@
 import math
 
+
 def pol_to_cart(r, phi):
     return (r * math.cos(phi), r * math.sin(phi))
+
 
 class Movement():
     def __init__(self, agent, model, options):

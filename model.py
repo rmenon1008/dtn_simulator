@@ -7,7 +7,10 @@ from agent import RoverAgent
 
 
 def merge(source, destination):
-    """Recursively merges source dict into destination dict."""
+    """
+    Recursively merges source dict into destination dict.
+    Used for merging node defaults with individual node options.
+    """
     for key, value in source.items():
         if isinstance(value, dict):
             node = destination.setdefault(key, {})
@@ -69,9 +72,12 @@ class LunarModel(mesa.Model):
         clean_rssi = 10 * 2.5 * math.log10(1/distance)
         noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
         return clean_rssi + noise
-    
+
     def get_distance(self, rssi):
-        """Returns the distance of the agent using an RSSI in dbm"""
+        """
+        Returns the distance of the agent using an RSSI in dbm.
+        Right now, only used to draw the 'fuzzy' range around agents.
+        """
         distance = math.exp(-0.0921034 * rssi)
         return distance
 
@@ -101,20 +107,22 @@ class LunarModel(mesa.Model):
                     })
 
         return neighbors
-    
+
     def move_agent(self, agent, dx, dy):
         """Moves the agent by the given delta x and delta y"""
         mag = (dx**2 + dy**2)**0.5
 
         # Give it a little bit of leeway to avoid floating point errors
         if mag > self.model_params["model_speed_limit"] + 0.0005:
-            logging.warning("Agent {} tried to move faster than model speed limit".format(agent.unique_id))
+            logging.warning(
+                "Agent {} tried to move faster than model speed limit".format(agent.unique_id))
             return
 
         new_pos = (agent.pos[0] + dx, agent.pos[1] + dy)
 
         if self.space.out_of_bounds(new_pos):
-            logging.warning("Agent {} tried to move out of bounds".format(agent.unique_id))
+            logging.warning(
+                "Agent {} tried to move out of bounds".format(agent.unique_id))
             return
-        
+
         self.space.move_agent(agent, (agent.pos[0] + dx, agent.pos[1] + dy))
