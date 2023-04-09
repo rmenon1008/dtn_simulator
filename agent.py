@@ -60,7 +60,7 @@ class RoverAgent(mesa.Agent):
             self.movement.step_circle(radius)
         elif self.behavior["type"] == "rssi_find_target":
             target = try_getting(self.behavior, "options",
-                                 "target", default="all")
+                                 "target_id", default="all")
             # Check if connected to target
             if self.radio.is_connected(target):
                 self.behavior["type"] = "fixed"

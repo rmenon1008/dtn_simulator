@@ -49,7 +49,7 @@ const LunarVis = function (maxSimX, maxSimY) {
       size = size * 1.1;
       const grad = context.createRadialGradient(scale(x), scale(y), 0, scale(x), scale(y), scale(size));
       grad.addColorStop(0, color);
-      grad.addColorStop(0.8, color);
+      grad.addColorStop(0.9, color);
       grad.addColorStop(1, gradientEdgeColor);
       context.fillStyle = grad;
     } else {
@@ -262,7 +262,7 @@ const LunarVis = function (maxSimX, maxSimY) {
     // Draw all the nodes on top
     modelState.forEach(node => {
       const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
-      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.behavior.type === "fixed" ? "square" : "circle"), node.hdtn.has_data);
+      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.behavior.type === "fixed" ? "square" : "circle"), false);
       addTooltip(node);
     });
 
