@@ -3,7 +3,7 @@ import logging
 import json
 import mesa
 
-from agent import RoverAgent
+from agent import RouterAgent
 
 
 def merge(source, destination):
@@ -57,7 +57,7 @@ class LunarModel(mesa.Model):
             # Create the agent
             # Add it to the schedule to get stepped each model tick
             # Place it on the space
-            a = RoverAgent(self, options)
+            a = RouterAgent(self, options)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 

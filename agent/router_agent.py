@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from scipy.optimize import leastsq
 
+from agent.agent_common import try_getting
 from peripherals.dtn.dtn import Dtn
 
 # The old HDTN class. Remove when replaced with Dtn
@@ -12,17 +13,7 @@ from peripherals.radio import Radio
 from peripherals.movement import Movement
 
 
-def try_getting(obj, *keys, default=None):
-    """Helper that tries to get a value from a nested dict."""
-    for key in keys:
-        if key in obj:
-            obj = obj[key]
-        else:
-            return default
-    return obj
-
-
-class RoverAgent(mesa.Agent):
+class RouterAgent(mesa.Agent):
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.history = []
