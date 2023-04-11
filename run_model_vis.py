@@ -3,14 +3,18 @@ from lunar_vis import LunarVis
 import mesa
 import json
 
-SIM_WIDTH = 1000
-SIM_HEIGHT = 550
+# AGENT UNITS
+# Agent top speed = 3.5 m/s (7.8 mph, max speed of the Lunar Roving Vehicle)
+# 1 model pixel = 1 meter
+# 1 tick = 1 second
+
+SIM_WIDTH = 1000  # 1 km
+SIM_HEIGHT = 650  # 650 m
 
 DEFAULT_MODEL_PARAMS = {
-    # "size": (SIM_WIDTH, SIM_HEIGHT),
-    "max_steps": 100000,
+    "max_steps": None,
     "rssi_noise_stdev": 4.5,
-    "model_speed_limit": 5,
+    "model_speed_limit": 3.0,
 }
 
 DEFAULT_INITIAL_STATE = {
