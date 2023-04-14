@@ -4,24 +4,64 @@ Contains the peripheral used by the router to exchange ClientPayload data with a
 For high-level details on this handshake process, look at the README in this directory.
 """
 
-from payload import ClientPayload
+from payload import ClientPayload, ClientMappingDictPayload, ClientBeaconPayload
 
 from peripherals.dtn.hdtn_bundle import Bundle
 from peripherals.roaming_dtn_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
 
 
 class RouterClientPayloadHandler:
+    CLIENT_MAPPING_TIMEOUT = 100  # defines how long a router-client should exist before it is considered expired.
+                                  # units = simulation steps
 
     def __init__(self, router_id, model, dtn):
         self.router_id = router_id
         self.model = model
         self.payloads_received_for_client = {}  # map of client_ids->[list of ClientPayloads]
         self.outgoing_payloads_to_send = []  # stores payloads for us to attempt to send with each `refresh()`
-
-        # TODO:  Fully implement everything which has to do with this map.
-        self.client_router_list_map = {}  # map of client_id->([list of router_ids], expiration_timestamp)
-                                          # which represents DTN router(s) known to be associated with the specified client.
+        self.client_router_mapping_dict = {}  # dict of client_id->(dict of router_id->(expiration timestamp))
+                                              # which represents DTN router(s) known to be associated with the specified
+                                              # client.
         self.dtn = dtn  # the DTN object we can use to send out Bundles over the DTN network.
+
+    """
+    Updates that this router can connect to a particular client.
+    
+    This method should be called whenever a ClientBeaconPayload is received.
+    """
+
+    # TODO Have this method be called when ClientBeaconPayload is received by agent.
+    def update_client_mapping(self, client_beacon_payload:  ClientBeaconPayload):
+        # if we don't have _any_ entry for the client_id in our local map, add one with an empty list.
+        if client_beacon_payload.client_id not in self.client_router_mapping_dict.keys():
+            self.client_router_mapping_dict[client_beacon_payload.client_id] = {}
+
+        # store a mapping of client->this router locally.
+        self.client_router_mapping_dict.get(client_beacon_payload.client_id)[self.router_id] \
+            = self.model.schedule.time + self.CLIENT_MAPPING_TIMEOUT
+
+    """
+    Handles mapping dicts received from other routers on the network.
+    
+    This means...
+    - Adding new entries from the map in the received payload.
+    - Updating expiration timestamps on-hand if the one stored in the received map is higher.
+    """
+
+    def handle_mapping_dict(self, mapping_dict_payload:  ClientMappingDictPayload):
+        for client_id in mapping_dict_payload.client_mappings.keys():
+            # if we don't have _any_ entry for the client_id in our local map, add one with an empty list.
+            if client_id not in self.client_router_mapping_dict.keys():
+                self.client_router_mapping_dict[client_id] = {}
+
+            for router_id in mapping_dict_payload.client_mappings.get(client_id).keys():
+                payload_map_expiration = mapping_dict_payload.client_mappings.get(client_id).get(router_id)
+                current_expiration = self.client_router_mapping_dict.get(client_id).get(router_id)
+
+                # if no such entry for the router_id is currently stored locally OR the locally stored entry has a
+                # less-recent expiration timestamp, store the data from the payload map.
+                if not current_expiration or payload_map_expiration > current_expiration:
+                    self.client_router_mapping_dict.get(client_id)[router_id] = payload_map_expiration
 
     """
     Stores a payload to be sent later over the network.
@@ -93,6 +133,12 @@ class RouterClientPayloadHandler:
         # remove expired payloads from payloads_received_for_client
         self.payloads_received_for_client = [payload for payload in self.payloads_received_for_client if payload.expiration_timestamp > self.model.schedule.time]
 
+        # remove expired router-client mappings.
+        for client_dict in self.client_router_mapping_dict.values():
+            for router_id in self.client_router_mapping_dict.keys():
+                if client_dict.get(router_id) <= self.model.schedule.time:
+                    del(client_dict[router_id])
+
         # attempt to send all stored outgoing payloads.
         self.__try_send_stored_outgoing_payloads()
 
@@ -109,11 +155,11 @@ class RouterClientPayloadHandler:
                 continue
 
             # see if we can get any router_id for a router associated with the payload's client
-            router_ids = self.client_router_list_map[payload.get_identifier]
+            router_ids_map = self.client_router_mapping_dict[payload.get_identifier]
 
             # if we have any router_id we can send to, send to them.
-            if router_ids is not None and router_ids.len > 0:
-                for router_id in router_ids:
+            if router_ids_map is not None:
+                for router_id in router_ids_map.keys():
                     # create the Bundle.
                     bundle = Bundle(payload.get_identifier, router_id,payload)
 

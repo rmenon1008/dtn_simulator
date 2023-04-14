@@ -14,6 +14,7 @@ class Payload:
 
 """
 Payload class containing a dict used to specify the client-router mappings for the client network.
+The mappings should be client_id->(dict of router_id->(expiration timestamp)).
 """
 class ClientMappingDictPayload(Payload):
     def __init__(self, client_mappings:  dict):
@@ -44,9 +45,8 @@ class ClientPayload(Payload):
 Payload class for Bundles sent as Router beacons.
 """
 class RouterBeaconPayload(Payload):
-    def __init__(self, node_id, client_id_list: list):
+    def __init__(self, node_id):
         self.node_id = node_id
-        self.client_id_list = client_id_list  # client_list = the list of clients currently connected.
 
 
 """
