@@ -2,9 +2,13 @@ import math
 import logging
 import json
 import mesa
-
+import numpy as np
 from agent import RoverAgent
+import random
 
+# Would prefer for this to be selected by
+# the user instead.
+GRID_STEP = 10
 
 def merge(source, destination):
     """
@@ -20,6 +24,106 @@ def merge(source, destination):
     return destination
 
 
+class ObsGrid():
+    """
+    The ObsGrid class creates and stores a occupancy grid layer for the agent
+    model to keep track of the presence of obstacles.
+    """
+    def __init__(self, size:tuple, grid_step:int=50, obs_size:tuple=(1, 13), obs_density:tuple=(1,15)) -> None:
+        """
+        :param size: Tuple of x and y lengths of the agent model space.
+        :param grid_step: Integer value determining the size of each grid-square.
+        :param obs_size: Tuple determining the min and max size range for obstacle generation.
+        :param obs_density: Integer value between one and ten that determines amount of obstacles in the space.
+        """
+        self.x = size[0]
+        self.y = size[1]
+        self.grid_step = grid_step
+        self.obs_density = obs_density
+        self.obs_size = obs_size
+
+        self.grid = [[0] * int(self.x / self.grid_step) for i in range(int(self.y / self.grid_step))]
+    
+    
+    def place_obstacles(self):
+        def generate_polygon(min_sides, max_sides, min_size, max_size):
+            # Set the number of sides for the polygon
+            num_sides = random.randint(min_sides, max_sides)
+
+            # Set the length of each side of the polygon
+            side_length = random.randint(min_size, max_size)
+
+            # Set the starting position for the polygon
+            start_x = random.randint(0, int(self.x / GRID_STEP))
+            start_y = random.randint(0, int(self.y / GRID_STEP))
+
+            # Generate the vertices of the polygon
+            vertices = []
+            angle = 360 / num_sides
+            current_angle = random.randint(0, 360)
+            for i in range(num_sides):
+                x = start_x + side_length * math.cos(math.radians(current_angle))
+                y = start_y + side_length * math.sin(math.radians(current_angle))
+                vertices.append((x, y))
+                current_angle += angle
+
+            # Close the polygon
+            vertices.append(vertices[0])
+
+            return vertices
+
+        # Generate a list of random polygons
+        polygons = []
+        for i in range(random.randint(self.obs_density[0], self.obs_density[1])):
+            # TODO: the min/max sizes should be related
+            vertices = generate_polygon(3, 10, self.obs_size[0], self.obs_size[1])
+            polygons.append(vertices)
+
+        def point_in_polygon(point, polygon):
+            """
+            Determines if a point is inside a polygon.
+            """
+            x, y = point
+            inside = False
+            j = len(polygon) - 1
+            for i in range(len(polygon)):
+                if ((polygon[i][1] > y) != (polygon[j][1] > y)) and \
+                        (x < (polygon[j][0] - polygon[i][0]) * (y - polygon[i][1]) / (polygon[j][1] - polygon[i][1]) + polygon[i][0]):
+                    inside = not inside
+                j = i
+            return inside
+        
+        # Check each grid cell for occupancy
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                x = j + 0.5
+                y = i + 0.5
+                point = (x, y)
+                for polygon in polygons:
+                    if point_in_polygon(point, polygon):
+                        self.grid[i][j] = 1
+        
+        # print(np.array(self.grid))
+
+    def get_grid(self):
+        """
+        Returns grid for this ObsGrid object.
+        """
+        return self.grid
+    
+    def save_grid(self):
+        """
+        Save the current ObsGrid object.
+        """
+        pass
+
+    def load_grid(self):
+        """
+        Load a saved ObsGrid object.
+        """
+        pass
+
+
 class LunarModel(mesa.Model):
     """
     A model that rover agents exist within.
@@ -28,8 +132,12 @@ class LunarModel(mesa.Model):
 
     def __init__(self, size, model_params, initial_state):
         super().__init__()
-        self.model_params = model_params
 
+        # Check that the the grid step is a factor of the length/width of the screen size.
+        assert(size[0] % GRID_STEP == 0 and size[1] % GRID_STEP == 0)
+
+        self.model_params = model_params
+        
         # Set up the space and schedule
         self.space = mesa.space.ContinuousSpace(
             size[0], size[1], False)
@@ -40,6 +148,12 @@ class LunarModel(mesa.Model):
 
         # Stores references to the agents as mappings of "id"->agent
         self.agents = {}
+        
+        self.grid_layer = ObsGrid(size, grid_step=GRID_STEP)
+        self.grid_layer.place_obstacles()
+        self.grid_step = GRID_STEP
+        self.grid = self.grid_layer.get_grid()
+        # print(np.array(self.grid_layer.get_grid()))
 
         for agent_options in initial_state["agents"]:
 
@@ -51,6 +165,11 @@ class LunarModel(mesa.Model):
             if "pos" not in options:
                 options["pos"] = (self.random.uniform(0, self.space.width),
                                   self.random.uniform(0, self.space.height))
+                
+                while self.grid[math.floor(options["pos"][1] / GRID_STEP)][math.floor(options["pos"][0] / GRID_STEP)] == 1:
+                    options["pos"] = (self.random.uniform(0, self.space.width),
+                                      self.random.uniform(0, self.space.height))
+            
             if "id" not in options:
                 options["id"] = self.next_id()
 
@@ -60,9 +179,11 @@ class LunarModel(mesa.Model):
             a = RoverAgent(self, options)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
-
+            
             # Stash the agent in a map for easy lookup later.
             self.agents[options["id"]] = a
+        
+        # print(np.array(self.grid_layer.get_grid()))
 
     def step(self):
         self.schedule.step()
@@ -126,7 +247,7 @@ class LunarModel(mesa.Model):
 
         new_pos = (agent.pos[0] + dx, agent.pos[1] + dy)
 
-        if self.space.out_of_bounds(new_pos):
+        if self.space.out_of_bounds(new_pos) or self.grid[math.floor(new_pos[1] / GRID_STEP)][math.floor(new_pos[0] / GRID_STEP)] == 1:
             logging.warning(
                 "Agent {} tried to move out of bounds".format(agent.unique_id))
             return

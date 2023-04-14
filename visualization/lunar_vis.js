@@ -154,7 +154,7 @@ const LunarVis = function (maxSimX, maxSimY) {
     nodeElem.appendChild(tooltip);
     canvasContainer.appendChild(nodeElem);
   };
-
+  
   // Adds visualization options to the DOM
   visOptions.append(
     addBooleanInput("node_ranges", {
@@ -212,58 +212,98 @@ const LunarVis = function (maxSimX, maxSimY) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     const getNode = (id) => {
-      return modelState.find(node => node.id === id);
+      return modelState["nodes"].find(node => node.id === id);
     };
+    
 
     // Draw the historical RSSI values
-    modelState.forEach(node => {
-      var transparency = 1;
-      if (node.history.reverse()) {
-        for (let i = 0; i < node.history.length - 1; i++) {
-          const entry = node.history[i];
-          let color = "rgba(0, 0, 0, 0.1)";
-          if (entry.radio.neighborhood) {
-            color = colorFromSignal(getMaxRssi(entry.radio.neighborhood), node.radio.estimated_detection_range, transparency);
-            if (historyFade) {
-              transparency = Math.max(0, transparency * 0.995 - 0.001);
+    Object.entries(modelState).forEach(([key, value]) => {
+      if (key === "nodes"){
+        value.forEach(node => {
+          var transparency = 1;
+          if (node.history.reverse()) {
+            for (let i = 0; i < node.history.length - 1; i++) {
+              const entry = node.history[i];
+              let color = "rgba(0, 0, 0, 0.1)";
+              if (entry.radio.neighborhood) {
+                color = colorFromSignal(getMaxRssi(entry.radio.neighborhood), node.radio.estimated_detection_range, transparency);
+                if (historyFade) {
+                  transparency = Math.max(0, transparency * 0.995 - 0.001);
+                }
+              }
+              drawShape(entry.pos[0], entry.pos[1], 3 * SCALE, color, "circle");
             }
           }
-          drawShape(entry.pos[0], entry.pos[1], 3 * SCALE, color, "circle");
-        }
+        });
       }
     });
 
     // Draw the detection and connection ranges as transparent circles
     if (showRanges) {
-      modelState.forEach(node => {
-        if (node.radio.estimated_detection_range) {
-          drawShape(node.pos[0], node.pos[1], node.radio.estimated_detection_range, "rgba(0, 0, 255, 0.07)", "circle", false, "rgba(0, 0, 255, 0.0)");
+      Object.entries(modelState).forEach(([key, value]) => {
+        if (key === "nodes"){
+          value.forEach(node => {
+            if (node.radio.estimated_detection_range) {
+              drawShape(node.pos[0], node.pos[1], node.radio.estimated_detection_range, "rgba(0, 0, 255, 0.07)", "circle", false, "rgba(0, 0, 255, 0.0)");
+            }
+          });
         }
       });
-      modelState.forEach(node => {
-        if (node.radio.estimated_connection_range) {
-          drawShape(node.pos[0], node.pos[1], node.radio.estimated_connection_range, "rgba(0, 255, 0, 0.15)", "circle", false, "rgba(0, 255, 0, 0.0)");
+      Object.entries(modelState).forEach(([key, value]) => {
+        if (key === "nodes"){
+          value.forEach(node => {
+            if (node.radio.estimated_connection_range) {
+            drawShape(node.pos[0], node.pos[1], node.radio.estimated_connection_range, "rgba(0, 255, 0, 0.15)", "circle", false, "rgba(0, 255, 0, 0.0)");
+            }
+          });
         }
       });
     }
 
     // Draw lines between nodes that have an RSSI
-    modelState.forEach(node => {
-      if (node.radio.neighborhood) {
-        node.radio.neighborhood.forEach(neighbor => {
-          if (neighbor.connected || showDetectionLines) {
-            const otherNode = getNode(neighbor.id);
-            drawLine(node.pos[0], node.pos[1], otherNode.pos[0], otherNode.pos[1], colorFromSignal(neighbor.rssi, node.radio.estimated_detection_range));
+    Object.entries(modelState).forEach(([key, value]) => {
+      if (key === "nodes"){
+        value.forEach(node => {
+          if (node.radio.neighborhood) {
+            node.radio.neighborhood.forEach(neighbor => {
+              if (neighbor.connected || showDetectionLines) {
+                const otherNode = getNode(neighbor.id);
+                drawLine(node.pos[0], node.pos[1], otherNode.pos[0], otherNode.pos[1], colorFromSignal(neighbor.rssi, node.radio.estimated_detection_range));
+              }
+            });
           }
         });
       }
     });
 
     // Draw all the nodes on top
-    modelState.forEach(node => {
-      const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
-      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.behavior.type === "fixed" ? "square" : "circle"), false);
-      addTooltip(node);
+    Object.entries(modelState).forEach(([key, value]) => {
+      // console.log("your MOM")
+      if (key === "nodes") {
+        value.forEach(node => {
+          const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
+          drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.behavior.type === "fixed" ? "square" : "circle"), false);
+          addTooltip(node);
+        });
+      }
+    });
+
+    Object.entries(modelState).forEach(([key, value]) => {
+      // Check if the current value is an array
+      if (key === "obs_grid") {
+    
+        // Iterate over each element in the 2D array
+        for (let i = 0; i < value.length; i++) {
+          for (let j = 0; j < value[i].length; j++) {
+    
+            // Perform some action on the current element
+            if (value[i][j] == 1) {
+              // TODO: not hard-code these pixel drawing parameters
+              drawShape((j * 10) + 5, (i * 10) + 5, 10, "rgba(130, 130, 130, 1.0)", "square", false);
+            }
+          }
+        }
+      }
     });
 
     // // Draw nodes target locations

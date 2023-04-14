@@ -21,4 +21,7 @@ class LunarVis(VisualizationElement):
         nodes = []
         for agent in model.schedule.agents:
             nodes.append(agent.get_state())
-        return nodes
+        return {
+            "obs_grid"  : model.grid,
+            "nodes"     : nodes
+        }

@@ -11,6 +11,10 @@ DEFAULT_MODEL_PARAMS = {
     "max_steps": 100000,
     "rssi_noise_stdev": 4.5,
     "model_speed_limit": 5,
+
+    "obs_density_range": (1, 15),
+
+    "obs_size_range": (1, 13)
 }
 
 DEFAULT_INITIAL_STATE = {
@@ -35,7 +39,7 @@ DEFAULT_INITIAL_STATE = {
             "behavior": {
                 "type": "fixed",
             },
-            "pos": (SIM_WIDTH/2, SIM_HEIGHT/2),
+            # "pos": (SIM_WIDTH/2, SIM_HEIGHT/2),
             "dtn": {},
         },
         {
