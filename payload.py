@@ -21,13 +21,17 @@ class ClientMappingDictPayload(Payload):
 
 
 """
-Payload class containing the Bundle payload sent by the client.
+Payload class containing the payloads sent between the clients on the network.
 """
-class ClientBundlePayload(Payload):
+class ClientPayload(Payload):
+    EXPIRATION_LIFESPAN = 20  # defines how long a ClientPayload should exist before expiration.
+                              # units = simulation steps
+
     def __init__(self, source_client_id, dest_client_id, seqnum):
         self.source_client_id = source_client_id
         self.dest_client_id = dest_client_id
         self.seqnum = seqnum
+        self.expiration_timestamp = seqnum + ClientPayload.EXPIRATION_LIFESPAN
 
     """
     Returns a string which can be used to identify this payload. 
