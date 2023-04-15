@@ -1,15 +1,23 @@
 """
 Used to test router-specific functions in the RouterClientPayloadHandler.
 """
-from mockito import ANY, when, mock
+import sys
+import json
+
+from mockito import ANY, when, verify, mock, spy2, arg_that
 
 import mesa
 
 from payload import ClientPayload, ClientBeaconPayload
 from peripherals.dtn.dtn import Dtn
+from peripherals.dtn.hdtn_bundle import Bundle
 from peripherals.roaming_dtn_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 
-ROUTER_ID = "r0"
+"""
+Test constants.
+"""
+ROUTER_ID_0 = "r0"
+ROUTER_ID_1 = "r1"
 CLIENT_ID_0 = "c0"
 CLIENT_ID_1 = "c1"
 
@@ -21,8 +29,8 @@ def test_handle_payload_refresh_payload_expires():
     schedule = mesa.time.RandomActivation(mesa.Model())
     dummy_model = mock({"schedule": schedule})
 
-    # create the client_handler
-    router_handler = RouterClientPayloadHandler(ROUTER_ID, dummy_model, Dtn(0, dummy_model))
+    # create the router_handler
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Dtn(0, dummy_model))
 
     # create a payload object.
     payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time)
@@ -53,8 +61,8 @@ def test_update_client_mapping_refresh_mapping_expires():
     schedule = mesa.time.RandomActivation(mesa.Model())
     dummy_model = mock({"schedule": schedule})
 
-    # create the client_handler
-    router_handler = RouterClientPayloadHandler(ROUTER_ID, dummy_model, Dtn(0, dummy_model))
+    # create the router_handler
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Dtn(0, dummy_model))
 
     # create a ClientBeaconPayload object.
     beacon_payload = ClientBeaconPayload(CLIENT_ID_0)
@@ -63,7 +71,7 @@ def test_update_client_mapping_refresh_mapping_expires():
     router_handler.update_client_mapping(beacon_payload)
 
     # assert that the router stored a record connecting this handler to the client.
-    assert ROUTER_ID in router_handler.client_router_mapping_dict.get(CLIENT_ID_0).keys()
+    assert ROUTER_ID_0 in router_handler.client_router_mapping_dict.get(CLIENT_ID_0).keys()
 
     # move the schedule forward such that the entry expires.
     expire_timestamp = RouterClientPayloadHandler.CLIENT_MAPPING_TIMEOUT + 1
@@ -74,8 +82,57 @@ def test_update_client_mapping_refresh_mapping_expires():
     router_handler.refresh()
 
     # assert that the router stored a record connecting this handler to the client.
-    assert ROUTER_ID not in router_handler.client_router_mapping_dict.get(CLIENT_ID_0)
+    assert ROUTER_ID_0 not in router_handler.client_router_mapping_dict.get(CLIENT_ID_0)
 
-# TODO:  Add test for sending stored outgoing payloads.
+
+"""
+Tests that with each refresh...
+- Outgoing payloads with a known DTN route are sent out.
+- Outgoing payloads without a known DTN route are stored.
+- Outgoing payloads which are expired are thrown out.
+"""
+def test_send_stored_outgoing_payloads():
+    # set up a dummy model object used by the RouterClientPayloadHandler object.
+    schedule = mesa.time.RandomActivation(mesa.Model())
+    dummy_model = mock({"schedule": schedule})
+    dtn = Dtn(0, dummy_model)
+    spy2(dtn.handle_bundle)
+
+    # create the router_handler
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, dtn)
+
+    # store a dict with a route to CLIENT_ID_1 in the router_handler.
+    router_handler.client_router_mapping_dict = {CLIENT_ID_1: {ROUTER_ID_1: sys.maxsize}}
+
+    # create + store the three payloads in the router_handler.
+    known_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time)
+    unknown_payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, schedule.time)
+    expired_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time - ClientPayload.EXPIRATION_LIFESPAN - 1)
+    router_handler.handshake_6([known_payload, unknown_payload, expired_payload])
+
+    # assert that the three payloads are in the router_handler.
+    assert known_payload in router_handler.outgoing_payloads_to_send
+    assert unknown_payload in router_handler.outgoing_payloads_to_send
+    assert expired_payload in router_handler.outgoing_payloads_to_send
+
+    # refresh the router_handler, triggering an attempt to send out the stored outgoing payloads.
+    router_handler.refresh()
+
+    # verify that known_payload was sent out.
+    # due to issues with mockito, we need to use a custom function here to match the Bundle fed to the DTN call.
+    def bundle_match(other_bundle: Bundle):
+        if other_bundle.dest_id == ROUTER_ID_1 \
+                and other_bundle.payload == known_payload \
+                and other_bundle.bundle_id == known_payload.get_identifier():
+            return True
+        else:
+            return False
+    verify(dtn, times=1).handle_bundle(arg_that(lambda bundle: bundle_match(bundle)))
+
+    # assert that unknown_payload was _not_ sent out.
+    assert unknown_payload in router_handler.outgoing_payloads_to_send
+
+    # assert that expired_payload was deleted.
+    assert expired_payload not in router_handler.outgoing_payloads_to_send
 
 # TODO:  Add test for merging in mapping_dict_payload.

@@ -167,17 +167,17 @@ class RouterClientPayloadHandler:
         unhandled_payloads = []
         for payload in self.outgoing_payloads_to_send:
             # if payload has expired, do not process it.
-            if payload.expiration_timestamp > self.model.schedule.time:
+            if payload.expiration_timestamp <= self.model.schedule.time:
                 continue
 
             # see if we can get any router_id for a router associated with the payload's client
-            router_ids_map = self.client_router_mapping_dict[payload.get_identifier]
+            router_ids_map = self.client_router_mapping_dict.get(payload.dest_client_id)
 
             # if we have any router_id we can send to, send to them.
             if router_ids_map is not None:
                 for router_id in router_ids_map.keys():
                     # create the Bundle.
-                    bundle = Bundle(payload.get_identifier, router_id,payload)
+                    bundle = Bundle(payload.get_identifier(), router_id, payload)
 
                     # send the Bundle.
                     self.dtn.handle_bundle(bundle)

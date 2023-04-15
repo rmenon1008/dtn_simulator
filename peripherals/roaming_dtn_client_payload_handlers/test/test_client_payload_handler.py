@@ -8,6 +8,9 @@ import mesa
 from payload import ClientPayload
 from peripherals.roaming_dtn_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
 
+"""
+Test constants.
+"""
 CLIENT_ID_0 = "c0"
 CLIENT_ID_1 = "c1"
 
