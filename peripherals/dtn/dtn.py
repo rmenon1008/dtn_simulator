@@ -3,6 +3,7 @@ Contains the Dtn class, which is a simplified implementation of HDTN.
 """
 import string
 
+from payload import ClientMappingDictPayload, ClientPayload, ClientBeaconPayload
 from peripherals.dtn.hdtn_bundle import Bundle
 from peripherals.dtn.storage import Storage
 from peripherals.dtn.schrouter import Schrouter
@@ -34,7 +35,16 @@ class Dtn:
 
         # if this is the intended destination for the bundle, "receive" it and exit.
         if bundle.dest_id == self.node_id:
-            return
+            # handle different payload types differently.
+            if isinstance(bundle.payload, ClientMappingDictPayload):
+                self.model.get_client_payload_handler_object(self.node_id).handle_mapping_dict(bundle.payload)
+            elif isinstance(bundle.payload, ClientPayload):
+                self.model.get_client_payload_handler_object(self.node_id).handle_payload(bundle.payload)
+            elif isinstance(bundle.payload, ClientBeaconPayload):
+                self.model.get_client_payload_handler_object(self.node_id).update_client_mapping(bundle.payload)
+            else:
+                pass
+            # add more cases here if new payload types are added which need special router-level DTN handling!
 
         # if there exists a link by which we can route the Bundle to its destination, pass it on to the next link.
         if self.schrouter.check_any_availability(bundle.dest_id):

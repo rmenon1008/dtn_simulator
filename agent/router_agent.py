@@ -16,7 +16,7 @@ class RouterAgent(mesa.Agent):
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
-        self.dtn = Dtn(self.unique_id, model)  # HDTN(self, model, node_options["dtn"])
+        self.dtn = Dtn(self.unique_id, model)
         self.radio = Radio(self, model, node_options["radio"])
         self.payload_handler = RouterClientPayloadHandler(self.unique_id, model, self.dtn)
 
