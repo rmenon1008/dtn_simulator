@@ -83,7 +83,7 @@ class ClientClientPayloadHandler:
     """
 
     def refresh(self):
-        self.payloads_to_send = [(payload, expiration_timestamp) for (payload, expiration_timestamp) in
-                                 self.payloads_to_send if expiration_timestamp > self.model.schedule.time]
+        self.payloads_to_send = [payload for payload in
+                                 self.payloads_to_send if payload.expiration_timestamp > self.model.schedule.time]
         self.already_received_payload_ids = [(payload, expiration_timestamp) for (payload, expiration_timestamp) in
                                              self.already_received_payload_ids if expiration_timestamp > self.model.schedule.time]
