@@ -8,7 +8,7 @@ from mockito import ANY, when, verify, mock, spy2, arg_that
 
 import mesa
 
-from payload import ClientPayload, ClientBeaconPayload
+from payload import ClientPayload, ClientBeaconPayload, ClientMappingDictPayload
 from peripherals.dtn.dtn import Dtn
 from peripherals.dtn.hdtn_bundle import Bundle
 from peripherals.roaming_dtn_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
@@ -135,4 +135,41 @@ def test_send_stored_outgoing_payloads():
     # assert that expired_payload was deleted.
     assert expired_payload not in router_handler.outgoing_payloads_to_send
 
-# TODO:  Add test for merging in mapping_dict_payload.
+"""
+Tests that handle_mapping_dict successfully merges in ClientMappingDictPayloads as expected.
+
+This means two particular cases:
+- Adding new entries from the map in the received payload.
+- Updating expiration timestamps on-hand if the one stored in the received map is higher.
+"""
+def test_handle_mapping_dict():
+    # create the router_handler
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, mock(), mock())
+
+    # add two entries to the dict:
+    # - c1: r0: timestamp = 1
+    # - c1: r1: timestamp = -1
+    router_handler.client_router_mapping_dict = {CLIENT_ID_1: {ROUTER_ID_0: 1, ROUTER_ID_1: -1}}
+
+    # create a dict as follows:
+    # - c0: r0: timestamp = 0  <--- should make the handler store a new entry for c0, r0 in the dict.
+    # - c1: r0: timestamp = 0  <--- should not affect the handler's stored timestamp for c1, r0
+    # - c1: r1: timestamp = 1  <--- should make the handler update stored timestamp for c1, r1 to 1.
+    mapping_dict_payload_dict = {CLIENT_ID_0: {ROUTER_ID_0: 0},
+                                 CLIENT_ID_1: {ROUTER_ID_0: 0,
+                                               ROUTER_ID_1: 1}}
+
+    # create the payload.
+    mapping_dict_payload = ClientMappingDictPayload(mapping_dict_payload_dict)
+
+    # provide the handler with the payload, initiating the mapping dict update.
+    router_handler.handle_mapping_dict(mapping_dict_payload)
+
+    # assert that the mapping changes were processed correctly by the handler.  the dict should look as follows:
+    # - c0: r0: timestamp = 0
+    # - c1: r0: timestamp = 1
+    # - c1: r1: timestamp = 1
+    expected_mapping_dict_payload_dict = {CLIENT_ID_0: {ROUTER_ID_0: 0},
+                                          CLIENT_ID_1: {ROUTER_ID_0: 1,
+                                                        ROUTER_ID_1: 1}}
+    assert expected_mapping_dict_payload_dict == router_handler.client_router_mapping_dict

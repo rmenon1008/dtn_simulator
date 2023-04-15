@@ -49,7 +49,7 @@ class RouterClientPayloadHandler:
 
     def handle_mapping_dict(self, mapping_dict_payload:  ClientMappingDictPayload):
         for client_id in mapping_dict_payload.client_mappings.keys():
-            # if we don't have _any_ entry for the client_id in our local map, add one with an empty list.
+            # if we don't have _any_ dict entry for the client_id in our local dict, add one with an empty dict.
             if client_id not in self.client_router_mapping_dict.keys():
                 self.client_router_mapping_dict[client_id] = {}
 
@@ -58,7 +58,7 @@ class RouterClientPayloadHandler:
                 current_expiration = self.client_router_mapping_dict.get(client_id).get(router_id)
 
                 # if no such entry for the router_id is currently stored locally OR the locally stored entry has a
-                # less-recent expiration timestamp, store the data from the payload map.
+                # less-recent expiration timestamp, store the data from the payload dict.
                 if not current_expiration or payload_map_expiration > current_expiration:
                     self.client_router_mapping_dict.get(client_id)[router_id] = payload_map_expiration
 
