@@ -8,6 +8,9 @@ import mesa
 from payload import ClientPayload
 from peripherals.roaming_dtn_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
 
+CLIENT_ID_0 = "c0"
+CLIENT_ID_1 = "c1"
+
 """
 Tests that payloads stored-to-be-sent can expire.
 """
@@ -17,10 +20,10 @@ def test_store_payload_refresh_payload_expires():
     dummy_model = mock({"schedule": schedule})
 
     # create the client_handler
-    client_handler = ClientClientPayloadHandler("0", dummy_model)
+    client_handler = ClientClientPayloadHandler(CLIENT_ID_0, dummy_model)
 
     # create a payload object.
-    payload = ClientPayload("0", "0", dummy_model.schedule.time)
+    payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time)
 
     # store the payload object.
     client_handler.store_payload(payload)
@@ -49,10 +52,10 @@ def test_already_received_payload_ids_expiration():
     dummy_model = mock({"schedule": schedule})
 
     # create the client_handler
-    client_handler = ClientClientPayloadHandler("0", dummy_model)
+    client_handler = ClientClientPayloadHandler(CLIENT_ID_0, dummy_model)
 
     # create the entry for the already_received_payload_ids list.
-    already_received_entry = ("0", schedule.time)
+    already_received_entry = (CLIENT_ID_0, schedule.time)
 
     # store the entry in already_received_payload_ids
     client_handler.already_received_payload_ids.append(already_received_entry)

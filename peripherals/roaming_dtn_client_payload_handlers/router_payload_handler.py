@@ -63,7 +63,7 @@ class RouterClientPayloadHandler:
                     self.client_router_mapping_dict.get(client_id)[router_id] = payload_map_expiration
 
     """
-    Stores a payload to be sent later over the network.
+    Stores a payload to be sent to a client later over the network.
     """
 
     def handle_payload(self, payload: ClientPayload):
@@ -135,13 +135,25 @@ class RouterClientPayloadHandler:
     """
     def refresh(self):
         # remove expired payloads from payloads_received_for_client
-        self.payloads_received_for_client = [payload for payload in self.payloads_received_for_client if payload.expiration_timestamp > self.model.schedule.time]
+        for client_payload_list in self.payloads_received_for_client.values():
+            for payload in client_payload_list:
+                if payload.expiration_timestamp <= self.model.schedule.time:
+                    client_payload_list.remove(payload)
 
         # remove expired router-client mappings.
         for client_dict in self.client_router_mapping_dict.values():
-            for router_id in self.client_router_mapping_dict.keys():
+
+            # stores what we need to delete from the dict.
+            expired_router_ids_to_delete = []
+
+            # figure out what values we need to delete.
+            for router_id in client_dict.keys():
                 if client_dict.get(router_id) <= self.model.schedule.time:
-                    del(client_dict[router_id])
+                    expired_router_ids_to_delete.append(router_id)
+
+            # delete the values.
+            for expired_router_id in expired_router_ids_to_delete:
+                del(client_dict[expired_router_id])
 
         # attempt to send all stored outgoing payloads.
         self.__try_send_stored_outgoing_payloads()
