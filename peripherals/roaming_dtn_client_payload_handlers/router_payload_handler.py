@@ -7,7 +7,6 @@ For high-level details on this handshake process, look at the README in this dir
 from payload import ClientPayload, ClientMappingDictPayload, ClientBeaconPayload
 
 from peripherals.dtn.hdtn_bundle import Bundle
-from peripherals.roaming_dtn_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
 
 
 class RouterClientPayloadHandler:
@@ -67,8 +66,13 @@ class RouterClientPayloadHandler:
     Stores a payload to be sent later over the network.
     """
 
-    def handle_payload(self, payload: ClientPayload, expiration_timestamp):
-        self.payloads_received_for_client.append((payload, expiration_timestamp))
+    def handle_payload(self, payload: ClientPayload):
+        # if no list exists in the dict for the client, add one.
+        if payload.dest_client_id not in self.payloads_received_for_client.keys():
+            self.payloads_received_for_client[payload.dest_client_id] = []
+
+        # store the payload in the dict for the client.
+        self.payloads_received_for_client[payload.dest_client_id].append(payload)
 
     """
     Executes "step 2" of the handshake process described in README.md.
@@ -78,7 +82,7 @@ class RouterClientPayloadHandler:
     NOTE:  This method does _not_ verify that the device is in-range of the router--that needs to be done separately
            before this method is called.
     """
-    def handshake_2(self, client_handler:  ClientClientPayloadHandler):
+    def handshake_2(self, client_handler):
         # get a list of metadata for the payloads waiting for the client.
         payloads_for_client_metadata = []
         for payload in self.payloads_received_for_client[client_handler.client_id]:
@@ -98,7 +102,7 @@ class RouterClientPayloadHandler:
            before this method is called.
     """
 
-    def handshake_4(self, client_handler:  ClientClientPayloadHandler, desired_payload_ids: list):
+    def handshake_4(self, client_handler, desired_payload_ids: list):
         # obtain the payloads the client wants.
         payloads_for_client = [payload for payload
                               in self.payloads_received_for_client[client_handler.client_id]
@@ -122,7 +126,7 @@ class RouterClientPayloadHandler:
 
     def handshake_6(self, payloads_from_client: list):
         # store the payloads so that they can be sent out at the next refresh.
-        self.outgoing_payloads_to_send.append(payloads_from_client)
+        self.outgoing_payloads_to_send.extend(payloads_from_client)
 
     """
     Refreshes the state of the RouterClientPayloadHandler.

@@ -28,17 +28,16 @@ class ClientPayload(Payload):
     EXPIRATION_LIFESPAN = 20  # defines how long a ClientPayload should exist before expiration.
                               # units = simulation steps
 
-    def __init__(self, source_client_id, dest_client_id, seqnum):
+    def __init__(self, source_client_id, dest_client_id, creation_timestamp):
         self.source_client_id = source_client_id
         self.dest_client_id = dest_client_id
-        self.seqnum = seqnum
-        self.expiration_timestamp = seqnum + ClientPayload.EXPIRATION_LIFESPAN
+        self.expiration_timestamp = creation_timestamp + ClientPayload.EXPIRATION_LIFESPAN
 
     """
     Returns a string which can be used to identify this payload. 
     """
     def get_identifier(self):
-        return "src:  " + self.source_client_id + "\tdst:  " + self.dest_client_id + "\tseqnum:  " + self.seqnum
+        return "src:  " + str(self.source_client_id) + "\tdst:  " + str(self.dest_client_id) + "\texpiration_timestamp:  " + str(self.expiration_timestamp)
 
 
 """
