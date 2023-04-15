@@ -26,7 +26,7 @@ class RoverAgent(mesa.Agent):
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.history = []
-        self.behavior = node_options["behavior"]
+        self.special_behavior = try_getting(node_options, "special_behavior", default=None)
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
@@ -48,22 +48,13 @@ class RoverAgent(mesa.Agent):
     def step(self):
         self.refresh_and_log()
 
-        if self.behavior["type"] == "random":
-            self.movement.step_random()
-        elif self.behavior["type"] == "spiral":
-            separation = try_getting(
-                self.behavior, "options", "separation", default=50)
-            self.movement.step_spiral(separation)
-        elif self.behavior["type"] == "circle":
-            radius = try_getting(self.behavior, "options",
-                                 "radius", default=100)
-            self.movement.step_circle(radius)
-        elif self.behavior["type"] == "rssi_find_target":
-            target = try_getting(self.behavior, "options",
-                                 "target_id", default="all")
+        if self.special_behavior is not None:
+            if self.special_behavior["type"] == "find_node_rssi":
+                target = self.special_behavior["options"]["target_id"]
+
             # Check if connected to target
             if self.radio.is_connected(target):
-                self.behavior["type"] = "fixed"
+                self.special_behavior = None
 
             # 1. Create a matrix with previous data
             positions = []
@@ -79,7 +70,7 @@ class RoverAgent(mesa.Agent):
             rssis = np.array(rssis[-100:])
 
             if len(positions) < 10:
-                self.movement.step_spiral()
+                self.movement.step()
                 return
 
             # 2. Assume RSSI is approximately of the form
@@ -96,16 +87,19 @@ class RoverAgent(mesa.Agent):
             a, b, c = leastsq(rssi_error, (0, 0, 0))[0]
 
             if self.model.space.out_of_bounds((a, b)):
-                self.movement.step_spiral()
+                self.movement.step()
                 return
 
             self.movement.move_towards((a, b))
+
+        else:
+            self.movement.step()
 
     def get_state(self):
         return {
             "id": self.unique_id,
             "pos": self.pos,
-            "behavior": self.behavior,
+            # "behavior": self.behavior,
             "history": self.history,
             "dtn": self.dtn.get_state(),
             "radio": self.radio.get_state(),

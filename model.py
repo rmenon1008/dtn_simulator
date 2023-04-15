@@ -4,6 +4,7 @@ import json
 import mesa
 
 from agent import RoverAgent
+from peripherals.movement import generate_pattern
 
 
 def merge(source, destination):
@@ -49,8 +50,11 @@ class LunarModel(mesa.Model):
             merge(initial_state["agent_defaults"], options)
 
             if "pos" not in options:
-                options["pos"] = (self.random.uniform(0, self.space.width),
-                                  self.random.uniform(0, self.space.height))
+                if "movement" in options and "pattern" in options["movement"]:
+                    options["pos"] = generate_pattern(options["movement"]).starting_pos
+                else:
+                    options["pos"] = (self.random.uniform(0, self.space.width),
+                                      self.random.uniform(0, self.space.height))
             if "id" not in options:
                 options["id"] = self.next_id()
 
@@ -136,5 +140,6 @@ class LunarModel(mesa.Model):
     """
     Used to easily obtain references to other DTN objects.
     """
+
     def get_dtn_object(self, node_id):
         return self.agents[node_id].dtn
