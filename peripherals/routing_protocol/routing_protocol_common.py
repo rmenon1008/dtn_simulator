@@ -25,7 +25,7 @@ Represents a Bundle on the network.
 """
 class Bundle:
     EXPIRATION_LIFESPAN = 200  # defines how long a Bundle should exist before expiration.
-                              # units = simulation steps
+                               # units = simulation steps
 
     def __init__(self, bundle_id, dest_id, payload:  Payload, creation_timestamp):
         self.bundle_id = bundle_id  # the id of the bundle

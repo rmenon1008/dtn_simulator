@@ -16,9 +16,10 @@ from peripherals.routing_protocol.dtn.storage import Storage
 class SprayAndWait:
     NUM_NODES_TO_SPRAY = 4
 
-    def __init__(self, node_id, model):
+    def __init__(self, node_id, model, agent):
         self.node_id = node_id
         self.model = model
+        self.agent = agent
         self.storage = Storage()
         self.bundle_sprays_map = {}  # key = bundle, val = list of nodes we already sprayed with the bundle.
         self.waiting_bundles = []
@@ -51,7 +52,7 @@ class SprayAndWait:
                                 if bundle.expiration_timestamp > self.model.schedule.time]
 
         # find all nearby agents, shuffle their ordering and iterate thru them...
-        for neighbor_data in random.shuffle(self.model.get_neighbors(self)):
+        for neighbor_data in random.shuffle(self.model.get_neighbors(self.agent)):
             # obtain the agent associated with the neighbor
             neighbor_agent = self.model.agents[neighbor_data["id"]]
 

@@ -3,15 +3,14 @@ Contains the Epidemic class, which implements the epidemic algorithm w/ bundle e
 """
 from agent.client_agent import ClientAgent
 from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
-from peripherals.routing_protocol.dtn.storage import Storage
 
 
 class Epidemic:
 
-    def __init__(self, node_id, model):
+    def __init__(self, node_id, model, agent):
         self.node_id = node_id
         self.model = model
-        self.storage = Storage()
+        self.agent = agent
         self.known_bundles = []
         self.num_bundle_sends = 0
         self.num_repeated_bundle_receives = 0
@@ -39,7 +38,7 @@ class Epidemic:
                               if bundle.expiration_timestamp > self.model.schedule.time]
 
         # find all nearby agents, spam them with your Bundles.
-        for neighbor_data in self.model.get_neighbors(self):
+        for neighbor_data in self.model.get_neighbors(self.agent):
             # obtain the agent associated with the neighbor
             neighbor_agent = self.model.agents[neighbor_data["id"]]
 
