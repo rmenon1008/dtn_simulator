@@ -4,9 +4,9 @@ Contains the Dtn class, which is a simplified implementation of HDTN.
 import string
 
 from payload import ClientMappingDictPayload, ClientPayload, ClientBeaconPayload
-from peripherals.dtn.hdtn_bundle import Bundle
-from peripherals.dtn.storage import Storage
-from peripherals.dtn.schrouter import Schrouter
+from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.dtn.storage import Storage
+from peripherals.routing_protocol.dtn.schrouter import Schrouter
 
 
 class Dtn:

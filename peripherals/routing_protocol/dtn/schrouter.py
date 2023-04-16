@@ -4,8 +4,8 @@ Contains the Schrouter class, which handles all contact plan-related content tha
 import string
 import sys
 
-from peripherals.dtn.external_dependencies.cp_file_tools import read_contact_plan_from_json
-from peripherals.dtn.external_dependencies.py_cgr_lib import Contact, cgr_dijkstra, Route
+from peripherals.routing_protocol.external_dependencies.cp_file_tools import read_contact_plan_from_json
+from peripherals.routing_protocol.external_dependencies.py_cgr_lib import Contact, cgr_dijkstra, Route
 
 
 class Schrouter:

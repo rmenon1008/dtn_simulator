@@ -6,7 +6,7 @@ from mockito import mock
 import mesa
 
 from payload import ClientPayload
-from peripherals.roaming_dtn_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
 
 """
 Test constants.

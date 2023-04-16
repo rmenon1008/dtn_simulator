@@ -3,11 +3,11 @@ import mesa
 from agent.agent_common import try_getting, rssi_find_router_target
 from agent.client_agent import ClientAgent
 from payload import ClientMappingDictPayload
-from peripherals.dtn.dtn import Dtn
+from peripherals.routing_protocol.dtn.dtn import Dtn
 
 from peripherals.radio import Radio
 from peripherals.movement import Movement
-from peripherals.roaming_dtn_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 
 
 class RouterAgent(mesa.Agent):
@@ -18,14 +18,14 @@ class RouterAgent(mesa.Agent):
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
-        self.dtn = Dtn(self.unique_id, model)
+        self.routing_protocol = Dtn(self.unique_id, model)
         self.radio = Radio(self, model, node_options["radio"])
-        self.payload_handler = RouterClientPayloadHandler(self.unique_id, model, self.dtn)
+        self.payload_handler = RouterClientPayloadHandler(self.unique_id, model, self.routing_protocol)
 
     def update_history(self):
         self.history.append({
             "pos": self.pos,
-            "dtn": self.dtn.get_state(),
+            "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),
             "payloads_awaiting_dtn_transmission": len(self.payload_handler.outgoing_payloads_to_send),
             "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
@@ -35,7 +35,7 @@ class RouterAgent(mesa.Agent):
     def step(self):
         # update our peripherals.
         self.radio.refresh()
-        self.dtn.refresh()
+        self.routing_protocol.refresh()
         self.update_history()
 
         self.__attempt_router_connection_and_exchange_client_mappings()
@@ -84,6 +84,6 @@ class RouterAgent(mesa.Agent):
             "pos": self.pos,
             "behavior": self.behavior,
             "history": self.history,
-            "dtn": self.dtn.get_state(),
+            "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),
         }

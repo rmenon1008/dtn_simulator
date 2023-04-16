@@ -5,8 +5,8 @@ import pytest
 import mesa
 
 from payload import Payload
-from peripherals.dtn.dtn import Dtn
-from peripherals.dtn.hdtn_bundle import Bundle
+from peripherals.routing_protocol.dtn.dtn import Dtn
+from peripherals.routing_protocol.network_bundle import Bundle
 
 """
 Method used to setup DTN objects for this file's unit tests.
@@ -56,7 +56,7 @@ def test_handle_bundle_best_route_indirect(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 1, Payload())
+    bundle = Bundle(0, 1, Payload(), 0)
 
     # have node 0 handle the Bundle.
     dtn_dict[0].handle_bundle(bundle)
@@ -76,7 +76,7 @@ def test_handle_bundle_best_route_direct(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 1, Payload())
+    bundle = Bundle(0, 1, Payload(), 0)
 
     # move all Dtn objects forward to timestamp=3
     schedule.step()
@@ -100,7 +100,7 @@ def test_handle_bundle_stores_bundle_sends_once_linked(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 4, Payload())
+    bundle = Bundle(0, 4, Payload(), 0)
 
     # have node 0 handle the Bundle.
     dtn_dict[0].handle_bundle(bundle)
@@ -143,9 +143,9 @@ def test_construct_dtn_from_json():
 
     # construct dtns w/ the Schrouter being configured from a file.
     dtn_dict = {}
-    dtn_dict[10] = spy(Dtn(10, dummy_model, "peripherals/dtn/test/test_contact_plans/contactPlan.json"))
-    dtn_dict[1] = spy(Dtn(1, dummy_model, "peripherals/dtn/test/test_contact_plans/contactPlan.json"))
-    dtn_dict[2] = spy(Dtn(2, dummy_model, "peripherals/dtn/test/test_contact_plans/contactPlan.json"))
+    dtn_dict[10] = spy(Dtn(10, dummy_model, "peripherals/routing_protocol/test/dtn/test_contact_plans/contactPlan.json"))
+    dtn_dict[1] = spy(Dtn(1, dummy_model, "peripherals/routing_protocol/test/dtn/test_contact_plans/contactPlan.json"))
+    dtn_dict[2] = spy(Dtn(2, dummy_model, "peripherals/routing_protocol/test/dtn/test_contact_plans/contactPlan.json"))
 
     # wire-up the dummy_model to use the dtn_dict for lookups.
     when(dummy_model).get_dtn_object(10).thenReturn(dtn_dict[10])
@@ -160,7 +160,7 @@ def test_construct_dtn_from_json():
     #      2
 
     # create a Bundle to send from 10 to 1.
-    bundle = Bundle(10, 1, Payload())
+    bundle = Bundle(10, 1, Payload(), 0)
 
     # have node 10 handle the Bundle.
     dtn_dict[10].handle_bundle(bundle)

@@ -2,8 +2,8 @@
 Used to test the handshake process between the RouterClientPayloadHandler and ClientClientPayloadHandler
 """
 from payload import ClientPayload
-from peripherals.roaming_dtn_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
-from peripherals.roaming_dtn_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 from mockito import mock, spy2, verify
 
 """

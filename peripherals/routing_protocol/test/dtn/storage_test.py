@@ -1,8 +1,8 @@
 from random import randint
 
 from payload import Payload
-from peripherals.dtn.hdtn_bundle import Bundle
-from peripherals.dtn.storage import Storage
+from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.dtn.storage import Storage
 
 
 def test_bundle_lifecycle():
@@ -11,7 +11,7 @@ def test_bundle_lifecycle():
 
     # store a bundle in the Storage.
     dest_id = randint
-    bundle_1 = Bundle(randint, dest_id, Payload())
+    bundle_1 = Bundle(randint, dest_id, Payload(), 0)
     storage.store_bundle(dest_id, bundle_1)
 
     # successfully get the bundle from Storage + assert it looks as expected.
@@ -19,7 +19,7 @@ def test_bundle_lifecycle():
     assert bundle_1 == retrieved_bundle_1
 
     # store a second bundle in the Storage.
-    bundle_2 = Bundle(randint, dest_id, Payload())
+    bundle_2 = Bundle(randint, dest_id, Payload(), 0)
     storage.store_bundle(dest_id, bundle_2)
 
     # successfully get the second bundle from Storage + assert it looks as expected.
