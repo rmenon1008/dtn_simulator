@@ -3,8 +3,7 @@ Contains the Dtn class, which is a simplified implementation of HDTN.
 """
 import string
 
-from payload import ClientMappingDictPayload, ClientPayload, ClientBeaconPayload
-from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
 from peripherals.routing_protocol.dtn.storage import Storage
 from peripherals.routing_protocol.dtn.schrouter import Schrouter
 
@@ -21,6 +20,11 @@ class Dtn:
         # if no filename is provided, "None" will be supplied to the Schrouter and an empty Schrouter will be created.
         self.schrouter = Schrouter(contact_plan_json_filename)
 
+        # metrics used for easy performance comparison
+        self.num_bundle_sends = 0
+        self.num_repeated_bundle_receives = 0
+        self.num_bundle_reached_destination = 0
+
     """
     Receives + handles bundles of data.
     
@@ -35,16 +39,8 @@ class Dtn:
 
         # if this is the intended destination for the bundle, "receive" it and exit.
         if bundle.dest_id == self.node_id:
-            # handle different payload types differently.
-            if isinstance(bundle.payload, ClientMappingDictPayload):
-                self.model.get_client_payload_handler_object(self.node_id).handle_mapping_dict(bundle.payload)
-            elif isinstance(bundle.payload, ClientPayload):
-                self.model.get_client_payload_handler_object(self.node_id).handle_payload(bundle.payload)
-            elif isinstance(bundle.payload, ClientBeaconPayload):
-                self.model.get_client_payload_handler_object(self.node_id).update_client_mapping(bundle.payload)
-            else:
-                pass
-            # add more cases here if new payload types are added which need special router-level DTN handling!
+            handle_payload(self.model, self.node_id, bundle.payload)
+            self.num_bundle_reached_destination += 1
 
         # if there exists a link by which we can route the Bundle to its destination, pass it on to the next link.
         elif self.schrouter.check_any_availability(bundle.dest_id):
@@ -59,7 +55,12 @@ class Dtn:
 
         # if no such link exists, store the bundle in storage.
         else:
-            self.storage.store_bundle(bundle.dest_id, bundle)
+            # check to see if the bundle is already in storage.  if it is, we've seen this before and it shouldn't be
+            # stored again.
+            if self.storage.bundle_is_in_storage(bundle):
+                self.num_repeated_bundle_receives += 1
+            else:
+                self.storage.store_bundle(bundle.dest_id, bundle)
 
     """
     Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
@@ -72,7 +73,9 @@ class Dtn:
     """
     def get_state(self):
         return {
-            # TODO:  Add state-representation data here as necessary.
+            "num_repeated_bundle_receives": self.num_repeated_bundle_receives,
+            "num_bundle_sends": self.num_bundle_sends,
+            "num_bundle_reached_destination": self.num_bundle_reached_destination
         }
 
     """
@@ -135,3 +138,4 @@ class Dtn:
     def __send_bundle(self, bundle: Bundle, dest_id):
         dest_dtn_node = self.model.get_dtn_object(dest_id)
         dest_dtn_node.handle_bundle(bundle)
+        self.num_bundle_sends += 1

@@ -1,7 +1,7 @@
 from random import randint
 
 from payload import Payload
-from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.routing_protocol_common import Bundle
 from peripherals.routing_protocol.dtn.storage import Storage
 
 

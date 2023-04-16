@@ -7,7 +7,7 @@ For high-level details on the client-router data transfer handshake process, loo
 
 from payload import ClientPayload, ClientMappingDictPayload, ClientBeaconPayload
 
-from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.routing_protocol_common import Bundle
 
 
 class RouterClientPayloadHandler:

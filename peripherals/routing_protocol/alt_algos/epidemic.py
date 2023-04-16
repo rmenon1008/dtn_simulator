@@ -2,7 +2,7 @@
 Contains the Epidemic class, which implements the epidemic algorithm w/ bundle expiration.
 """
 from agent.client_agent import ClientAgent
-from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
 from peripherals.routing_protocol.dtn.storage import Storage
 
 
@@ -22,6 +22,7 @@ class Epidemic:
     """
     def handle_bundle(self, bundle: Bundle):
         if self.node_id == bundle.dest_id:
+            handle_payload(self.model, self.node_id, bundle.payload)
             self.num_bundle_reached_destination += 1
         elif bundle not in self.known_bundles:
             self.known_bundles.append(bundle)

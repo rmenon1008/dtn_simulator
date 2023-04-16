@@ -6,7 +6,7 @@ import mesa
 
 from payload import Payload
 from peripherals.routing_protocol.dtn.dtn import Dtn
-from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.routing_protocol_common import Bundle
 
 """
 Method used to setup DTN objects for this file's unit tests.

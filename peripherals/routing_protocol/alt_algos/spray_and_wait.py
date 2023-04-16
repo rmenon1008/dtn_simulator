@@ -9,7 +9,7 @@ This algorithm has two parts:
 from random import random
 
 from agent.client_agent import ClientAgent
-from peripherals.routing_protocol.network_bundle import Bundle
+from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
 from peripherals.routing_protocol.dtn.storage import Storage
 
 
@@ -39,6 +39,7 @@ class SprayAndWait:
         self.waiting_bundles.append(bundle)
 
     def handle_bundle_destination(self, bundle: Bundle):
+        handle_payload(self.model, self.node_id, bundle.payload)
         self.num_bundle_reached_destination += 1
 
     """

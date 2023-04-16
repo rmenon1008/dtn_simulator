@@ -25,6 +25,18 @@ class Storage:
         self.stored_message_dict[dest_id].append(bundle)
 
     """
+    Returns if we already have the passed Bundle in storage.
+    """
+    def bundle_is_in_storage(self, bundle):
+
+        # check if we've ever stored any bundles for the dest node.
+        if bundle.dest_id not in self.stored_message_dict:
+            return False
+
+        # check if the bundle is stored
+        return bundle in self.stored_message_dict[bundle.dest_id]
+
+    """
     Retrieves a bundle for us to send from storage.
     
     If `last_bundle` is provided + it matches the front of the stored list of bundles, we remove
