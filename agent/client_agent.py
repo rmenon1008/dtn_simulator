@@ -53,27 +53,20 @@ class ClientAgent(mesa.Agent):
         # refresh the radio.
         self.radio.refresh()
 
-        # refresh payload-exchange-related and ClientAgentMode-related content.
-        self.__step_payload()
-
-        # refresh movement.
-        self.__step_movement()
-
-    """
-    Executes all the ClientPayload-specific and ClientAgentMode-specific content for this step. 
-    """
-    def __step_payload(self):
-        # we should _always_ emit a beacon, regardless of current state.
+        # emit the beacon.
         self.__emit_beacon()
 
         # we should update the current mode of the ClientAgent to match the ClientAgent's current state + the current
         # step timestamp.
-        self.__update_mode()
+        self.__step_mode()
 
         # if we're in the CONNECTION_ESTABLISHMENT mode, attempt to establish a connection with any nearby node and
         # transfer data.
         if self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT:
-            self.__attempt_establish_connection_and_payload_transfer()
+            self.__attempt_router_connection_and_payload_transfer()
+
+        # refresh movement.
+        self.__step_movement()
 
     """
     Sends a Bundle containing a ClientBeaconPayload to all RouterAgents in the detection range.
@@ -101,7 +94,7 @@ class ClientAgent(mesa.Agent):
     after being sent once by the client's payload_handler.  This also should allow the client to receive as much data
     as possible since some routers may have content which others do not.
     """
-    def __attempt_establish_connection_and_payload_transfer(self):
+    def __attempt_router_connection_and_payload_transfer(self):
 
         # iterate over the neighbors (if there are any)
         for neighbor_data in self.model.get_neighbors(self):
@@ -125,7 +118,7 @@ class ClientAgent(mesa.Agent):
     """
     Updates the stored mode of the ClientAgent based upon its state at the current step.
     """
-    def __update_mode(self):
+    def __step_mode(self):
         # if we were connected to the router in the last step, set the state to "WORKING" and reset the "working steps"
         # counter to RECONNECTION_INTERVAL.
         if self.mode == ClientAgentMode.CONNECTED:

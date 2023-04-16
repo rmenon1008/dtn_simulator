@@ -1,6 +1,8 @@
 import mesa
 
 from agent.agent_common import try_getting, rssi_find_target
+from agent.client_agent import ClientAgent
+from payload import ClientMappingDictPayload
 from peripherals.dtn.dtn import Dtn
 
 from peripherals.radio import Radio
@@ -27,14 +29,38 @@ class RouterAgent(mesa.Agent):
             "radio": self.radio.get_state()
         })
 
-    def refresh_and_log(self):
+    def step(self):
+        # update our peripherals.
         self.radio.refresh()
         self.dtn.refresh()
         self.update_history()
 
-    def step(self):
-        self.refresh_and_log()
+        self.__attempt_router_connection_and_exchange_client_mappings()
 
+        self.__step_movement()
+
+    """
+    Connects to any RouterAgent neighbors (if any are nearby in connection range) and exchanges Client->Router mappings.
+    """
+    def __attempt_router_connection_and_exchange_client_mappings(self):
+        # iterate over the neighbors (if there are any)
+        for neighbor_data in self.model.get_neighbors(self):
+            # obtain the agent associated with the neighbor
+            neighbor_agent = self.model.agents[neighbor_data["id"]]
+
+            # ignore exchanging data with ClientAgents or RouterAgents we're not connected to.
+            if isinstance(neighbor_agent, ClientAgent) or not neighbor_data["connected"]:
+                continue
+
+            # if we've reached this point, the neighbor is a connected RouterAgent.
+            #
+            # send out client mapping data to the other RouterAgent.
+            # (the other RouterAgent should send their client mapping data to us as well.)
+            neighbor_agent.payload_handler\
+                .handle_mapping_dict(ClientMappingDictPayload(self.payload_handler.client_router_mapping_dict))
+
+
+    def __step_movement(self):
         if self.behavior["type"] == "random":
             self.movement.step_random()
         elif self.behavior["type"] == "spiral":
@@ -46,6 +72,7 @@ class RouterAgent(mesa.Agent):
                                  "radius", default=100)
             self.movement.step_circle(radius)
         elif self.behavior["type"] == "rssi_find_target":
+            # move towards the nearest RouterAgent.
             rssi_find_target(self, RouterAgent)
 
     def get_state(self):

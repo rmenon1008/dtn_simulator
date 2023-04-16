@@ -29,7 +29,6 @@ class RouterClientPayloadHandler:
     This method should be called whenever a ClientBeaconPayload is received.
     """
 
-    # TODO Have this method be called when ClientBeaconPayload is received by agent.
     def update_client_mapping(self, client_beacon_payload:  ClientBeaconPayload):
         # if we don't have _any_ entry for the client_id in our local map, add one with an empty list.
         if client_beacon_payload.client_id not in self.client_router_mapping_dict.keys():
