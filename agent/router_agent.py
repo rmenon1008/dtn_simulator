@@ -26,7 +26,10 @@ class RouterAgent(mesa.Agent):
         self.history.append({
             "pos": self.pos,
             "dtn": self.dtn.get_state(),
-            "radio": self.radio.get_state()
+            "radio": self.radio.get_state(),
+            "payloads_awaiting_dtn_transmission": len(self.payload_handler.outgoing_payloads_to_send),
+            "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
+            "router_client_mappings": self.payload_handler.client_router_mapping_dict
         })
 
     def step(self):

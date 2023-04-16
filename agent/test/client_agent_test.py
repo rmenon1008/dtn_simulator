@@ -1,12 +1,13 @@
 """
-Contains values + functions used to set up the RouterAgent and ClientAgent tests.
+Tests the ClientAgent communications-focused backend code.
+
+(This does not involve UI-focused content like movement or behavior.)
 """
 from agent.client_agent import ClientAgent, ClientAgentMode
 import mesa, pytest
 from mockito import mock, spy, verify, when
 
 from agent.router_agent import RouterAgent
-from peripherals.roaming_dtn_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 
 # test constants.
 ROUTER_ID_0 = "r0"
