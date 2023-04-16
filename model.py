@@ -2,6 +2,7 @@ import math
 import logging
 import mesa
 
+from agent.client_agent import ClientAgent
 from agent.router_agent import RouterAgent
 
 
@@ -39,6 +40,8 @@ class LunarModel(mesa.Model):
 
         # Stores references to the agents as mappings of "id"->agent
         self.agents = {}
+        self.router_agents = {}
+        self.client_agents = {}
 
         for agent_options in initial_state["agents"]:
 
@@ -56,7 +59,15 @@ class LunarModel(mesa.Model):
             # Create the agent
             # Add it to the schedule to get stepped each model tick
             # Place it on the space
-            a = RouterAgent(self, options)
+            a = None
+            if "type" not in options or options["type"] == "router":
+                a = RouterAgent(self, options)
+                self.router_agents[options["id"]] = a
+            elif options["type"] == "client":
+                a = ClientAgent(self, options)
+                self.client_agents[options["id"]] = a
+
+            print(a)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 

@@ -2,9 +2,8 @@
 Used to test router-specific functions in the RouterClientPayloadHandler.
 """
 import sys
-import json
 
-from mockito import ANY, when, verify, mock, spy2, arg_that
+from mockito import verify, mock, spy2, arg_that
 
 import mesa
 

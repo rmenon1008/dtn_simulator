@@ -3,7 +3,6 @@ Contains the peripheral used by the client to exchange ClientPayload data with a
 
 For high-level details on this handshake process, look at the README in this directory.
 """
-import sys
 from copy import copy
 
 from payload import ClientPayload

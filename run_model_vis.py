@@ -50,7 +50,7 @@ DEFAULT_INITIAL_STATE = {
         },
         {
             "behavior": {
-                "type": "random",
+                "type": "spiral",
                 "options": {
                     "target_id": 0,
                 },

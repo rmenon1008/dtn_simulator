@@ -4,10 +4,6 @@ Stores content shared across agent classes + files.
 import mesa
 import numpy as np
 from scipy.optimize import leastsq
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from agent.router_agent import RouterAgent
 
 def try_getting(obj, *keys, default=None):
     """Helper that tries to get a value from a nested dict."""
@@ -34,7 +30,7 @@ def rssi_find_router_target(agent: mesa.Agent):
             for n in h["radio"]["neighborhood"]:
                 # if desired_target_agent_type is not None + n is not of desired_target_agent_type,
                 # skip n.
-                if not isinstance(agent.model.agents[n["id"]], RouterAgent):
+                if n["id"] not in agent.model.router_agents.keys():
                     continue
 
                 if n["id"] == target or target == "all":

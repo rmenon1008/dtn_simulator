@@ -1,7 +1,8 @@
 """
-Contains the peripheral used by the router to exchange ClientPayload data with a client.
+Contains the peripheral used by the router to exchange ClientPayload data with a client + client mappings with other
+routers.
 
-For high-level details on this handshake process, look at the README in this directory.
+For high-level details on the client-router data transfer handshake process, look at the README in this directory.
 """
 
 from payload import ClientPayload, ClientMappingDictPayload, ClientBeaconPayload

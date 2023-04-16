@@ -5,7 +5,7 @@ Tests the ClientAgent communications-focused backend code.
 """
 from agent.client_agent import ClientAgent, ClientAgentMode
 import mesa, pytest
-from mockito import mock, spy, verify, when
+from mockito import mock, verify, when
 
 from agent.router_agent import RouterAgent
 
