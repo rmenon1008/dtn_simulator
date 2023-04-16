@@ -16,7 +16,7 @@ def try_getting(obj, *keys, default=None):
     return obj
 
 
-def rssi_find_target(agent: mesa.Agent):
+def rssi_find_target(agent: mesa.Agent, desired_target_agent_type):
     target = try_getting(agent.behavior, "options",
                          "target_id", default="all")
     # Check if connected to target
@@ -29,6 +29,11 @@ def rssi_find_target(agent: mesa.Agent):
     for h in agent.history:
         if "neighborhood" in h["radio"]:
             for n in h["radio"]["neighborhood"]:
+                # if desired_target_agent_type is not None + n is not of desired_target_agent_type,
+                # skip n.
+                if not isinstance(agent.model.agents[n["id"]], desired_target_agent_type):
+                    continue
+
                 if n["id"] == target or target == "all":
                     positions.append(h["pos"])
                     rssis.append(n["rssi"])

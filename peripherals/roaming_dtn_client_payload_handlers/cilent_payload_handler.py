@@ -16,6 +16,10 @@ class ClientClientPayloadHandler:
         self.payloads_to_send = []  # elements are ClientPayloads.
         self.already_received_payload_ids = []  # elements are tuples of ('id', 'expiration timestamp').
 
+        # vars used to record stats for measurements + evaluation
+        self.num_payloads_sent = 0
+        self.num_payloads_received = 0
+
     """
     Stores a ClientPayload to be sent later over the network.
     """
@@ -72,9 +76,14 @@ class ClientClientPayloadHandler:
         # store the metadata for the payloads from the router.
         for payload in payloads_for_client:
             self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
+            self.num_payloads_received += 1
 
         # send the stored outgoing payloads to the router.
         router_handler.handshake_6(self.payloads_to_send)
+        self.num_payloads_sent += len(self.payloads_to_send)
+
+        # clear the list of payloads to send (since we've sent them into the DTN network).
+        self.payloads_to_send.clear()
 
     """
     Refreshes the state of the ClientClientPayloadHandler.

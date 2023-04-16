@@ -46,7 +46,7 @@ class RouterAgent(mesa.Agent):
                                  "radius", default=100)
             self.movement.step_circle(radius)
         elif self.behavior["type"] == "rssi_find_target":
-            rssi_find_target(self)
+            rssi_find_target(self, RouterAgent)
 
     def get_state(self):
         return {
