@@ -1,10 +1,9 @@
-from model import LunarModel
-from lunar_vis import LunarVis
-import mesa
-import json
+ROUTER_ID_0 = "r0"
+ROUTER_ID_1 = "r1"
+CLIENT_ID_0 = "c0"
+CLIENT_ID_1 = "c1"
 
-SIM_WIDTH = 1000
-SIM_HEIGHT = 550
+DEFAULT_SIZE = (1000, 550)
 
 DEFAULT_MODEL_PARAMS = {
     # "size": (SIM_WIDTH, SIM_HEIGHT),
@@ -32,23 +31,25 @@ DEFAULT_INITIAL_STATE = {
         # not provided, they will be assigned
         # randomly.
         {
-            "id": 0,
+            "id": ROUTER_ID_0,
             "behavior": {
                 "type": "fixed",
             },
-            "pos": (SIM_WIDTH/2, SIM_HEIGHT/2),
+            "pos": (DEFAULT_SIZE[0]/2, DEFAULT_SIZE[1]/2),
             "dtn": {},
         },
         {
+            "id": ROUTER_ID_1,
             "behavior": {
                 "type": "rssi_find_target",
                 "options": {
-                    "target_id": 0,
+                    "target_id": ROUTER_ID_0,
                 },
             },
             "radio": {},
         },
         {
+            "id": CLIENT_ID_0,
             "behavior": {
                 "type": "random",
                 "options": {
@@ -60,44 +61,3 @@ DEFAULT_INITIAL_STATE = {
         }
     ]
 }
-
-vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
-
-
-class ObjectOption(mesa.visualization.UserParam):
-    def __init__(self, name="", value=None, choices=None, description=None):
-        self.param_type = "object"
-        self.name = name
-        self._value = json.dumps(value)
-
-    @property
-    def value(self):
-        return json.loads(self._value)
-
-    @value.setter
-    def value(self, value):
-        self._value = value
-
-
-model_params = ObjectOption(
-    "Model parameters",
-    value=DEFAULT_MODEL_PARAMS,
-)
-
-initial_state = ObjectOption(
-    "Initial agent states",
-    value=DEFAULT_INITIAL_STATE,
-)
-
-server = mesa.visualization.ModularServer(
-    LunarModel,
-    [vis],
-    "Model",
-    {
-        "size": (SIM_WIDTH, SIM_HEIGHT),
-        "model_params":  model_params,
-        "initial_state": initial_state,
-    })
-server.settings["template_path"] = "visualization"
-server.port = 8521  # The default
-server.launch(open_browser=True)

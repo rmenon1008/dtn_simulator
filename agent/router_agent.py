@@ -1,6 +1,6 @@
 import mesa
 
-from agent.agent_common import try_getting, rssi_find_target
+from agent.agent_common import try_getting, rssi_find_router_target
 from agent.client_agent import ClientAgent
 from payload import ClientMappingDictPayload
 from peripherals.dtn.dtn import Dtn
@@ -73,7 +73,7 @@ class RouterAgent(mesa.Agent):
             self.movement.step_circle(radius)
         elif self.behavior["type"] == "rssi_find_target":
             # move towards the nearest RouterAgent.
-            rssi_find_target(self, RouterAgent)
+            rssi_find_router_target(self)
 
     def get_state(self):
         return {

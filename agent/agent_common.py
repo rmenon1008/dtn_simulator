@@ -1,10 +1,13 @@
 """
 Stores content shared across agent classes + files.
 """
-from venv.bin import mesa
+import mesa
 import numpy as np
 from scipy.optimize import leastsq
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from agent.router_agent import RouterAgent
 
 def try_getting(obj, *keys, default=None):
     """Helper that tries to get a value from a nested dict."""
@@ -16,7 +19,7 @@ def try_getting(obj, *keys, default=None):
     return obj
 
 
-def rssi_find_target(agent: mesa.Agent, desired_target_agent_type):
+def rssi_find_router_target(agent: mesa.Agent):
     target = try_getting(agent.behavior, "options",
                          "target_id", default="all")
     # Check if connected to target
@@ -31,7 +34,7 @@ def rssi_find_target(agent: mesa.Agent, desired_target_agent_type):
             for n in h["radio"]["neighborhood"]:
                 # if desired_target_agent_type is not None + n is not of desired_target_agent_type,
                 # skip n.
-                if not isinstance(agent.model.agents[n["id"]], desired_target_agent_type):
+                if not isinstance(agent.model.agents[n["id"]], RouterAgent):
                     continue
 
                 if n["id"] == target or target == "all":

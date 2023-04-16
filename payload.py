@@ -41,14 +41,6 @@ class ClientPayload(Payload):
 
 
 """
-Payload class for Bundles sent as Router beacons.
-"""
-class RouterBeaconPayload(Payload):
-    def __init__(self, node_id):
-        self.node_id = node_id
-
-
-"""
 Payload class for Bundles sent as Client beacons.
 """
 class ClientBeaconPayload(Payload):

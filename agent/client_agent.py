@@ -10,8 +10,7 @@ from enum import Enum
 
 import mesa
 
-from agent.agent_common import try_getting, rssi_find_target
-from agent.router_agent import RouterAgent
+from agent.agent_common import try_getting, rssi_find_router_target
 from payload import ClientBeaconPayload
 from peripherals.movement import Movement
 from peripherals.radio import Radio
@@ -37,6 +36,8 @@ class ClientAgent(mesa.Agent):
         self.state = ClientAgentMode.WORKING
         self.history = []
         self.behavior = node_options["behavior"]
+        self.mode = ClientAgentMode.WORKING
+        self.working_steps_remaining = self.RECONNECTION_INTERVAL
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
@@ -143,9 +144,9 @@ class ClientAgent(mesa.Agent):
             radius = try_getting(self.behavior, "options",
                                  "radius", default=100)
             self.movement.step_circle(radius)
-        elif self.behavior["type"] == "rssi_find_target":
+        elif self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT:
             # move towards the nearest RouterAgent.
-            rssi_find_target(self, RouterAgent)
+            rssi_find_router_target(self)
 
     def get_state(self):
         return {
