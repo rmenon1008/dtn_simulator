@@ -4,6 +4,7 @@ Contains the peripheral used by the client to exchange ClientPayload data with a
 For high-level details on this handshake process, look at the README in this directory.
 """
 import sys
+from copy import copy
 
 from payload import ClientPayload
 
@@ -79,10 +80,10 @@ class ClientClientPayloadHandler:
             self.num_payloads_received += 1
 
         # send the stored outgoing payloads to the router.
-        router_handler.handshake_6(self.payloads_to_send)
+        router_handler.handshake_6(copy(self.payloads_to_send))
         self.num_payloads_sent += len(self.payloads_to_send)
 
-        # clear the list of payloads to send (since we've sent them into the DTN network).
+        # clear the list of payloads to send (since we've now sent them into the DTN network).
         self.payloads_to_send.clear()
 
     """

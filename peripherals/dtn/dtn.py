@@ -47,7 +47,7 @@ class Dtn:
             # add more cases here if new payload types are added which need special router-level DTN handling!
 
         # if there exists a link by which we can route the Bundle to its destination, pass it on to the next link.
-        if self.schrouter.check_any_availability(bundle.dest_id):
+        elif self.schrouter.check_any_availability(bundle.dest_id):
             # compute the route.
             route = self.schrouter.get_best_route_dijkstra(self.node_id, bundle.dest_id, self.model.schedule.time)
 
