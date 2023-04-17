@@ -3,18 +3,14 @@ from lunar_vis import LunarVis
 import mesa
 import json
 
-# AGENT UNITS
-# Agent top speed = 3.5 m/s (7.8 mph, max speed of the Lunar Roving Vehicle)
-# 1 model pixel = 1 meter
-# 1 tick = 1 second
-
-SIM_WIDTH = 1000  # 1 km
-SIM_HEIGHT = 650  # 650 m
+SIM_WIDTH = 1000
+SIM_HEIGHT = 550
 
 DEFAULT_MODEL_PARAMS = {
-    "max_steps": None,
+    # "size": (SIM_WIDTH, SIM_HEIGHT),
+    "max_steps": 100000,
     "rssi_noise_stdev": 4.5,
-    "model_speed_limit": 3.0,
+    "model_speed_limit": 5,
 }
 
 DEFAULT_INITIAL_STATE = {
@@ -26,7 +22,7 @@ DEFAULT_INITIAL_STATE = {
             "detection_thresh": -60,
             "connection_thresh": -25,
         },
-        "dtn": {},
+        "routing_protocol": {},
         "movement": {},
         "type": "router"  # can be a "router" or a "client".
     },
@@ -41,7 +37,7 @@ DEFAULT_INITIAL_STATE = {
                 "type": "fixed",
             },
             "pos": (SIM_WIDTH/2, SIM_HEIGHT/2),
-            "dtn": {},
+            "routing_protocol": {},
         },
         {
             "behavior": {

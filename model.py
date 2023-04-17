@@ -147,7 +147,7 @@ class LunarModel(mesa.Model):
     Used to easily obtain references to other DTN objects.
     """
     def get_dtn_object(self, node_id):
-        return self.agents[node_id].dtn
+        return self.agents[node_id].routing_protocol
 
     """
     Used to easily obtain references to RouterClientPayloadHandler and ClientPayloadHandler objects 

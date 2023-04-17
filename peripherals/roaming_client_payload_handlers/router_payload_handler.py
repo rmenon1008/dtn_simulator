@@ -7,7 +7,7 @@ For high-level details on the client-router data transfer handshake process, loo
 
 from payload import ClientPayload, ClientMappingDictPayload, ClientBeaconPayload
 
-from peripherals.dtn.hdtn_bundle import Bundle
+from peripherals.routing_protocol.routing_protocol_common import Bundle
 
 
 class RouterClientPayloadHandler:
@@ -177,7 +177,7 @@ class RouterClientPayloadHandler:
             if router_ids_map is not None:
                 for router_id in router_ids_map.keys():
                     # create the Bundle.
-                    bundle = Bundle(payload.get_identifier(), router_id, payload)
+                    bundle = Bundle(payload.get_identifier(), router_id, payload, self.model.schedule.time)
 
                     # send the Bundle.
                     self.dtn.handle_bundle(bundle)

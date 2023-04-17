@@ -44,7 +44,7 @@ def setup():
 
     # mock the peripherals in the ClientAgent
     router_agent.movement = mock()
-    router_agent.dtn = mock()
+    router_agent.routing_protocol = mock()
     router_agent.radio = mock()
     router_agent.payload_handler = mocked_router_0_payload_handler
 

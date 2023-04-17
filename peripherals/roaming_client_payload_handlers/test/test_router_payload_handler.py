@@ -8,9 +8,9 @@ from mockito import verify, mock, spy2, arg_that
 import mesa
 
 from payload import ClientPayload, ClientBeaconPayload, ClientMappingDictPayload
-from peripherals.dtn.dtn import Dtn
-from peripherals.dtn.hdtn_bundle import Bundle
-from peripherals.roaming_dtn_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
+from peripherals.routing_protocol.dtn.dtn import Dtn
+from peripherals.routing_protocol.routing_protocol_common import Bundle
+from peripherals.roaming_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 
 """
 Test constants.

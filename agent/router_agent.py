@@ -1,16 +1,31 @@
+from enum import Enum
+
 import mesa
 
 from agent.agent_common import try_getting, rssi_find_router_target
 from agent.client_agent import ClientAgent
 from payload import ClientMappingDictPayload
-from peripherals.dtn.dtn import Dtn
+from peripherals.routing_protocol.alt_algos.epidemic import Epidemic
+from peripherals.routing_protocol.alt_algos.spray_and_wait import SprayAndWait
+from peripherals.routing_protocol.dtn.dtn import Dtn
 
 from peripherals.radio import Radio
 from peripherals.movement import Movement
-from peripherals.roaming_dtn_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 
+"""
+Used to communicate which routing protocol we want this RouterAgent to use.
+
+All RouterAgent on the network _must_ use the same protocol, or nothing will work.
+"""
+class RoutingProtocol(Enum):
+    DTN = 0
+    EPIDEMIC = 1
+    SPRAY_AND_WAIT = 2
 
 class RouterAgent(mesa.Agent):
+    ROUTING_PROTOCOL = RoutingProtocol.DTN  # <--- modify this value to change routing protocol.
+
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.history = []
@@ -18,14 +33,14 @@ class RouterAgent(mesa.Agent):
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
-        self.dtn = Dtn(self.unique_id, model)
+        self.routing_protocol = self.__get_routing_protocol_object()
         self.radio = Radio(self, model, node_options["radio"])
-        self.payload_handler = RouterClientPayloadHandler(self.unique_id, model, self.dtn)
+        self.payload_handler = RouterClientPayloadHandler(self.unique_id, model, self.routing_protocol)
 
     def update_history(self):
         self.history.append({
             "pos": self.pos,
-            "dtn": self.dtn.get_state(),
+            "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),
             "payloads_awaiting_dtn_transmission": len(self.payload_handler.outgoing_payloads_to_send),
             "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
@@ -35,7 +50,7 @@ class RouterAgent(mesa.Agent):
     def step(self):
         # update our peripherals.
         self.radio.refresh()
-        self.dtn.refresh()
+        self.routing_protocol.refresh()
         self.update_history()
 
         self.__attempt_router_connection_and_exchange_client_mappings()
@@ -62,7 +77,6 @@ class RouterAgent(mesa.Agent):
             neighbor_agent.payload_handler\
                 .handle_mapping_dict(ClientMappingDictPayload(self.payload_handler.client_router_mapping_dict))
 
-
     def __step_movement(self):
         if self.behavior["type"] == "random":
             self.movement.step_random()
@@ -78,12 +92,20 @@ class RouterAgent(mesa.Agent):
             # move towards the nearest RouterAgent.
             rssi_find_router_target(self)
 
+    def __get_routing_protocol_object(self):
+        if self.ROUTING_PROTOCOL == RoutingProtocol.DTN:
+            return Dtn(self.unique_id, self.model)
+        elif self.ROUTING_PROTOCOL == RoutingProtocol.EPIDEMIC:
+            return Epidemic(self.unique_id, self.model, self)
+        elif self.ROUTING_PROTOCOL == RoutingProtocol.SPRAY_AND_WAIT:
+            return SprayAndWait(self.unique_id, self.model, self)
+
     def get_state(self):
         return {
             "id": self.unique_id,
             "pos": self.pos,
             "behavior": self.behavior,
             "history": self.history,
-            "dtn": self.dtn.get_state(),
+            "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),
         }
