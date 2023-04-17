@@ -1,12 +1,11 @@
 """
 Tests for the "epidemic" algorithm.
 """
-from agent.client_agent import ClientAgent
-import mesa, pytest
-from mockito import mock, arg_that, verify, when
+import mesa
+from mockito import mock, when
 
 from agent.router_agent import RouterAgent
-from payload import ClientMappingDictPayload, Payload
+from payload import Payload
 from peripherals.routing_protocol.alt_algos.epidemic import Epidemic
 from peripherals.routing_protocol.routing_protocol_common import Bundle
 
