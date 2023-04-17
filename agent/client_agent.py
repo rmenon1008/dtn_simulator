@@ -38,6 +38,7 @@ class ClientAgent(mesa.Agent):
         self.behavior = node_options["behavior"]
         self.mode = ClientAgentMode.WORKING
         self.working_steps_remaining = self.RECONNECTION_INTERVAL
+        self.special_behavior = try_getting(node_options, "special_behavior", default=None)
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
@@ -134,19 +135,14 @@ class ClientAgent(mesa.Agent):
                 self.mode = ClientAgentMode.CONNECTION_ESTABLISHMENT
 
     def __step_movement(self):
-        if self.behavior["type"] == "random":
-            self.movement.step_random()
-        elif self.behavior["type"] == "spiral":
-            separation = try_getting(
-                self.behavior, "options", "separation", default=50)
-            self.movement.step_spiral(separation)
-        elif self.behavior["type"] == "circle":
-            radius = try_getting(self.behavior, "options",
-                                 "radius", default=100)
-            self.movement.step_circle(radius)
-        elif self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT:
-            # move towards the nearest RouterAgent.
-            rssi_find_router_target(self)
+        if self.special_behavior is not None or self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT:
+            if self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT \
+                    or self.special_behavior["type"] == "find_node_rssi":
+
+                rssi_find_router_target(self)
+            # TODO:  Add other cases for `special_behavior` here.
+        else:
+            self.movement.step()
 
     def get_state(self):
         return {

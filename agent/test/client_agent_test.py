@@ -33,7 +33,13 @@ def setup():
                                               "behavior": {
                                                   "type": "random"
                                               },
-                                              "movement": "",
+                                              "movement": {
+                                                  "pattern": "fixed",
+                                                  "speed": 0,
+                                                  "options": {
+                                                      "pos": (0, 0)
+                                                  }
+                                              },
                                               "radio": {
                                                   "detection_thresh": 20,
                                                   "connection_thresh": 10}

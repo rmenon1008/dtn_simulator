@@ -262,7 +262,7 @@ const LunarVis = function (maxSimX, maxSimY) {
     // Draw all the nodes on top
     modelState.forEach(node => {
       const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
-      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, (node.behavior.type === "fixed" ? "square" : "circle"), false);
+      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, "circle", false);
       addTooltip(node);
     });
 

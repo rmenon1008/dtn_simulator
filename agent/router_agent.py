@@ -30,6 +30,7 @@ class RouterAgent(mesa.Agent):
         super().__init__(node_options["id"], model)
         self.history = []
         self.behavior = node_options["behavior"]
+        self.special_behavior = try_getting(node_options, "special_behavior", default=None)
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
@@ -78,19 +79,12 @@ class RouterAgent(mesa.Agent):
                 .handle_mapping_dict(ClientMappingDictPayload(self.payload_handler.client_router_mapping_dict))
 
     def __step_movement(self):
-        if self.behavior["type"] == "random":
-            self.movement.step_random()
-        elif self.behavior["type"] == "spiral":
-            separation = try_getting(
-                self.behavior, "options", "separation", default=50)
-            self.movement.step_spiral(separation)
-        elif self.behavior["type"] == "circle":
-            radius = try_getting(self.behavior, "options",
-                                 "radius", default=100)
-            self.movement.step_circle(radius)
-        elif self.behavior["type"] == "rssi_find_target":
-            # move towards the nearest RouterAgent.
-            rssi_find_router_target(self)
+        if self.special_behavior is not None:
+            if self.special_behavior["type"] == "find_node_rssi":
+                rssi_find_router_target(self)
+            # TODO:  Add other cases for `special_behavior` here.
+        else:
+            self.movement.step()
 
     def __get_routing_protocol_object(self):
         if self.ROUTING_PROTOCOL == RoutingProtocol.DTN:

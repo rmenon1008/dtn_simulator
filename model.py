@@ -2,6 +2,7 @@ import math
 import logging
 import mesa
 
+from peripherals.movement import generate_pattern
 from agent.client_agent import ClientAgent
 from agent.router_agent import RouterAgent
 
@@ -51,8 +52,11 @@ class LunarModel(mesa.Model):
             merge(initial_state["agent_defaults"], options)
 
             if "pos" not in options:
-                options["pos"] = (self.random.uniform(0, self.space.width),
-                                  self.random.uniform(0, self.space.height))
+                if "movement" in options and "pattern" in options["movement"]:
+                    options["pos"] = generate_pattern(options["movement"]).starting_pos
+                else:
+                    options["pos"] = (self.random.uniform(0, self.space.width),
+                                      self.random.uniform(0, self.space.height))
             if "id" not in options:
                 options["id"] = self.next_id()
 

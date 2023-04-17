@@ -16,8 +16,8 @@ def try_getting(obj, *keys, default=None):
 
 
 def rssi_find_router_target(agent: mesa.Agent):
-    target = try_getting(agent.behavior, "options",
-                         "target_id", default="all")
+    target = agent.special_behavior["options"]["target_id"]
+
     # Check if connected to target
     if agent.radio.is_connected(target):
         agent.behavior["type"] = "fixed"
