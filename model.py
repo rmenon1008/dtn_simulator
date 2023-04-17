@@ -144,10 +144,10 @@ class LunarModel(mesa.Model):
         self.space.move_agent(agent, (agent.pos[0] + dx, agent.pos[1] + dy))
 
     """
-    Used to easily obtain references to other DTN objects.
+    Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.
     """
-    def get_dtn_object(self, node_id):
-        return self.agents[node_id].routing_protocol
+    def get_routing_protocol_object(self, node_id):
+        return self.router_agents[node_id].routing_protocol
 
     """
     Used to easily obtain references to RouterClientPayloadHandler and ClientPayloadHandler objects 

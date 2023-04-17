@@ -136,6 +136,6 @@ class Dtn:
     Private function used to send the passed Bundle to the specified node in the network.
     """
     def __send_bundle(self, bundle: Bundle, dest_id):
-        dest_dtn_node = self.model.get_dtn_object(dest_id)
+        dest_dtn_node = self.model.get_routing_protocol_object(dest_id)
         dest_dtn_node.handle_bundle(bundle)
         self.num_bundle_sends += 1

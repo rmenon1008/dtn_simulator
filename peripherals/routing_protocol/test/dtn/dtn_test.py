@@ -27,11 +27,11 @@ def setup():
     dtn_dict[4] = spy(Dtn(4, dummy_model))
 
     # wire-up the dummy_model to use the dtn_dict for lookups.
-    when(dummy_model).get_dtn_object(0).thenReturn(dtn_dict[0])
-    when(dummy_model).get_dtn_object(1).thenReturn(dtn_dict[1])
-    when(dummy_model).get_dtn_object(2).thenReturn(dtn_dict[2])
-    when(dummy_model).get_dtn_object(3).thenReturn(dtn_dict[3])
-    when(dummy_model).get_dtn_object(4).thenReturn(dtn_dict[4])
+    when(dummy_model).get_routing_protocol_object(0).thenReturn(dtn_dict[0])
+    when(dummy_model).get_routing_protocol_object(1).thenReturn(dtn_dict[1])
+    when(dummy_model).get_routing_protocol_object(2).thenReturn(dtn_dict[2])
+    when(dummy_model).get_routing_protocol_object(3).thenReturn(dtn_dict[3])
+    when(dummy_model).get_routing_protocol_object(4).thenReturn(dtn_dict[4])
 
     # link-up the nodes as follows with the respective timestamps...
     # 0 -> 1:  @3-5
@@ -148,9 +148,9 @@ def test_construct_dtn_from_json():
     dtn_dict[2] = spy(Dtn(2, dummy_model, "peripherals/routing_protocol/test/dtn/test_contact_plans/contactPlan.json"))
 
     # wire-up the dummy_model to use the dtn_dict for lookups.
-    when(dummy_model).get_dtn_object(10).thenReturn(dtn_dict[10])
-    when(dummy_model).get_dtn_object(1).thenReturn(dtn_dict[1])
-    when(dummy_model).get_dtn_object(2).thenReturn(dtn_dict[2])
+    when(dummy_model).get_routing_protocol_object(10).thenReturn(dtn_dict[10])
+    when(dummy_model).get_routing_protocol_object(1).thenReturn(dtn_dict[1])
+    when(dummy_model).get_routing_protocol_object(2).thenReturn(dtn_dict[2])
 
     # topology loaded from file:
     #      1
