@@ -27,7 +27,8 @@ DEFAULT_INITIAL_STATE = {
             "connection_thresh": -25,
         },
         "dtn": {},
-        "movement": {}
+        "movement": {},
+        "type": "router"  # can be a "router" or a "client".
     },
     "agents": [
         # The model will create an agent for each
@@ -51,6 +52,16 @@ DEFAULT_INITIAL_STATE = {
             },
             "radio": {},
         },
+        {
+            "behavior": {
+                "type": "spiral",
+                "options": {
+                    "target_id": 0,
+                },
+            },
+            "radio": {},
+            "type": "client"
+        }
     ]
 }
 

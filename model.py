@@ -1,9 +1,9 @@
 import math
 import logging
-import json
 import mesa
 
-from agent import RoverAgent
+from agent.client_agent import ClientAgent
+from agent.router_agent import RouterAgent
 
 
 def merge(source, destination):
@@ -22,7 +22,7 @@ def merge(source, destination):
 
 class LunarModel(mesa.Model):
     """
-    A model that rover agents exist within.
+    A model that RouterAgents and ClientAgents exist within.
     Also provides methods for accessing neighbors.
     """
 
@@ -40,6 +40,8 @@ class LunarModel(mesa.Model):
 
         # Stores references to the agents as mappings of "id"->agent
         self.agents = {}
+        self.router_agents = {}
+        self.client_agents = {}
 
         for agent_options in initial_state["agents"]:
 
@@ -57,7 +59,15 @@ class LunarModel(mesa.Model):
             # Create the agent
             # Add it to the schedule to get stepped each model tick
             # Place it on the space
-            a = RoverAgent(self, options)
+            a = None
+            if "type" not in options or options["type"] == "router":
+                a = RouterAgent(self, options)
+                self.router_agents[options["id"]] = a
+            elif options["type"] == "client":
+                a = ClientAgent(self, options)
+                self.client_agents[options["id"]] = a
+
+            print(a)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 
@@ -138,3 +148,10 @@ class LunarModel(mesa.Model):
     """
     def get_dtn_object(self, node_id):
         return self.agents[node_id].dtn
+
+    """
+    Used to easily obtain references to RouterClientPayloadHandler and ClientPayloadHandler objects 
+    from RouterAgents and ClientAgents.
+    """
+    def get_client_payload_handler_object(self, node_id):
+        return self.agents[node_id].payload_handler

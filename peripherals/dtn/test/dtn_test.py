@@ -4,6 +4,7 @@ from mockito import mock, spy, verify, when
 import pytest
 import mesa
 
+from payload import Payload
 from peripherals.dtn.dtn import Dtn
 from peripherals.dtn.hdtn_bundle import Bundle
 
@@ -47,7 +48,7 @@ def setup():
 
 
 """
-Tests sending a Bundle when the best route is indirect.
+Tests sending a Bundle when the best route is an indirect one with more hops.
 
 (@timestamp = 0, the best route is 0->2->1)
 """
@@ -55,7 +56,7 @@ def test_handle_bundle_best_route_indirect(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 1)
+    bundle = Bundle(0, 1, Payload())
 
     # have node 0 handle the Bundle.
     dtn_dict[0].handle_bundle(bundle)
@@ -66,15 +67,16 @@ def test_handle_bundle_best_route_indirect(setup):
     verify(dtn_dict[1], times=1).handle_bundle(...)
 
 """
-Tests sending a Bundle when the best route is indirect.
+Tests sending a Bundle when the best route switches from an indirect one to a direct one.
 
-(@timestamp = 0, the best route is 0->2->1)
+@timestamp = 0, the best route is 0->2->1
+@timestamp = 3, the best route is 0->1
 """
-def test_handle_bundle_best_route_indirect(setup):
+def test_handle_bundle_best_route_direct(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 1)
+    bundle = Bundle(0, 1, Payload())
 
     # move all Dtn objects forward to timestamp=3
     schedule.step()
@@ -98,7 +100,7 @@ def test_handle_bundle_stores_bundle_sends_once_linked(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 4)
+    bundle = Bundle(0, 4, Payload())
 
     # have node 0 handle the Bundle.
     dtn_dict[0].handle_bundle(bundle)
@@ -158,7 +160,7 @@ def test_construct_dtn_from_json():
     #      2
 
     # create a Bundle to send from 10 to 1.
-    bundle = Bundle(10, 1)
+    bundle = Bundle(10, 1, Payload())
 
     # have node 10 handle the Bundle.
     dtn_dict[10].handle_bundle(bundle)
