@@ -111,9 +111,9 @@ def test_spray_and_wait_expiration(setup):
     # disconnect r0 from all other routers via modifying the get_neighbor call to the mocked_model.
     when(mocked_model).get_neighbors(r_dict[0]).thenReturn([])
 
-    # feed a Bundle to s0.
-    # NOTE:  The Bundle has the last RouterAgent as its destination + r0 is not connected to the last RouterAgent,
-    # so the Bundle will be held by all other nodes before reaching its destination.
+    # feed a new second Bundle to s0.
+    # NOTE:  The Bundle has the last RouterAgent as its destination.  r0 is no longer connected to any RouterAgent,
+    #        so the Bundle will be held by s0 until it expires.
     bundle_2 = Bundle(0, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time)
     s_dict[0].handle_bundle(bundle_2)
 
@@ -128,9 +128,9 @@ def test_spray_and_wait_expiration(setup):
     for i in range(0, SprayAndWait.NUM_NODES_TO_SPRAY):
         s_dict[i].refresh()
 
-    # assert that bundle_2 is no longer present in s0's bundle_sprays_map
+    # assert that bundle_2 is no longer present in s0's bundle_sprays_map (since it expired).
     assert bundle_2 not in s_dict[0].bundle_sprays_map.keys()
 
-    # assert that bundle_1 is not present in any s#'s waiting_bundles list.
+    # assert that bundle_1 is not present in any s#'s waiting_bundles list (since it expired).
     for i in range(1, SprayAndWait.NUM_NODES_TO_SPRAY - 1):
         assert bundle_1 not in s_dict[i].waiting_bundles

@@ -32,4 +32,4 @@ class Bundle:
         self.dest_id = dest_id  # the id of the destination node
         self.payload = payload
         self.expiration_timestamp = creation_timestamp + self.EXPIRATION_LIFESPAN
-        # TODO:  Add more params here + modify existing ones in the future!
+        #  add more params here + modify existing ones in the future as necessary.

@@ -1,5 +1,5 @@
 """
-Contains the SprayAndWait class, which implements SprayAndWait with expiration.
+Contains the SprayAndWait class, which implements the "Spray-and-Wait" algorithm with Bundle expiration.
 
 This algorithm has two parts:
 - spray:  the node creates the bundle + sends it out to a random set of N nearby nodes.
@@ -10,16 +10,14 @@ import numpy as np
 
 from agent.client_agent import ClientAgent
 from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
-from peripherals.routing_protocol.dtn.storage import Storage
 
 class SprayAndWait:
-    NUM_NODES_TO_SPRAY = 4
+    NUM_NODES_TO_SPRAY = 4  # To adjust how many nodes get "sprayed" with the message, modify this value.
 
     def __init__(self, node_id, model, agent):
         self.node_id = node_id
         self.model = model
         self.agent = agent
-        self.storage = Storage()
         self.bundle_sprays_map = {}  # key = bundle, val = list of nodes we already sprayed with the bundle.
         self.waiting_bundles = []
         self.num_bundle_sends = 0
@@ -43,7 +41,10 @@ class SprayAndWait:
         self.num_bundle_reached_destination += 1
 
     """
-    Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
+    Refreshes the state of the SprayAndWait object.  Called by the simulation at each timestamp.  This means:
+    - Checking if any stored Bundles have expired.
+    - Spraying any Bundles which haven't hit their spray limits yet.
+    - Checking to see if any "waiting" Bundles can be sent to their destination + sending them onto their dest if so.
     """
     def refresh(self):
         # remove any expired Bundles from the map of Bundles which we wish to spray.
@@ -60,7 +61,7 @@ class SprayAndWait:
         self.waiting_bundles = [bundle for bundle in self.waiting_bundles
                                 if bundle.expiration_timestamp > self.model.schedule.time]
 
-        # find all nearby agents, shuffle their ordering and iterate thru them...
+        # find all nearby agents, shuffle their ordering (to ensure randomized spraying) and iterate thru them...
         neighbor_list = self.model.get_neighbors(self.agent)
         np.random.shuffle(neighbor_list)
         for neighbor_data in neighbor_list:
@@ -77,7 +78,7 @@ class SprayAndWait:
             finished_spraying_list = []  # stores Bundles for which we have finished spraying and need to delete after
                                          # iteration completes.
             for bundle in self.bundle_sprays_map.keys():
-                # if we already sprayed this neighbor with this bundle, move on to the next spray Bundle.
+                # if we already sprayed this neighbor with this bundle, move on to the next neighbor.
                 if neighbor_agent in self.bundle_sprays_map[bundle]:
                     continue
 
@@ -96,7 +97,7 @@ class SprayAndWait:
             # iterate thru your waiting bundles and see if the connected neighbor is the intended recipient of any of
             # them.
             finished_waiting_list = []  # stores Bundles which we have successfully transmitted to the dest and need to
-                                        # delete after iteration completes.
+                                        # delete from local storage after iteration completes.
             for bundle in self.waiting_bundles:
                 if bundle.dest_id == neighbor_data["id"]:
                     neighbor_agent.routing_protocol.handle_bundle_destination(bundle)
@@ -116,11 +117,3 @@ class SprayAndWait:
             "num_bundle_sends": self.num_bundle_sends,
             "num_bundle_reached_destination": self.num_bundle_reached_destination
         }
-
-
-    """
-    Private function used to send the passed Bundle to the specified node in the network.
-    """
-    def __send_bundle(self, bundle: Bundle, dest_id):
-        dest_dtn_node = self.model.get_dtn_object(dest_id)
-        dest_dtn_node.handle_bundle(bundle)

@@ -5,8 +5,9 @@ Contains the Storage class, which is a simplified version of HDTN Storage.
 
 class Storage:
 
-    def __init__(self):
+    def __init__(self, model):
         # initialize dictionary to store bundles.
+        self.model = model
 
         # key = destination
         # value = list containing bundles which need to be sent to that destination.
@@ -48,7 +49,7 @@ class Storage:
     def get_next_bundle_for_id(self, dest_id, last_bundle=None):
 
         # if we have no list of bundles on-hand for the specified ID, return "None".
-        if dest_id not in self.stored_message_dict:
+        if dest_id not in self.stored_message_dict or len(self.stored_message_dict[dest_id]) == 0:
             return None
 
         # if last_bundle was provided and last_bundle == front of the list,
@@ -62,3 +63,12 @@ class Storage:
 
         # return the bundle at the front of the list.
         return self.stored_message_dict[dest_id][0]
+
+    """
+    Refreshes the storage to delete any expired Bundles.
+    """
+    def refresh(self):
+        for bundle_list in self.stored_message_dict.values():
+            for bundle in bundle_list:
+                if bundle.expiration_timestamp <= self.model.schedule.time:
+                    bundle_list.remove(bundle)

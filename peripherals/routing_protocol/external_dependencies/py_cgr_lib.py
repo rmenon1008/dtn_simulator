@@ -22,7 +22,7 @@ class Contact:
         self.owlt = owlt
         self.volume = rate * (end - start)
         self.confidence = confidence
-        self.id = id # routing_protocol-contact-plan-tools: MODIFIED TO ADD THIS FIELD
+        self.id = id # dtn-contact-plan-tools: MODIFIED TO ADD THIS FIELD
 
         # variable parameters
         self.mav = [self.volume, self.volume, self.volume]

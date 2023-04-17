@@ -15,12 +15,12 @@ class Dtn:
 
         self.model = model
 
-        self.storage = Storage()
+        self.storage = Storage(self.model)
 
         # if no filename is provided, "None" will be supplied to the Schrouter and an empty Schrouter will be created.
         self.schrouter = Schrouter(contact_plan_json_filename)
 
-        # metrics used for easy performance comparison
+        # metrics used for easy algo performance comparison
         self.num_bundle_sends = 0
         self.num_repeated_bundle_receives = 0
         self.num_bundle_reached_destination = 0
@@ -57,16 +57,16 @@ class Dtn:
         else:
             # check to see if the bundle is already in storage.  if it is, we've seen this before and it shouldn't be
             # stored again.
-            if self.storage.bundle_is_in_storage(bundle):
-                self.num_repeated_bundle_receives += 1
-            else:
+            if not self.storage.bundle_is_in_storage(bundle):
                 self.storage.store_bundle(bundle.dest_id, bundle)
+            else:
+                self.num_repeated_bundle_receives += 1
 
     """
     Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
     """
     def refresh(self):
-        pass
+        self.storage.refresh()  # refresh the storage so that any expired Bundles are deleted.
 
     """
     Called by the agent and sent to the visualization for simulation history log.

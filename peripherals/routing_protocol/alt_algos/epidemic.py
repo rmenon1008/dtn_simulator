@@ -1,5 +1,5 @@
 """
-Contains the Epidemic class, which implements the epidemic algorithm w/ bundle expiration.
+Contains the Epidemic class, which implements the "Epidemic" algorithm with Bundle expiration.
 """
 from agent.client_agent import ClientAgent
 from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
@@ -11,7 +11,9 @@ class Epidemic:
         self.node_id = node_id
         self.model = model
         self.agent = agent
-        self.known_bundles = []
+        self.known_bundles = []  # Bundles currently known by the Epidemic node + being sent out to other nodes.
+                                 # Bundles can expire.  This list is also used for deduping incoming Bundles from other
+                                 # nodes.
         self.num_bundle_sends = 0
         self.num_repeated_bundle_receives = 0
         self.num_bundle_reached_destination = 0
@@ -30,7 +32,7 @@ class Epidemic:
 
 
     """
-    Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
+    Refreshes the state of the Epidemic object.  Called by the simulation at each timestamp.
     """
     def refresh(self):
         # remove any expired Bundles from the list of known_bundles which we wish to propagate.
@@ -63,11 +65,3 @@ class Epidemic:
             "num_bundle_sends": self.num_bundle_sends,
             "num_bundle_reached_destination": self.num_bundle_reached_destination
         }
-
-
-    """
-    Private function used to send the passed Bundle to the specified node in the network.
-    """
-    def __send_bundle(self, bundle: Bundle, dest_id):
-        dest_dtn_node = self.model.get_dtn_object(dest_id)
-        dest_dtn_node.handle_bundle(bundle)
