@@ -17,7 +17,7 @@ def merge(source, destination):
             node = destination.setdefault(key, {})
             merge(value, node)
         else:
-            destination[key] = value
+            destination.setdefault(key, value)
     return destination
 
 
@@ -123,7 +123,6 @@ class LunarModel(mesa.Model):
                         "id": other.unique_id,
                         "rssi": rssi,
                         "connected": connected,
-                        "send_bundle": other.dtn.handle_bundle if connected else None
                     })
 
         return neighbors

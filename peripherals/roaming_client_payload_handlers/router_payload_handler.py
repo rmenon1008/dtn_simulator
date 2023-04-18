@@ -85,8 +85,9 @@ class RouterClientPayloadHandler:
     def handshake_2(self, client_handler):
         # get a list of metadata for the payloads waiting for the client.
         payloads_for_client_metadata = []
-        for payload in self.payloads_received_for_client[client_handler.client_id]:
-            payloads_for_client_metadata.append((payload.get_identifier(), payload.expiration_timestamp))
+        if client_handler.client_id in self.payloads_received_for_client.keys():
+            for payload in self.payloads_received_for_client[client_handler.client_id]:
+                payloads_for_client_metadata.append((payload.get_identifier(), payload.expiration_timestamp))
 
         # send the metadata list back to the client.
         client_handler.handshake_3(self, payloads_for_client_metadata)

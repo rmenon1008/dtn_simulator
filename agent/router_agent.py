@@ -29,7 +29,6 @@ class RouterAgent(mesa.Agent):
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.history = []
-        self.behavior = node_options["behavior"]
         self.special_behavior = try_getting(node_options, "special_behavior", default=None)
 
         # Peripherals
@@ -98,7 +97,6 @@ class RouterAgent(mesa.Agent):
         return {
             "id": self.unique_id,
             "pos": self.pos,
-            "behavior": self.behavior,
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),

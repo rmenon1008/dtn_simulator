@@ -39,7 +39,7 @@ DEFAULT_AGENT_STATE = {
 
     # Agents is a list of agents that will be created by the model
     "agents": [
-        # Agent 1:
+        # RouterAgent 1:
         {
             "id": 0,                        # Unique id of the agent (optional, default is assigned by model)
             "radio": {
@@ -56,7 +56,7 @@ DEFAULT_AGENT_STATE = {
             }
         },
 
-        # Agent 2:
+        # RouterAgent 2:
         {
             "movement": {
                 "pattern": "spline",        # Spline movement pattern
@@ -77,7 +77,7 @@ DEFAULT_AGENT_STATE = {
             }
         },
 
-        # Agent 3:
+        # RouterAgent 3:
         {
             "movement": {
                 "pattern": "waypoints",     # Waypoint movement pattern
@@ -97,7 +97,7 @@ DEFAULT_AGENT_STATE = {
             }
         },
 
-        # Agent 4:
+        # RouterAgent 4:
         {
             "movement": {
                 "pattern": "circle",        # Circle movement pattern
@@ -110,7 +110,7 @@ DEFAULT_AGENT_STATE = {
             }
         },
 
-        # Agent 5:
+        # RouterAgent 5:
         {
             "special_behavior": {           # Agent special behavior (optional)
                 "type": "find_node_rssi",   # This is the only special behavior implemented right now
@@ -127,6 +127,8 @@ DEFAULT_AGENT_STATE = {
                 }
             }
         },
+
+        # ClientAgent 1:
         {
             "movement": {
                 "pattern": "spiral",  # Random movement pattern
@@ -136,6 +138,8 @@ DEFAULT_AGENT_STATE = {
                     "separation": 10,  # Distance between spiral arms
                 }
             },
+            "pos": (SIM_WIDTH/2,
+                    SIM_HEIGHT/2),  # The only option for "fixed" is the position
             "type": "client"  # set the agent type to be a ClientAgent.
         }
     ]

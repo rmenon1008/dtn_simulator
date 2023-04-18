@@ -20,7 +20,7 @@ def rssi_find_router_target(agent: mesa.Agent):
 
     # Check if connected to target
     if agent.radio.is_connected(target):
-        agent.behavior["type"] = "fixed"
+        agent.special_behavior["type"] = None
 
     # 1. Create a matrix with previous data
     positions = []
@@ -41,7 +41,7 @@ def rssi_find_router_target(agent: mesa.Agent):
     rssis = np.array(rssis[-100:])
 
     if len(positions) < 10:
-        agent.movement.step_spiral()
+        agent.movement.step()
         return
 
     # 2. Assume RSSI is approximately of the form
@@ -58,7 +58,7 @@ def rssi_find_router_target(agent: mesa.Agent):
     a, b, c = leastsq(rssi_error, (0, 0, 0))[0]
 
     if agent.model.space.out_of_bounds((a, b)):
-        agent.movement.step_spiral()
+        agent.movement.step()
         return
 
     agent.movement.move_towards((a, b))

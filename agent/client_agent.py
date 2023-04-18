@@ -35,7 +35,6 @@ class ClientAgent(mesa.Agent):
         super().__init__(node_options["id"], model)
         self.state = ClientAgentMode.WORKING
         self.history = []
-        self.behavior = node_options["behavior"]
         self.mode = ClientAgentMode.WORKING
         self.working_steps_remaining = self.RECONNECTION_INTERVAL
         self.special_behavior = try_getting(node_options, "special_behavior", default=None)
@@ -65,6 +64,10 @@ class ClientAgent(mesa.Agent):
         # if we're in the CONNECTION_ESTABLISHMENT mode, attempt to establish a connection with any nearby node and
         # transfer data.
         if self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT:
+            # if we don't already have a RouterAgent target to move towards, attempt to get one.
+            if self.special_behavior == None:
+                self.__find_nearby_router()
+
             self.__attempt_router_connection_and_payload_transfer()
 
         # refresh movement.
@@ -126,6 +129,7 @@ class ClientAgent(mesa.Agent):
         if self.mode == ClientAgentMode.CONNECTED:
             self.mode = ClientAgentMode.WORKING
             self.working_steps_remaining = self.RECONNECTION_INTERVAL
+            self.special_behavior = None  # reset special_behavior since we no longer are pursuing a router.
 
         # if we're in WORKING mode, decrement the "working steps" counter.  if the counter runs out, transition into
         # CONNECTION_ESTABLISHMENT mode.
@@ -135,7 +139,7 @@ class ClientAgent(mesa.Agent):
                 self.mode = ClientAgentMode.CONNECTION_ESTABLISHMENT
 
     def __step_movement(self):
-        if self.special_behavior is not None or self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT:
+        if self.special_behavior is not None and self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT:
             if self.mode == ClientAgentMode.CONNECTION_ESTABLISHMENT \
                     or self.special_behavior["type"] == "find_node_rssi":
 
@@ -144,11 +148,37 @@ class ClientAgent(mesa.Agent):
         else:
             self.movement.step()
 
+    """
+    Used to attempt to find a nearby DTN router using get_neighbors, then stores it as a target in special_behavior.
+    
+    This should be used in every step where...
+    - We are in CONNECTION_ESTABLISHMENT mode.
+    - We aren't already pursuing a router.
+    """
+    def __find_nearby_router(self):
+        # iterate over the neighbors (if there are any)
+        for neighbor_data in self.model.get_neighbors(self):
+            # obtain the agent associated with the neighbor
+            neighbor_agent = self.model.agents[neighbor_data["id"]]
+
+            # ignore ClientAgents:  we want to pursue routers
+            if isinstance(neighbor_agent, ClientAgent):
+                continue
+
+            # if we've reached this point, the neighbor is a connected RouterAgent.  store it in special_behavior and
+            # stop searching.
+            self.special_behavior = {
+                "type": "find_node_rssi",
+                "options": {
+                    "target_id": neighbor_data["id"]
+                }
+            }
+            return
+
     def get_state(self):
         return {
             "id": self.unique_id,
             "pos": self.pos,
-            "behavior": self.behavior,
             "history": self.history,
             "radio": self.radio.get_state(),
             "num_client_payloads_sent":  self.payload_handler.num_payloads_sent,

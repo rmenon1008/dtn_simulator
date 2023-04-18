@@ -53,13 +53,19 @@ class ClientClientPayloadHandler:
     """
 
     def handshake_3(self, router_handler, payloads_for_client_metadata: list):
-        # extract the list of payload IDs we don't have from "payloads_for_client_metadata".
-        desired_payload_ids = [payload_id for (payload_id, expiration_timestamp)
-                               in payloads_for_client_metadata
-                               if (payload_id, expiration_timestamp) not in self.already_received_payload_ids]
+        # if no payloads were sent by the router, skip to step 5.
+        if len(payloads_for_client_metadata) == 0:
+            self.handshake_5(router_handler, [])
 
-        # ask the RouterClientPayloadHandler for the ClientPayloads associated with desired_payload_ids.
-        router_handler.handshake_4(self, desired_payload_ids)
+        # otherwise, analyze the metadata received from the router.
+        else:
+            # extract the list of payload IDs we don't have from "payloads_for_client_metadata".
+            desired_payload_ids = [payload_id for (payload_id, expiration_timestamp)
+                                   in payloads_for_client_metadata
+                                   if (payload_id, expiration_timestamp) not in self.already_received_payload_ids]
+
+            # ask the RouterClientPayloadHandler for the ClientPayloads associated with desired_payload_ids.
+            router_handler.handshake_4(self, desired_payload_ids)
 
     """
     Executes "step 5" of the handshake process described in README.md.
