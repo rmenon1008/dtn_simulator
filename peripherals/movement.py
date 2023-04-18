@@ -86,7 +86,7 @@ class WaypointsPattern():
                         next_index = len(self.waypoints) - 2
                 else:
                     next_index = 0
-                self.should_teleport = True
+                    self.should_teleport = True
             else:
                 next_index = self.index
         else:
