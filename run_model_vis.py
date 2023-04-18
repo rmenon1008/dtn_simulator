@@ -20,6 +20,14 @@ DEFAULT_MODEL_PARAMS = {
     "max_steps": None,
     "rssi_noise_stdev": 4.5,    # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model
+
+    "data_drop_schedule": [     # Schedule of data drops
+                                # Drops can be picked up by any client that comes within 5 units
+                                # A payload is created from the drop and stored on the client
+                                # repeat_every can be used to repeat a drop every n ticks
+        { "time": 50, "pos": (520, 100), "target_id": 0 },
+        { "time": 100, "pos": (475, 100), "target_id": 0, "repeat_every": 100 },
+    ]
 }
 
 # Agent state defines the agents that will be created and their initial states
@@ -110,24 +118,6 @@ DEFAULT_AGENT_STATE = {
             }
         },
 
-        # RouterAgent 5:
-        {
-            "special_behavior": {           # Agent special behavior (optional)
-                "type": "find_node_rssi",   # This is the only special behavior implemented right now
-                "options": {                # Options specific to this special behavior
-                    "target_id": 0,         # The id of the agent to find
-                }
-            },
-            "movement": {
-                "pattern": "spiral",        # Random movement pattern
-                "speed": 3.5,               # Speed of this agent in m/s
-                "options": {
-                    "center": (500, 100),   # Center of the spiral
-                    "separation": 10,       # Distance between spiral arms
-                }
-            }
-        },
-
         # ClientAgent 1:
         {
             "movement": {
@@ -138,8 +128,6 @@ DEFAULT_AGENT_STATE = {
                     "separation": 10,  # Distance between spiral arms
                 }
             },
-            "pos": (SIM_WIDTH/2,
-                    SIM_HEIGHT/2),  # The only option for "fixed" is the position
             "type": "client"  # set the agent type to be a ClientAgent.
         }
     ]

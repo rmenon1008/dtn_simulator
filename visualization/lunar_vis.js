@@ -211,12 +211,15 @@ const LunarVis = function (maxSimX, maxSimY) {
     console.log(modelState);
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    const nodes = modelState.nodes;
+    const data_drops = modelState.data_drops;
+
     const getNode = (id) => {
-      return modelState.find(node => node.id === id);
+      return nodes.find(node => node.id === id);
     };
 
     // Draw the historical RSSI values
-    modelState.forEach(node => {
+    nodes.forEach(node => {
       var transparency = 1;
       if (node.history.reverse()) {
         for (let i = 0; i < node.history.length - 1; i++) {
@@ -235,12 +238,12 @@ const LunarVis = function (maxSimX, maxSimY) {
 
     // Draw the detection and connection ranges as transparent circles
     if (showRanges) {
-      modelState.forEach(node => {
+      nodes.forEach(node => {
         if (node.radio.estimated_detection_range) {
           drawShape(node.pos[0], node.pos[1], node.radio.estimated_detection_range, "rgba(0, 0, 255, 0.07)", "circle", false, "rgba(0, 0, 255, 0.0)");
         }
       });
-      modelState.forEach(node => {
+      nodes.forEach(node => {
         if (node.radio.estimated_connection_range) {
           drawShape(node.pos[0], node.pos[1], node.radio.estimated_connection_range, "rgba(0, 255, 0, 0.15)", "circle", false, "rgba(0, 255, 0, 0.0)");
         }
@@ -248,7 +251,7 @@ const LunarVis = function (maxSimX, maxSimY) {
     }
 
     // Draw lines between nodes that have an RSSI
-    modelState.forEach(node => {
+    nodes.forEach(node => {
       if (node.radio.neighborhood) {
         node.radio.neighborhood.forEach(neighbor => {
           if (neighbor.connected || showDetectionLines) {
@@ -260,15 +263,20 @@ const LunarVis = function (maxSimX, maxSimY) {
     });
 
     // Draw all the nodes on top
-    modelState.forEach(node => {
+    nodes.forEach(node => {
       const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
       drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, "circle", false);
       addTooltip(node);
     });
 
+    // Draw data drops
+    data_drops.forEach(drop => {
+      drawShape(drop.pos[0], drop.pos[1], 5 * SCALE, "rgba(255, 0, 0, 0.5)", "square", false);
+    });
+
     // // Draw nodes target locations
     // if (showTargetLocations) {
-    //   modelState.forEach(node => {
+    //   nodes.forEach(node => {
     //     if (node.target_location) {
     //       drawShape(node.target_location[0], node.target_location[1], 5 * SCALE, "rgba(0, 0, 255, 0.5)", "X");
     //     }

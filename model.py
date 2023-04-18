@@ -3,6 +3,7 @@ import logging
 import mesa
 
 from peripherals.movement import generate_pattern
+from payload import ClientPayload
 from agent.client_agent import ClientAgent
 from agent.router_agent import RouterAgent
 
@@ -30,6 +31,9 @@ class LunarModel(mesa.Model):
     def __init__(self, size, model_params, initial_state):
         super().__init__()
         self.model_params = model_params
+
+        # Set up an array of data drops
+        self.data_drops = []
 
         # Set up the space and schedule
         self.space = mesa.space.ContinuousSpace(
@@ -79,10 +83,35 @@ class LunarModel(mesa.Model):
             self.agents[options["id"]] = a
 
     def step(self):
+        # Check if there are any data drops
+        if "data_drop_schedule" in self.model_params:
+            self.update_data_drops()
+
         self.schedule.step()
         if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
             if self.schedule.steps >= self.model_params["max_steps"] - 1:
                 self.running = False
+    
+    def update_data_drops(self):
+        DROP_PICKUP_RANGE = 5
+        
+        # Check if there are any new data drops
+        for drop in self.model_params["data_drop_schedule"]:
+            if drop["time"] == self.schedule.steps:
+                self.data_drops.append(drop)
+            elif "repeat_every" in drop:
+                if (self.schedule.steps - drop["time"]) % drop["repeat_every"] == 0 and self.schedule.steps > drop["time"]:
+                    self.data_drops.append(drop)
+
+        # Check if any agents are in range of a data drop
+        for drop in self.data_drops:
+            for agent in self.schedule.agents:
+                if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
+                    # Make sure the agent is a client
+                    if isinstance(agent, ClientAgent):
+                        agent.payload_handler.store_payload(ClientPayload(agent.unique_id, drop["target_id"], self.schedule.steps))
+                        self.data_drops.remove(drop)
+                        pass
 
     def get_rssi(self, agent, other):
         """Returns the RSSI of the agent to the other agent in dBm"""
