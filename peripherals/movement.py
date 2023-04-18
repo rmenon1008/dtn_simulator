@@ -89,6 +89,71 @@ class WaypointsPattern():
         self.index = next_index
         return self.waypoints[self.index]
 
+class ArcPattern(WaypointsPattern):
+    OVERSAMPLING_AMOUNT = 50
+    # https://chris35wills.github.io/parabola_python
+
+    def __init__(self, control_points, start_index=0, forward=True, repeat=True, bounce=False, speed=1):
+        def get_parabola_fn(x1, y1, x2, y2, x3, y3):
+            '''
+            Adapted and modifed to get the unknowns for defining a parabola:
+            http://stackoverflow.com/questions/717762/how-to-calculate-the-vertex-of-a-parabola-given-three-points
+            '''
+            # first 2 are roots, third is apex
+            # y = k(x-x1)(x-x2)
+            # y3 = k*(x3-x1)*(x3-x2)
+            # k = y3 / ((x3-x1)*(x3-x2))
+            k = y3 / ((x3 - x1) * (x3 - x2))
+            
+            # f(x) = k*(x-x1)*(x-x2)
+            f = lambda x : k * (x - x1) * (x - x2)
+            return f
+        x = [p[0] for p in control_points]
+        y = [p[1] for p in control_points]
+
+        if y[0] == y[1]: # horizontal arcs
+            f = get_parabola_fn(x[0], y[0], x[1], y[1], x[2], y[2])
+            waypoint_x = [*range(x[0], x[1], 1)]
+            waypoint_y = []
+            for i in range(len(waypoint_x)):
+                temp_x = waypoint_x[i]
+                temp_y = f(temp_x)
+                waypoint_y.append(temp_y + y[0])
+
+            # Now we can sample the spline at a constant speed
+            # We do this by finding the next point that is as far away as the desired speed
+            waypoints = [(waypoint_x[0], waypoint_y[0])]
+            for i in range(1, len(waypoint_x)):
+                dx = waypoint_x[i] - waypoints[-1][0]
+                dy = waypoint_y[i] - waypoints[-1][1]
+                dist = (dx**2 + dy**2)**0.5
+                if dist >= speed:
+                    # Go back one point so we don't overshoot the speed
+                    waypoints.append((waypoint_x[i-1], waypoint_y[i-1]))
+            print(waypoints)
+            super().__init__(waypoints, start_index, forward, repeat, bounce)
+        else: # vertical arcs
+            f = get_parabola_fn(y[0], x[0], y[1], x[1], y[2], x[2])
+            waypoint_x = []
+            waypoint_y = [*range(y[0], y[1], 1)]
+            for i in range(len(waypoint_y)):
+                temp_y = waypoint_y[i]
+                temp_x = f(temp_y)
+                waypoint_x.append(temp_x + x[0])
+
+            # Now we can sample the spline at a constant speed
+            # We do this by finding the next point that is as far away as the desired speed
+            waypoints = [(waypoint_x[0], waypoint_y[0])]
+            for i in range(1, len(waypoint_x)):
+                dx = waypoint_x[i] - waypoints[-1][0]
+                dy = waypoint_y[i] - waypoints[-1][1]
+                dist = (dx**2 + dy**2)**0.5
+                if dist >= speed:
+                    # Go back one point so we don't overshoot the speed
+                    waypoints.append((waypoint_x[i-1], waypoint_y[i-1]))
+            print(waypoints)
+            super().__init__(waypoints, start_index, forward, repeat, bounce)
+
 
 class SplinePattern(WaypointsPattern):
     OVERSAMPLING_AMOUNT = 50
@@ -166,6 +231,8 @@ def generate_pattern(movement_options):
 
     if pattern == "circle":
         return CirclePattern(**pattern_options, speed=movement_options["speed"])
+    elif pattern == "arc":
+        return ArcPattern(**pattern_options, speed=movement_options["speed"])
     elif pattern == "spline":
         return SplinePattern(**pattern_options, speed=movement_options["speed"])
     elif pattern == "fixed":
