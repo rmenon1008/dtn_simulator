@@ -136,7 +136,6 @@ class ArcPattern(WaypointsPattern):
                 if dist >= speed:
                     # Go back one point so we don't overshoot the speed
                     waypoints.append((waypoint_x[i-1], waypoint_y[i-1]))
-            print(waypoints)
             super().__init__(waypoints, start_index, forward, repeat, bounce)
         else: # vertical arcs
             f = get_parabola_fn(y[0], x[0], y[1], x[1], y[2], x[2])
@@ -157,7 +156,6 @@ class ArcPattern(WaypointsPattern):
                 if dist >= speed:
                     # Go back one point so we don't overshoot the speed
                     waypoints.append((waypoint_x[i-1], waypoint_y[i-1]))
-            print(waypoints)
             super().__init__(waypoints, start_index, forward, repeat, bounce)
 
 
