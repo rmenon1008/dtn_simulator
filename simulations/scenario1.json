@@ -1,0 +1,133 @@
+{
+  "agent_defaults": {
+    "radio": {
+      "detection_thresh": -60,
+      "connection_thresh": -50
+    }
+  },
+  "agents": [
+    {
+      "comment": "This is P1",
+      "movement": {
+        "pattern": "arc",
+        "speed": 2.5,
+        "options": {
+            "control_points": [
+              [0, 0],
+              [0, 650],
+              [200, 325]
+            ],
+            "repeat": true,
+            "bounce": false
+        }
+      }
+    },
+    {
+      "comment": "This is P2",
+      "movement": {
+        "pattern": "waypoints",
+        "speed": 2.5,
+        "options": {
+            "waypoints": [
+              [200, 649],
+              [200, 0]
+            ],
+            "repeat": true,
+            "bounce": true
+        }
+      }
+    },
+    {
+      "comment": "This is P3",
+      "movement": {
+        "pattern": "waypoints",
+        "speed": 2.5,
+        "options": {
+            "waypoints": [
+              [300, 0],
+              [300, 649]
+            ],
+            "repeat": true,
+            "bounce": false
+        }
+      }
+    },
+    {
+      "comment": "This is P4",
+      "movement": {
+        "pattern": "waypoints",
+        "speed": 2.5,
+        "options": {
+            "waypoints": [
+              [700, 649],
+              [700, 0]
+            ],
+            "repeat": true,
+            "bounce": false
+        }
+      }
+    },
+    {
+      "comment": "This is P5",
+      "movement": {
+        "pattern": "circle",
+        "speed": 3.5,
+        "options": {
+            "radius": 324,
+            "center": [
+              500,
+              325],
+            "repeat": true
+        }
+      }
+    },
+    {
+      "comment": "This is L1",
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            50,
+            550
+          ]
+        }
+      }
+    },
+    {
+      "comment": "This is L2",
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            400,
+            100
+          ]
+        }
+      }
+    },
+    {
+      "comment": "This is L3",
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            600,
+            400
+          ]
+        }
+      }
+    }
+  ]
+}
