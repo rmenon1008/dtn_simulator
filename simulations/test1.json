@@ -1,0 +1,90 @@
+{
+  "agent_defaults": {
+    "radio": {
+      "detection_thresh": -60,
+      "connection_thresh": -50
+    }
+  },
+  "agents": [
+    {
+      "id": 0,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            500,
+            325
+          ]
+        }
+      }
+    },
+    {
+      "id": 1,
+      "movement": {
+        "pattern": "circle",
+        "speed": 3.5,
+        "options": {
+          "radius": 75,
+          "start_index": 115,
+          "center": [
+            400,
+            225
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "id": 2,
+      "movement": {
+        "pattern": "circle",
+        "speed": 3.5,
+        "options": {
+          "radius": 75,
+          "start_index": 85,
+          "center": [
+            600,
+            225
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "id": 3,
+      "movement": {
+        "pattern": "circle",
+        "speed": 3.5,
+        "options": {
+          "radius": 75,
+          "start_index": 33,
+          "center": [
+            500,
+            450
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "id": 4,
+      "movement": {
+        "pattern": "circle",
+        "speed": 3.5,
+        "options": {
+          "radius": 75,
+          "start_index": 33,
+          "center": [
+            200,
+            450
+          ],
+          "repeat": true
+        }
+      }
+    }
+  ]
+}

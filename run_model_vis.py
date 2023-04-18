@@ -2,6 +2,7 @@ from model import LunarModel
 from lunar_vis import LunarVis
 import mesa
 import json
+import argparse
 
 from peripherals.movement import *
 
@@ -145,9 +146,6 @@ DEFAULT_AGENT_STATE = {
     ]
 }
 
-vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
-
-
 class ObjectOption(mesa.visualization.UserParam):
     def __init__(self, name="", value=None, choices=None, description=None):
         self.param_type = "object"
@@ -162,26 +160,36 @@ class ObjectOption(mesa.visualization.UserParam):
     def value(self, value):
         self._value = value
 
+def main():
+    argParser = argparse.ArgumentParser()
+    argParser.add_argument("-i", help="path to json file with initial simulation state")
+    args = argParser.parse_args()
+    init_state = DEFAULT_AGENT_STATE
+    if (args.i):
+        with open(args.i, "r") as init_json_file:
+            init_state = json.load(init_json_file)
 
-model_params = ObjectOption(
-    "Model parameters",
-    value=DEFAULT_MODEL_PARAMS,
-)
+    vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
+    model_params = ObjectOption(
+        "Model parameters",
+        value=DEFAULT_MODEL_PARAMS,
+    )
+    agent_state = ObjectOption(
+        "Initial agent states",
+        value=init_state,
+    )
+    server = mesa.visualization.ModularServer(
+        LunarModel,
+        [vis],
+        "Model",
+        {
+            "size": (SIM_WIDTH, SIM_HEIGHT),
+            "model_params":  model_params,
+            "initial_state": agent_state,
+        })
+    server.settings["template_path"] = "visualization"
+    server.port = 8521  # The default
+    server.launch(open_browser=True)
 
-agent_state = ObjectOption(
-    "Initial agent states",
-    value=DEFAULT_AGENT_STATE,
-)
-
-server = mesa.visualization.ModularServer(
-    LunarModel,
-    [vis],
-    "Model",
-    {
-        "size": (SIM_WIDTH, SIM_HEIGHT),
-        "model_params":  model_params,
-        "initial_state": agent_state,
-    })
-server.settings["template_path"] = "visualization"
-server.port = 8521  # The default
-server.launch(open_browser=True)
+if __name__ == "__main__":
+    main()
