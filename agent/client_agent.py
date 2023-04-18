@@ -51,6 +51,9 @@ class ClientAgent(mesa.Agent):
         })
 
     def step(self):
+        # update the history.
+        self.update_history()
+
         # refresh the radio.
         self.radio.refresh()
 
