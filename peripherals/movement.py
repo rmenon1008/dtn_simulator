@@ -42,6 +42,8 @@ class Movement():
         if self.is_close_to_point(self.target_pos):
             self.target_pos = self.pattern.next()
 
+        if self.pattern.should_teleport:
+            self.model.teleport_agent(self.agent, self.target_pos)
         self.move_towards(self.target_pos)
 
 
@@ -63,6 +65,7 @@ class WaypointsPattern():
         self.forward = forward
         self.repeat = repeat
         self.bounce = bounce
+        self.should_teleport = False
 
     def next(self):
         next_index = self.index
@@ -83,8 +86,11 @@ class WaypointsPattern():
                         next_index = len(self.waypoints) - 2
                 else:
                     next_index = 0
+                self.should_teleport = True
             else:
                 next_index = self.index
+        else:
+            self.should_teleport = False
 
         self.index = next_index
         return self.waypoints[self.index]
@@ -220,6 +226,7 @@ class SpiralPattern(WaypointsPattern):
 class FixedPattern():
     def __init__(self, pos):
         self.starting_pos = pos
+        self.should_teleport = False
 
     def next(self):
         return self.starting_pos

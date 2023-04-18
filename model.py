@@ -175,6 +175,15 @@ class LunarModel(mesa.Model):
 
         self.space.move_agent(agent, (agent.pos[0] + dx, agent.pos[1] + dy))
 
+    def teleport_agent(self, agent, pos):
+        """Teleports the agent to the given position"""
+        if self.space.out_of_bounds(pos):
+            logging.warning(
+                "Agent {} tried to teleport out of bounds".format(agent.unique_id))
+            return
+
+        self.space.move_agent(agent, pos)
+
     """
     Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.
     """
