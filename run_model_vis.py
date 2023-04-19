@@ -19,15 +19,15 @@ SIM_HEIGHT = 650  # 650 m
 DEFAULT_MODEL_PARAMS = {
     # Max number of steps to run the model for (can be None)
     "max_steps": None,
-    "rssi_noise_stdev": 4.5,    # Standard deviation of the noise added to RSSI values
+    "rssi_noise_stdev": 2.0,    # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model
 
     "data_drop_schedule": [     # Schedule of data drops
                                 # Drops can be picked up by any client that comes within 5 units
                                 # A payload is created from the drop and stored on the client
                                 # repeat_every can be used to repeat a drop every n ticks
-        { "time": 50, "pos": (520, 100), "target_id": 0 },
-        { "time": 100, "pos": (475, 100), "target_id": 0, "repeat_every": 100 },
+        { "time": 100, "pos": (475, 400), "target_id": 0 },
+        # { "time": 100, "pos": (475, 100), "target_id": 0, "repeat_every": 100 },
     ]
 }
 
@@ -39,7 +39,7 @@ DEFAULT_AGENT_STATE = {
     "agent_defaults": {
         "radio": {
             "detection_thresh": -60,    # RSSI threshold for detecting another agent
-            "connection_thresh": -25,   # RSSI threshold for connecting to another agent
+            "connection_thresh": -40,   # RSSI threshold for connecting to another agent
         },
         "routing_protocol": {},
         "movement": {},
@@ -48,28 +48,12 @@ DEFAULT_AGENT_STATE = {
 
     # Agents is a list of agents that will be created by the model
     "agents": [
-        # RouterAgent 1:
-        {
-            "id": 0,                        # Unique id of the agent (optional, default is assigned by model)
-            "radio": {
-                "detection_thresh": -65,    # This agent is overriding the default detection
-                                            # threshold for its radio
-            },
-            "movement": {
-                "pattern": "fixed",         # Fixed movement pattern
-                "speed": 0,                 # Speed of this agent in m/s
-                "options": {
-                    "pos": (SIM_WIDTH/2,
-                            SIM_HEIGHT/2),  # The only option for "fixed" is the position
-                }
-            }
-        },
 
         # RouterAgent 2:
         {
             "movement": {
                 "pattern": "spline",        # Spline movement pattern
-                "speed": 2.5,               # Speed of this agent in m/s
+                "speed": 1.75,               # Speed of this agent in m/s
                 "options": {
                     "control_points": [     # Control points for the spline
                         (700, 150),         # The spline will pass through these points
@@ -90,7 +74,7 @@ DEFAULT_AGENT_STATE = {
         {
             "movement": {
                 "pattern": "waypoints",     # Waypoint movement pattern
-                "speed": 3.5,               # Speed of this agent in m/s
+                "speed": 1.75,               # Speed of this agent in m/s
                 "options": {
                     "waypoints": [          # Waypoints for the agent to go between
                         (100, 100),
@@ -110,7 +94,7 @@ DEFAULT_AGENT_STATE = {
         {
             "movement": {
                 "pattern": "circle",        # Circle movement pattern
-                "speed": 3.5,               # Speed of this agent in m/s
+                "speed": 1.75,               # Speed of this agent in m/s
                 "options": {
                     "radius": 100,          # Radius of the circle
                     "center": (300, 300),   # Center of the circle
@@ -125,7 +109,7 @@ DEFAULT_AGENT_STATE = {
                 "pattern": "spiral",  # Random movement pattern
                 "speed": 3.5,  # Speed of this agent in m/s
                 "options": {
-                    "center": (500, 100),  # Center of the spiral
+                    "center": (500, 400),  # Center of the spiral
                     "separation": 10,  # Distance between spiral arms
                 }
             },
