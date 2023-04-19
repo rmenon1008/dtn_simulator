@@ -264,8 +264,14 @@ const LunarVis = function (maxSimX, maxSimY) {
 
     // Draw all the nodes on top
     nodes.forEach(node => {
+      let hasData = false;
+      if (node.num_stored_payloads && node.num_stored_payloads > 0) {
+        hasData = true;
+      } else if (node.routing_protocol && node.routing_protocol.num_stored_payloads.length > 0) {
+        hasData = true;
+      }
       const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
-      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, "circle", false);
+      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, "circle", hasData);
       addTooltip(node);
     });
 

@@ -189,5 +189,6 @@ class ClientAgent(mesa.Agent):
             "history": self.history,
             "radio": self.radio.get_state(),
             "num_client_payloads_sent":  self.payload_handler.num_payloads_sent,
-            "num_client_payloads_received":  self.payload_handler.num_payloads_received
+            "num_client_payloads_received":  self.payload_handler.num_payloads_received,
+            "num_stored_payloads": len(self.payload_handler.payloads_to_send)
         }

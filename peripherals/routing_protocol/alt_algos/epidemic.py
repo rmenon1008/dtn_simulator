@@ -63,5 +63,6 @@ class Epidemic:
         return {
             "num_repeated_bundle_receives": self.num_repeated_bundle_receives,
             "num_bundle_sends": self.num_bundle_sends,
-            "num_bundle_reached_destination": self.num_bundle_reached_destination
+            "num_bundle_reached_destination": self.num_bundle_reached_destination,
+            "num_stored_payloads": len(self.known_bundles)
         }
