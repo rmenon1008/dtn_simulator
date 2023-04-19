@@ -7,7 +7,8 @@
   },
   "agents": [
     {
-      "comment": "This is P1",
+      "name": "P1",
+      "type": "router",
       "movement": {
         "pattern": "arc",
         "speed": 2.5,
@@ -23,7 +24,8 @@
       }
     },
     {
-      "comment": "This is P2",
+      "name": "P2",
+      "type": "router",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -38,7 +40,8 @@
       }
     },
     {
-      "comment": "This is P3",
+      "name": "P3",
+      "type": "router",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -53,7 +56,8 @@
       }
     },
     {
-      "comment": "This is P4",
+      "name": "P4",
+      "type": "router",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -68,7 +72,8 @@
       }
     },
     {
-      "comment": "This is P5",
+      "name": "P5",
+      "type": "router",
       "movement": {
         "pattern": "circle",
         "speed": 3.5,
@@ -82,7 +87,8 @@
       }
     },
     {
-      "comment": "This is L1",
+      "name": "L1",
+      "type": "router",
       "radio": {
         "detection_thresh": -65
       },
@@ -98,7 +104,8 @@
       }
     },
     {
-      "comment": "This is L2",
+      "name": "L2",
+      "type": "router",
       "radio": {
         "detection_thresh": -65
       },
@@ -114,7 +121,8 @@
       }
     },
     {
-      "comment": "This is L3",
+      "name": "L3",
+      "type": "router",
       "radio": {
         "detection_thresh": -65
       },
@@ -126,6 +134,21 @@
             600,
             400
           ]
+        }
+      }
+    },
+    {
+      "name": "C1",
+      "type": "client",
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spiral",
+        "speed": 3.5,
+        "options": {
+          "center": [500,400],
+          "separation": 10
         }
       }
     }
