@@ -26,6 +26,9 @@ class RoutingProtocol(Enum):
 class RouterAgent(mesa.Agent):
     ROUTING_PROTOCOL = RoutingProtocol.DTN  # <--- modify this value to change routing protocol.
 
+    # Maximum length of the history to keep. Prevents the simulation from slowing down.
+    MAX_HISTORY_LENGTH = 150
+
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.history = []
@@ -46,6 +49,7 @@ class RouterAgent(mesa.Agent):
             "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
             "router_client_mappings": self.payload_handler.client_router_mapping_dict
         })
+        self.history = self.history[-self.MAX_HISTORY_LENGTH:]
 
     def step(self):
         # update our peripherals.

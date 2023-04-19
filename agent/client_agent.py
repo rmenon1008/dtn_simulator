@@ -31,6 +31,9 @@ class ClientAgent(mesa.Agent):
     # after RECONNECTION_INTERVAL steps, the ClientAgent must work towards reconnecting to the DTN network.
     RECONNECTION_INTERVAL = 100
 
+    # Maximum length of the history to keep. Prevents the simulation from slowing down.
+    MAX_HISTORY_LENGTH = 150
+
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.state = ClientAgentMode.WORKING
@@ -49,6 +52,7 @@ class ClientAgent(mesa.Agent):
             "pos": self.pos,
             "radio": self.radio.get_state()
         })
+        self.history = self.history[-self.MAX_HISTORY_LENGTH:]
 
     def step(self):
         # update the history.
