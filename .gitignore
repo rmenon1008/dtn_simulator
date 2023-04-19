@@ -26,3 +26,6 @@ pip-delete-this-directory.txt
 
 # MacOS
 .DS_STORE
+
+# Generated Files
+cp.json

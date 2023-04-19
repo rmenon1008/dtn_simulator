@@ -135,21 +135,35 @@ class ObjectOption(mesa.visualization.UserParam):
 def main():
     argParser = argparse.ArgumentParser()
     argParser.add_argument("-i", help="path to json file with initial simulation state")
+    argParser.add_argument("-m", help="path to json file with model params")
+    argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
     args = argParser.parse_args()
     init_state = DEFAULT_AGENT_STATE
+    init_model_params = DEFAULT_MODEL_PARAMS
     if (args.i):
         with open(args.i, "r") as init_json_file:
             init_state = json.load(init_json_file)
 
-    vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
+    if (args.m):
+        with open(args.m, "r") as init_json_file:
+            init_model_params = json.load(init_json_file)
+
     model_params = ObjectOption(
         "Model parameters",
-        value=DEFAULT_MODEL_PARAMS,
+        value=init_model_params,
     )
+
+    if (args.make_contact_plan):
+        new_json = model_params.value
+        new_json["make_contact_plan"] = True
+        model_params.value = json.dumps(new_json)
+
     agent_state = ObjectOption(
         "Initial agent states",
         value=init_state,
     )
+    
+    vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
     server = mesa.visualization.ModularServer(
         LunarModel,
         [vis],
