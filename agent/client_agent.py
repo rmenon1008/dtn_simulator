@@ -36,6 +36,7 @@ class ClientAgent(mesa.Agent):
 
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
+        self.name = try_getting(node_options, "name", default=None)
         self.state = ClientAgentMode.WORKING
         self.history = []
         self.mode = ClientAgentMode.WORKING
@@ -183,12 +184,16 @@ class ClientAgent(mesa.Agent):
             return
 
     def get_state(self):
-        return {
+        state = {
             "id": self.unique_id,
             "pos": self.pos,
             "history": self.history,
             "radio": self.radio.get_state(),
             "num_client_payloads_sent":  self.payload_handler.num_payloads_sent,
             "num_client_payloads_received":  self.payload_handler.num_payloads_received,
-            "num_stored_payloads": len(self.payload_handler.payloads_to_send)
+            "num_stored_payloads": len(self.payload_handler.payloads_to_send),
+            "type": "client"
         }
+        if self.name:
+            state["name"] = self.name
+        return state

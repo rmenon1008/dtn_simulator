@@ -31,6 +31,7 @@ class RouterAgent(mesa.Agent):
 
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
+        self.name = try_getting(node_options, "name", default=None)
         self.history = []
         self.special_behavior = try_getting(node_options, "special_behavior", default=None)
 
@@ -98,10 +99,14 @@ class RouterAgent(mesa.Agent):
             return SprayAndWait(self.unique_id, self.model, self)
 
     def get_state(self):
-        return {
+        state = {
             "id": self.unique_id,
             "pos": self.pos,
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),
+            "type": "router"
         }
+        if self.name:
+            state["name"] = self.name
+        return state
