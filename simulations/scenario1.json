@@ -33,7 +33,7 @@
               [200, 0]
             ],
             "repeat": true,
-            "bounce": true
+            "bounce": false
         }
       }
     },

@@ -1,0 +1,16 @@
+{
+    "max_steps": 5000,
+    "rssi_noise_stdev": 0,
+    "model_speed_limit": 10,
+    "data_drop_schedule": [
+      {
+        "time": 100,
+        "pos": [
+          475,
+          400
+        ],
+        "target_id": 0
+      }
+    ],
+    "make_contact_plan": true
+  }
