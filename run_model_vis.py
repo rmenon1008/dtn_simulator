@@ -27,7 +27,7 @@ DEFAULT_MODEL_PARAMS = {
                                 # Drops can be picked up by any client that comes within 5 units
                                 # A payload is created from the drop and stored on the client
                                 # repeat_every can be used to repeat a drop every n ticks
-        { "time": 100, "pos": (475, 400), "target_id": 0 },
+        { "drop_id": 0, "time": 100, "pos": (475, 400), "target_id": 0 },
         # { "time": 100, "pos": (475, 100), "target_id": 0, "repeat_every": 100 },
     ]
 }

@@ -197,7 +197,7 @@ class LunarModel(mesa.Model):
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
                     # Make sure the agent is a client
                     if isinstance(agent, ClientAgent):
-                        agent.payload_handler.store_payload(ClientPayload(agent.unique_id, drop["target_id"], self.schedule.steps))
+                        agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps))
                         self.data_drops.remove(drop)
                         pass
 
