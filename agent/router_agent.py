@@ -34,6 +34,7 @@ class RouterAgent(mesa.Agent):
         self.name = try_getting(node_options, "name", default=None)
         self.history = []
         self.special_behavior = try_getting(node_options, "special_behavior", default=None)
+        self.contact_plan_filepath = try_getting(node_options, "cp_file", default=None)
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
@@ -93,7 +94,7 @@ class RouterAgent(mesa.Agent):
 
     def __get_routing_protocol_object(self):
         if self.ROUTING_PROTOCOL == RoutingProtocol.DTN:
-            return Dtn(self.unique_id, self.model)
+            return Dtn(self.unique_id, self.model, self.contact_plan_filepath)
         elif self.ROUTING_PROTOCOL == RoutingProtocol.EPIDEMIC:
             return Epidemic(self.unique_id, self.model, self)
         elif self.ROUTING_PROTOCOL == RoutingProtocol.SPRAY_AND_WAIT:
