@@ -9,6 +9,8 @@
     {
       "name": "P1",
       "type": "router",
+      "id": 1,
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "movement": {
         "pattern": "arc",
         "speed": 2.5,
@@ -26,6 +28,8 @@
     {
       "name": "P2",
       "type": "router",
+      "id": 2,
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -41,7 +45,9 @@
     },
     {
       "name": "P3",
+      "id": 3,
       "type": "router",
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -57,7 +63,9 @@
     },
     {
       "name": "P4",
+      "id": 4,
       "type": "router",
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -74,6 +82,8 @@
     {
       "name": "P5",
       "type": "router",
+      "id": 5,
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "movement": {
         "pattern": "circle",
         "speed": 3.5,
@@ -89,6 +99,8 @@
     {
       "name": "L1",
       "type": "router",
+      "id": 6,
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "radio": {
         "detection_thresh": -65
       },
@@ -106,6 +118,8 @@
     {
       "name": "L2",
       "type": "router",
+      "id": 7,
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "radio": {
         "detection_thresh": -65
       },
@@ -123,6 +137,8 @@
     {
       "name": "L3",
       "type": "router",
+      "id": 8,
+      "cp_file": "simulations/scenario1/scenario1_contactplan_5000steps.json",
       "radio": {
         "detection_thresh": -65
       },
@@ -131,8 +147,8 @@
         "speed": 0,
         "options": {
           "pos": [
-            600,
-            400
+            650,
+            500
           ]
         }
       }
@@ -140,6 +156,7 @@
     {
       "name": "C1",
       "type": "client",
+      "id": 9,
       "radio": {
         "detection_thresh": -65
       },
