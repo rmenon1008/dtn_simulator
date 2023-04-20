@@ -178,6 +178,7 @@ class RouterClientPayloadHandler:
             if router_ids_map is not None:
                 for router_id in router_ids_map.keys():
                     # create the Bundle.
+                    print("creating bundle destined to host router:", router_id)
                     bundle = Bundle(payload.get_identifier(), router_id, payload, self.model.schedule.time)
 
                     # send the Bundle.
@@ -186,6 +187,7 @@ class RouterClientPayloadHandler:
             # if we were unable to send out the payload, store it for later.
             else:
                 unhandled_payloads.append(payload)
+                print("router", self.router_id, "couldn't find a host router for outgoing payload")
 
         # update the locally-stored payloads.
         self.outgoing_payloads_to_send = unhandled_payloads

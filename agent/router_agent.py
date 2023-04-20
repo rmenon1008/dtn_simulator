@@ -56,6 +56,7 @@ class RouterAgent(mesa.Agent):
         # update our peripherals.
         self.radio.refresh()
         self.routing_protocol.refresh()
+        self.payload_handler.refresh()
         self.update_history()
 
         self.__attempt_router_connection_and_exchange_client_mappings()
@@ -104,6 +105,7 @@ class RouterAgent(mesa.Agent):
             "pos": self.pos,
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
+            "outgoing_payloads_to_send": len(self.payload_handler.outgoing_payloads_to_send),
             "radio": self.radio.get_state(),
             "type": "router"
         }

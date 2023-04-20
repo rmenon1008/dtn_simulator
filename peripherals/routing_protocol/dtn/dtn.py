@@ -41,20 +41,22 @@ class Dtn:
         if bundle.dest_id == self.node_id:
             handle_payload(self.model, self.node_id, bundle.payload)
             self.num_bundle_reached_destination += 1
+            print("this bundle was for me, router", self.node_id)
 
         # if there exists a link by which we can route the Bundle to its destination, pass it on to the next link.
         elif self.schrouter.check_any_availability(bundle.dest_id):
             # compute the route.
             route = self.schrouter.get_best_route_dijkstra(self.node_id, bundle.dest_id, self.model.schedule.time)
-
             # get the ID of the next node on the route.
             next_hop_dest_id = route.hops[0].to
-
+            print("this bundle is destined for", bundle.dest_id, "next hop is", next_hop_dest_id)
+            print("transporting this to the next hop:", next_hop_dest_id)
             # send the bundle onto the next node on the route.
             self.__send_bundle(bundle, next_hop_dest_id)
 
         # if no such link exists, store the bundle in storage.
         else:
+            print("putting bundle destined for", bundle.dest_id, "in storage")
             # check to see if the bundle is already in storage.  if it is, we've seen this before and it shouldn't be
             # stored again.
             if not self.storage.bundle_is_in_storage(bundle):
