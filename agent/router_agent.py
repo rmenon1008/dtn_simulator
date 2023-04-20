@@ -24,13 +24,14 @@ class RoutingProtocol(Enum):
     SPRAY_AND_WAIT = 2
 
 class RouterAgent(mesa.Agent):
-    ROUTING_PROTOCOL = RoutingProtocol.DTN  # <--- modify this value to change routing protocol.
 
     # Maximum length of the history to keep. Prevents the simulation from slowing down.
     MAX_HISTORY_LENGTH = 150
 
-    def __init__(self, model, node_options):
+    def __init__(self, model, node_options, protocol_type):
         super().__init__(node_options["id"], model)
+        self.routing_protocol_type = RoutingProtocol(protocol_type) # protocol_type is an int corresponding to enum
+        print("routing protocol type is", self.routing_protocol_type)
         self.name = try_getting(node_options, "name", default=None)
         self.history = []
         self.special_behavior = try_getting(node_options, "special_behavior", default=None)
@@ -93,11 +94,11 @@ class RouterAgent(mesa.Agent):
             self.movement.step()
 
     def __get_routing_protocol_object(self):
-        if self.ROUTING_PROTOCOL == RoutingProtocol.DTN:
+        if self.routing_protocol_type == RoutingProtocol.DTN:
             return Dtn(self.unique_id, self.model, self.contact_plan_filepath)
-        elif self.ROUTING_PROTOCOL == RoutingProtocol.EPIDEMIC:
+        elif self.routing_protocol_type == RoutingProtocol.EPIDEMIC:
             return Epidemic(self.unique_id, self.model, self)
-        elif self.ROUTING_PROTOCOL == RoutingProtocol.SPRAY_AND_WAIT:
+        elif self.routing_protocol_type == RoutingProtocol.SPRAY_AND_WAIT:
             return SprayAndWait(self.unique_id, self.model, self)
 
     def get_state(self):

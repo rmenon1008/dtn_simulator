@@ -89,7 +89,7 @@ class LunarModel(mesa.Model):
             # Place it on the space
             a = None
             if "type" not in options or options["type"] == "router":
-                a = RouterAgent(self, options)
+                a = RouterAgent(self, options, model_params["routing_protocol"])
                 self.router_agents[options["id"]] = a
             elif options["type"] == "client":
                 a = ClientAgent(self, options)

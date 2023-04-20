@@ -19,6 +19,7 @@ SIM_HEIGHT = 650  # 650 m
 DEFAULT_MODEL_PARAMS = {
     # Max number of steps to run the model for (can be None)
     "max_steps": None,
+    "routing_protocol": 0,      # 0 -> DTN, 1 -> Epidemic, 2 -> Spray and Wait
     "rssi_noise_stdev": 2.0,    # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model
 
