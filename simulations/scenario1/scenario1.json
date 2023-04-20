@@ -168,6 +168,25 @@
           "separation": 10
         }
       }
+    },
+    {
+      "name": "C2",
+      "type": "client",
+      "id": 10,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "circle",
+        "speed": 3.5,
+        "options": {
+            "radius": 25,
+            "center": [
+              50,
+              600],
+            "repeat": true
+        }
+      }
     }
   ]
 }

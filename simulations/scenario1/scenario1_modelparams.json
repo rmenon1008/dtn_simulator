@@ -4,12 +4,20 @@
     "model_speed_limit": 10,
     "data_drop_schedule": [
       {
-        "time": 100,
+        "time": 5000,
         "pos": [
           475,
           400
         ],
         "target_id": 6
+      },
+      {
+        "time": 0,
+        "pos": [
+          500,
+          380
+        ],
+        "target_id": 10
       }
     ],
     "make_contact_plan": true
