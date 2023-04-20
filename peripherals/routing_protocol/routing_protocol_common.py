@@ -34,3 +34,12 @@ class Bundle:
         self.expiration_timestamp = creation_timestamp + self.EXPIRATION_LIFESPAN
         self.creation_timestamp = creation_timestamp
         #  add more params here + modify existing ones in the future as necessary.
+
+    def serialize(self):
+        return {
+            "bundle_id": self.bundle_id,
+            "dest_id": self.dest_id,
+            "expiration_timestamp": self.expiration_timestamp,
+            "creation_timestamp": self.creation_timestamp,
+            "payload": self.payload.serialize()
+        }

@@ -108,14 +108,18 @@ class Dtn:
     """
     def get_state(self):
         num_bundles = 0
+        curr_bundles = []
         for next_hop in self.local_storage:
-            num_bundles += len(self.local_storage[next_hop])
+            for bundle in self.local_storage[next_hop]:
+                num_bundles += 1
+                curr_bundles.append(bundle.serialize())
 
         return {
             "total_repeated_bundle_recv": self.num_repeated_bundle_receives,
             "total_bundle_sends": self.num_bundle_sends,
             "total_bundle_reached_dest_router": self.num_bundle_reached_destination,
             "curr_num_stored_bundles": num_bundles,
+            "curr_stored_bundles": curr_bundles,
         }
 
     """

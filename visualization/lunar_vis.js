@@ -276,11 +276,8 @@ const LunarVis = function (maxSimX, maxSimY) {
         hasData = true;
       }
       let hasDataToDeliverToClientDirectly = false;
-      if (node.curr_payloads_received_for_client && node.curr_payloads_received_for_client > 0) {
-        console.log("beep")
+      if (node.curr_num_payloads_received_for_client && node.curr_num_payloads_received_for_client > 0) {
         hasDataToDeliverToClientDirectly = true;
-      } else {
-        console.log("boop")
       }
       const sigcolor = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
       drawShape(x=node.pos[0], y=node.pos[1], size=8 * SCALE, color=sigcolor, shape="circle", centerDot=hasData, gradientEdgeColor=null, outline=hasDataToDeliverToClientDirectly);

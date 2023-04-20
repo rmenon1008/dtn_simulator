@@ -102,13 +102,18 @@ class RouterAgent(mesa.Agent):
             return SprayAndWait(self.unique_id, self.model, self)
 
     def get_state(self):
+        curr_payloads_received_for_client = []
+        for client_id in self.payload_handler.payloads_received_for_client:
+            for payload in self.payload_handler.payloads_received_for_client[client_id]:
+                curr_payloads_received_for_client.append(payload.serialize())
         state = {
             "id": self.unique_id,
             "pos": self.pos,
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
             "outgoing_payloads_to_send": len(self.payload_handler.outgoing_payloads_to_send),
-            "curr_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
+            "curr_num_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
+            "curr_payloads_received_for_client": curr_payloads_received_for_client,
             "radio": self.radio.get_state(),
             "type": "router"
         }
@@ -117,7 +122,7 @@ class RouterAgent(mesa.Agent):
         return state
     
     def __get_curr_num_payloads_received_for_client(self):
-        curr_payloads_received_for_client = 0
+        counter = 0
         for client_id in self.payload_handler.payloads_received_for_client:
-            curr_payloads_received_for_client += len(self.payload_handler.payloads_received_for_client[client_id])
-        return curr_payloads_received_for_client
+            counter += len(self.payload_handler.payloads_received_for_client[client_id])
+        return counter
