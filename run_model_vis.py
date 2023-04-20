@@ -136,6 +136,7 @@ def main():
     argParser = argparse.ArgumentParser()
     argParser.add_argument("-i", help="path to json file with initial simulation state")
     argParser.add_argument("-m", help="path to json file with model params")
+    argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
     argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
     args = argParser.parse_args()
     init_state = DEFAULT_AGENT_STATE
@@ -163,6 +164,12 @@ def main():
         value=init_state,
     )
     
+    if args.nv:
+        model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
+        for i in range(model_params.value["max_steps"]):
+            model.step()
+        print("done")
+        exit()
     vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
     server = mesa.visualization.ModularServer(
         LunarModel,
