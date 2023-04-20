@@ -6,6 +6,7 @@ import string
 from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
 from peripherals.routing_protocol.dtn.storage import Storage
 from peripherals.routing_protocol.dtn.schrouter import Schrouter
+from agent.client_agent import ClientAgent
 
 
 class Dtn:
@@ -24,6 +25,9 @@ class Dtn:
         self.num_bundle_sends = 0
         self.num_repeated_bundle_receives = 0
         self.num_bundle_reached_destination = 0
+        self.delivery_latency = []
+
+        self.local_storage = dict() # mapping of [next_hop] -> [list of bundles to send to that next hop]
 
     """
     Receives + handles bundles of data.
@@ -39,28 +43,29 @@ class Dtn:
 
         # if this is the intended destination for the bundle, "receive" it and exit.
         if bundle.dest_id == self.node_id:
-            handle_payload(self.model, self.node_id, bundle.payload)
-            self.num_bundle_reached_destination += 1
             print("this bundle was for me, router", self.node_id)
-
-        # if there exists a link by which we can route the Bundle to its destination, pass it on to the next link.
-        elif self.schrouter.check_any_availability(bundle.dest_id):
-            # compute the route.
-            route = self.schrouter.get_best_route_dijkstra(self.node_id, bundle.dest_id, self.model.schedule.time)
-            # get the ID of the next node on the route.
-            next_hop_dest_id = route.hops[0].to
-            print("this bundle is destined for", bundle.dest_id, "next hop is", next_hop_dest_id)
-            print("transporting this to the next hop:", next_hop_dest_id)
-            # send the bundle onto the next node on the route.
-            self.__send_bundle(bundle, next_hop_dest_id)
-
-        # if no such link exists, store the bundle in storage.
+            handle_payload(self.model, self.node_id, bundle.payload)
+            # this is inaccurate. should only mark it as success when we actually deliver it to the client
+            # self.num_bundle_reached_destination += 1 
+            return
         else:
-            print("putting bundle destined for", bundle.dest_id, "in storage")
-            # check to see if the bundle is already in storage.  if it is, we've seen this before and it shouldn't be
-            # stored again.
-            if not self.storage.bundle_is_in_storage(bundle):
-                self.storage.store_bundle(bundle.dest_id, bundle)
+            print("wasn't for me", self.node_id, "looking for a next hop...")
+        
+        # try to find a next hop for this bundle's destination
+        route = self.schrouter.get_best_route_dijkstra(self.node_id, bundle.dest_id, self.model.schedule.time)
+        if route is None:
+            # drop the bundle, the contact graph cant find a route for this, and we expect the contact plan to not change
+            # this could change in the future if we add expect the contact plan to be modified during a run
+            return 
+
+        next_hop_id = route.hops[0].to
+        print("the next hop for this bundle is:", next_hop_id)
+        if next_hop_id not in self.local_storage:
+            self.local_storage[next_hop_id] = [bundle]
+        else:
+            # check if we already have this bundle
+            if bundle not in self.local_storage[next_hop_id]:             
+                self.local_storage[next_hop_id].append(bundle)
             else:
                 self.num_repeated_bundle_receives += 1
 
@@ -68,17 +73,52 @@ class Dtn:
     Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
     """
     def refresh(self):
-        self.storage.refresh()  # refresh the storage so that any expired Bundles are deleted.
+        # self.storage.refresh()  # refresh the storage so that any expired Bundles are deleted.
+        for bundle_list in self.local_storage.values():
+            for bundle in bundle_list:
+                if bundle.expiration_timestamp <= self.model.schedule.time:
+                    bundle_list.remove(bundle)
+        # iterate over the neighbors (if there are any)
+        for neighbor_data in self.model.get_neighbors(self):
+            # obtain the agent associated with the neighbor
+            neighbor_agent = self.model.agents[neighbor_data["id"]]
+
+            # ignore exchanging data with ClientAgents or RouterAgents we're not connected to.
+            if isinstance(neighbor_agent, ClientAgent) or not neighbor_data["connected"]:
+                continue
+
+            # if we've reached this point, the neighbor is a connected RouterAgent.
+            # send out bundles to the other RouterAgent.
+            self.send_bundles_for_next_hop(neighbor_data["id"])
+    
+    """
+    Given a node that we are currently connected to, return all bundles that we should send to this node
+    Must make sure that you are actually "connected" to the next hop, before calling this
+    Does nothing if there are no bundles to send
+    """
+    def send_bundles_for_next_hop(self, next_hop_id, next_hop_agent):
+        if next_hop_id in self.local_storage:
+            self.num_bundle_sends += len(self.local_storage[next_hop_id])
+            bundles = self.local_storage.pop(next_hop_id)
+            for bundle in bundles:
+                print("router", self.unique_id, "is sending", len(bundles), "bundle(s) to router", next_hop_id)
+                next_hop_agent.handle_bundle(bundle)
 
     """
     Called by the agent and sent to the visualization for simulation history log.
     """
     def get_state(self):
+        num_bundles = 0
+        for next_hop in self.local_storage:
+            num_bundles += len(self.local_storage[next_hop])
+
         return {
             "num_repeated_bundle_receives": self.num_repeated_bundle_receives,
             "num_bundle_sends": self.num_bundle_sends,
             "num_bundle_reached_destination": self.num_bundle_reached_destination,
-            "num_stored_payloads": len(self.storage.stored_message_dict.keys()),
+            # "num_stored_payloads": len(self.storage.stored_message_dict.keys()),
+            "num_stored_payloads": num_bundles,
+            "all_delivery_latencies": self.delivery_latency,
         }
 
     """
