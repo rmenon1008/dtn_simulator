@@ -189,9 +189,11 @@ class ClientAgent(mesa.Agent):
             "pos": self.pos,
             "history": self.history,
             "radio": self.radio.get_state(),
-            "num_client_payloads_sent":  self.payload_handler.num_payloads_sent,
-            "num_client_payloads_received":  self.payload_handler.num_payloads_received,
-            "num_stored_payloads": len(self.payload_handler.payloads_to_send),
+            "total_pay_sent_to_router":  self.payload_handler.num_payloads_sent,
+            "total_pay_recv_from_router":  self.payload_handler.num_payloads_received,
+            "pay_recv_latencies":  self.payload_handler.received_payload_latencies,
+            "total_drops_picked_up_from_ground":  self.payload_handler.num_drops_picked_up,
+            "curr_num_stored_payloads": len(self.payload_handler.payloads_to_send),
             "type": "client"
         }
         if self.name:
