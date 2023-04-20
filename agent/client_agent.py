@@ -184,6 +184,9 @@ class ClientAgent(mesa.Agent):
             return
 
     def get_state(self):
+        curr_stored_payloads = []
+        for p in self.payload_handler.payloads_to_send:
+            curr_stored_payloads.append(p.serialize())
         state = {
             "id": self.unique_id,
             "pos": self.pos,
@@ -192,8 +195,10 @@ class ClientAgent(mesa.Agent):
             "total_pay_sent_to_router":  self.payload_handler.num_payloads_sent,
             "total_pay_recv_from_router":  self.payload_handler.num_payloads_received,
             "pay_recv_latencies":  self.payload_handler.received_payload_latencies,
+            "received_payloads": self.payload_handler.received_payloads,
             "total_drops_picked_up_from_ground":  self.payload_handler.num_drops_picked_up,
             "curr_num_stored_payloads": len(self.payload_handler.payloads_to_send),
+            "curr_stored_payloads": curr_stored_payloads,
             "type": "client"
         }
         if self.name:

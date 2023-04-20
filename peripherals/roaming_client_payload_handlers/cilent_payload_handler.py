@@ -20,6 +20,7 @@ class ClientClientPayloadHandler:
         self.num_payloads_sent = 0
         self.num_payloads_received = 0
         self.received_payload_latencies = []
+        self.received_payloads = []
         self.num_drops_picked_up = 0
 
     """
@@ -86,6 +87,17 @@ class ClientClientPayloadHandler:
         for payload in payloads_for_client:
             self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
             self.num_payloads_received += 1
+            latency = self.model.schedule.time - payload.creation_timestamp
+            received_payload_serialized = {
+                "drop_id": payload.drop_id,
+                "source_id": payload.source_client_id,
+                "dest_client_id": payload.dest_client_id,
+                "expiration_timestamp": payload.expiration_timestamp,
+                "creation_timestamp": payload.creation_timestamp,
+                "delivery_timestamp": self.model.schedule.time,
+                "delivery_latency": latency,
+            }
+            self.received_payloads.append(received_payload_serialized)
             self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
 
         # send the stored outgoing payloads to the router.
