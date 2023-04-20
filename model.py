@@ -58,7 +58,7 @@ class LunarModel(mesa.Model):
         # Set up the space and schedule
         self.space = mesa.space.ContinuousSpace(
             size[0], size[1], False)
-        self.schedule = mesa.time.RandomActivation(self)
+        self.schedule = mesa.time.BaseScheduler(self)
 
         # Used by mesa to know when the simulation is over
         self.running = True
