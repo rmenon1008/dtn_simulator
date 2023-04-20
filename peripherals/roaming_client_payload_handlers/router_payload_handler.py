@@ -118,10 +118,8 @@ class RouterClientPayloadHandler:
         # note: if false, this if statement ends the handshake early
         if len(payloads_for_client) > 0:
             print("router", self.router_id, "is now delivering", len(payloads_for_client), "payload(s) to client", client_handler.client_id)
-            for payload in payloads_for_client:
-                #TODO: dtn should be routing_protocol
-                #TODO: not all routing protocols have delivery_latencies right now
-                self.dtn.delivery_latency.append(self.model.schedule.time - payload.creation_timestamp)
+            # Metrics are not tracked here for delivery to clients because they are tracked on the client's side
+            # See client_agent.py
             client_handler.handshake_5(self, payloads_for_client)
         self.payloads_received_for_client[client_handler.client_id].clear()
 

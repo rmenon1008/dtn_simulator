@@ -43,7 +43,7 @@ const LunarVis = function (maxSimX, maxSimY) {
 
 
   // Draws a circle or square at the given coordinates
-  const drawShape = (x, y, size, color, shape = "circle", centerDot = false, gradientEdgeColor = null) => {
+  const drawShape = (x, y, size, color, shape = "circle", centerDot = false, gradientEdgeColor = null, outline = false) => {
     context.beginPath();
     if (gradientEdgeColor) {
       size = size * 1.1;
@@ -56,6 +56,11 @@ const LunarVis = function (maxSimX, maxSimY) {
       context.fillStyle = color;
     }
 
+    if (outline) {
+      context.arc(scale(x), scale(y), scale(size * 1.25), 0, 2 * Math.PI);
+      context.strokeStyle = "black";
+      context.stroke();
+    }
     if (shape === "circle") {
       context.arc(scale(x), scale(y), scale(size), 0, 2 * Math.PI);
       context.fill();
@@ -265,13 +270,20 @@ const LunarVis = function (maxSimX, maxSimY) {
     // Draw all the nodes on top
     nodes.forEach(node => {
       let hasData = false;
-      if (node.num_stored_payloads && node.num_stored_payloads > 0) {
+      if (node.curr_num_stored_payloads && node.curr_num_stored_payloads > 0) {
         hasData = true;
-      } else if (node.routing_protocol && node.routing_protocol.num_stored_bundles.length > 0) {
+      } else if (node.routing_protocol && node.routing_protocol.curr_num_stored_bundles > 0) {
         hasData = true;
       }
-      const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
-      drawShape(node.pos[0], node.pos[1], 8 * SCALE, color, "circle", hasData);
+      let hasDataToDeliverToClientDirectly = false;
+      if (node.curr_payloads_received_for_client && node.curr_payloads_received_for_client > 0) {
+        console.log("beep")
+        hasDataToDeliverToClientDirectly = true;
+      } else {
+        console.log("boop")
+      }
+      const sigcolor = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
+      drawShape(x=node.pos[0], y=node.pos[1], size=8 * SCALE, color=sigcolor, shape="circle", centerDot=hasData, gradientEdgeColor=null, outline=hasDataToDeliverToClientDirectly);
       addTooltip(node);
     });
 

@@ -116,6 +116,5 @@ class SprayAndWait:
             "total_repeated_bundle_recv": self.num_repeated_bundle_receives,
             "total_bundle_sends": self.num_bundle_sends,
             "total_bundle_reached_dest_router": self.num_bundle_reached_destination,
-            "num_stored_bundles": len(self.waiting_bundles),
-            "all_delivery_latencies": [], #todo
+            "curr_num_stored_bundles": len(self.waiting_bundles),
         }

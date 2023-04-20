@@ -48,7 +48,7 @@ class RouterAgent(mesa.Agent):
             "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),
             "payloads_awaiting_dtn_transmission": len(self.payload_handler.outgoing_payloads_to_send),
-            "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
+            "curr_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
             "router_client_mappings": self.payload_handler.client_router_mapping_dict
         })
         self.history = self.history[-self.MAX_HISTORY_LENGTH:]
@@ -107,10 +107,16 @@ class RouterAgent(mesa.Agent):
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
             "outgoing_payloads_to_send": len(self.payload_handler.outgoing_payloads_to_send),
-            "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
+            "curr_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
             "radio": self.radio.get_state(),
             "type": "router"
         }
         if self.name:
             state["name"] = self.name
         return state
+    
+    def __get_curr_num_payloads_received_for_client(self):
+        curr_payloads_received_for_client = 0
+        for client_id in self.payload_handler.payloads_received_for_client:
+            curr_payloads_received_for_client += len(self.payload_handler.payloads_received_for_client[client_id])
+        return curr_payloads_received_for_client
