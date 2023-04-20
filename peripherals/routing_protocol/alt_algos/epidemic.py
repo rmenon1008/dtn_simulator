@@ -61,8 +61,9 @@ class Epidemic:
     """
     def get_state(self):
         return {
-            "num_repeated_bundle_receives": self.num_repeated_bundle_receives,
-            "num_bundle_sends": self.num_bundle_sends,
-            "num_bundle_reached_destination": self.num_bundle_reached_destination,
-            "num_stored_payloads": len(self.known_bundles)
+            "total_repeated_bundle_recv": self.num_repeated_bundle_receives,
+            "total_bundle_sends": self.num_bundle_sends,
+            "total_bundle_reached_dest_router": self.num_bundle_reached_destination,
+            "num_stored_bundles": len(self.known_bundles),
+            "all_delivery_latencies": [], #TODO
         }

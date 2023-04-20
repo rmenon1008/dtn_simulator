@@ -107,6 +107,7 @@ class RouterAgent(mesa.Agent):
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
             "outgoing_payloads_to_send": len(self.payload_handler.outgoing_payloads_to_send),
+            "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
             "radio": self.radio.get_state(),
             "type": "router"
         }

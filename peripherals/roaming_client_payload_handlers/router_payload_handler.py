@@ -22,6 +22,7 @@ class RouterClientPayloadHandler:
         self.client_router_mapping_dict = {}  # dict of client_id->(dict of router_id->(expiration timestamp))
                                               # which represents DTN router(s) known to be associated with the specified
                                               # client.
+        self.num_bundles_delivered_to_client = 0
         self.dtn = dtn  # the DTN object we can use to send out Bundles over the DTN network.
 
     """
@@ -84,6 +85,7 @@ class RouterClientPayloadHandler:
            before this method is called.
     """
     def handshake_2(self, client_handler):
+        print(self.router_id, ": handshake_2()")
         # get a list of metadata for the payloads waiting for the client.
         payloads_for_client_metadata = []
         if client_handler.client_id in self.payloads_received_for_client.keys():
@@ -105,6 +107,7 @@ class RouterClientPayloadHandler:
     """
 
     def handshake_4(self, client_handler, desired_payload_ids: list):
+        print(self.router_id, ": handshake_4()")
         # obtain the payloads the client wants.
         payloads_for_client = [payload for payload
                               in self.payloads_received_for_client[client_handler.client_id]
@@ -116,9 +119,11 @@ class RouterClientPayloadHandler:
         if len(payloads_for_client) > 0:
             print("router", self.router_id, "is now delivering", len(payloads_for_client), "payload(s) to client", client_handler.client_id)
             for payload in payloads_for_client:
-                self.dtn.num_bundle_reached_destination += 1
+                #TODO: dtn should be routing_protocol
+                #TODO: not all routing protocols have delivery_latencies right now
                 self.dtn.delivery_latency.append(self.model.schedule.time - payload.creation_timestamp)
             client_handler.handshake_5(self, payloads_for_client)
+        self.payloads_received_for_client[client_handler.client_id].clear()
 
 
     """
@@ -133,6 +138,7 @@ class RouterClientPayloadHandler:
     """
 
     def handshake_6(self, payloads_from_client: list):
+        print(self.router_id, ": handshake_6()")
         # store the payloads so that they can be sent out at the next refresh.
         self.outgoing_payloads_to_send.extend(payloads_from_client)
 

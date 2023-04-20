@@ -267,7 +267,7 @@ const LunarVis = function (maxSimX, maxSimY) {
       let hasData = false;
       if (node.num_stored_payloads && node.num_stored_payloads > 0) {
         hasData = true;
-      } else if (node.routing_protocol && node.routing_protocol.num_stored_payloads.length > 0) {
+      } else if (node.routing_protocol && node.routing_protocol.num_stored_bundles.length > 0) {
         hasData = true;
       }
       const color = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);

@@ -45,8 +45,7 @@ class Dtn:
         if bundle.dest_id == self.node_id:
             print("this bundle was for me, router", self.node_id)
             handle_payload(self.model, self.node_id, bundle.payload)
-            # this is inaccurate. should only mark it as success when we actually deliver it to the client
-            # self.num_bundle_reached_destination += 1 
+            self.num_bundle_reached_destination += 1 
             return
         else:
             print("wasn't for me", self.node_id, "looking for a next hop...")
@@ -79,7 +78,8 @@ class Dtn:
                 if bundle.expiration_timestamp <= self.model.schedule.time:
                     bundle_list.remove(bundle)
         # iterate over the neighbors (if there are any)
-        for neighbor_data in self.model.get_neighbors(self):
+        my_agent = self.model.agents[self.node_id]
+        for neighbor_data in self.model.get_neighbors(my_agent):
             # obtain the agent associated with the neighbor
             neighbor_agent = self.model.agents[neighbor_data["id"]]
 
@@ -89,7 +89,7 @@ class Dtn:
 
             # if we've reached this point, the neighbor is a connected RouterAgent.
             # send out bundles to the other RouterAgent.
-            self.send_bundles_for_next_hop(neighbor_data["id"])
+            self.send_bundles_for_next_hop(neighbor_data["id"], neighbor_agent)
     
     """
     Given a node that we are currently connected to, return all bundles that we should send to this node
@@ -98,11 +98,11 @@ class Dtn:
     """
     def send_bundles_for_next_hop(self, next_hop_id, next_hop_agent):
         if next_hop_id in self.local_storage:
-            self.num_bundle_sends += len(self.local_storage[next_hop_id])
             bundles = self.local_storage.pop(next_hop_id)
             for bundle in bundles:
-                print("router", self.unique_id, "is sending", len(bundles), "bundle(s) to router", next_hop_id)
-                next_hop_agent.handle_bundle(bundle)
+                print("router", self.node_id, "is sending", len(bundles), "bundle(s) to router", next_hop_id)
+                next_hop_agent.routing_protocol.handle_bundle(bundle)
+                self.num_bundle_sends += 1
 
     """
     Called by the agent and sent to the visualization for simulation history log.
@@ -113,11 +113,10 @@ class Dtn:
             num_bundles += len(self.local_storage[next_hop])
 
         return {
-            "num_repeated_bundle_receives": self.num_repeated_bundle_receives,
-            "num_bundle_sends": self.num_bundle_sends,
-            "num_bundle_reached_destination": self.num_bundle_reached_destination,
-            # "num_stored_payloads": len(self.storage.stored_message_dict.keys()),
-            "num_stored_payloads": num_bundles,
+            "total_repeated_bundle_recv": self.num_repeated_bundle_receives,
+            "total_bundle_sends": self.num_bundle_sends,
+            "total_bundle_reached_dest_router": self.num_bundle_reached_destination,
+            "num_stored_bundles": num_bundles,
             "all_delivery_latencies": self.delivery_latency,
         }
 

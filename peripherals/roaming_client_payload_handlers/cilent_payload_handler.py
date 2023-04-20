@@ -19,6 +19,8 @@ class ClientClientPayloadHandler:
         # vars used to record stats for measurements + evaluation
         self.num_payloads_sent = 0
         self.num_payloads_received = 0
+        self.received_payload_latencies = []
+        self.num_drops_picked_up = 0
 
     """
     Stores a ClientPayload to be sent later over the network.
@@ -27,6 +29,7 @@ class ClientClientPayloadHandler:
     def store_payload(self, payload: ClientPayload):
         self.payloads_to_send.append(payload)
         self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
+        self.num_drops_picked_up += 1
 
     """
     Executes "step 1" of the handshake process described in README.md.
@@ -83,6 +86,7 @@ class ClientClientPayloadHandler:
         for payload in payloads_for_client:
             self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
             self.num_payloads_received += 1
+            self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
 
         # send the stored outgoing payloads to the router.
         # note: if false, this if statement ends the handshake early
