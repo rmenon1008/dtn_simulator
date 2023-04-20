@@ -1,5 +1,7 @@
 import math
 import logging
+import re
+import os
 import json
 import mesa
 import numpy as np
@@ -31,11 +33,12 @@ class ObsGrid():
     """
     def __init__(self, size:tuple, grid_step:int=50, obs_size:tuple=(1, 13), obs_density:tuple=(1,15)) -> None:
         """
-        :param size: Tuple of x and y lengths of the agent model space.
-        :param grid_step: Integer value determining the size of each grid-square.
-        :param obs_size: Tuple determining the min and max size range for obstacle generation.
+        :param size:        Tuple of x and y lengths of the agent model space.
+        :param grid_step:   Integer value determining the size of each grid-square.
+        :param obs_size:    Tuple determining the min and max size range for obstacle generation.
         :param obs_density: Integer value between one and ten that determines amount of obstacles in the space.
         """
+
         self.x = size[0]
         self.y = size[1]
         self.grid_step = grid_step
@@ -45,7 +48,11 @@ class ObsGrid():
         self.grid = [[0] * int(self.x / self.grid_step) for i in range(int(self.y / self.grid_step))]
     
     
-    def place_obstacles(self):
+    def place_obstacles(self) -> None:
+        """
+        Randomly generates and places polygon obstacles throughout grid-world environment
+        layer
+        """
         def generate_polygon(min_sides, max_sides, min_size, max_size):
             # Set the number of sides for the polygon
             num_sides = random.randint(min_sides, max_sides)
@@ -103,7 +110,6 @@ class ObsGrid():
                     if point_in_polygon(point, polygon):
                         self.grid[i][j] = 1
         
-        # print(np.array(self.grid))
 
     def get_grid(self):
         """
@@ -111,17 +117,52 @@ class ObsGrid():
         """
         return self.grid
     
-    def save_grid(self):
+
+    def save_grid(self, filepath:str) -> None:
         """
         Save the current ObsGrid object.
+        :param filepath: A string representing the path to save this obstacle grid layer to. Default appends 
+        ".layer" to the file name.
         """
-        pass
 
-    def load_grid(self):
+        # Extract directory by regex matching to split string until last '/'
+        dir = list(filter(None, re.split("^(.+)\/([^\/]+)$", filepath)))[0]
+
+        if not os.path.exists(dir):
+            logging.error("The directory specified for saving obstacle grid file does not exist")
+            raise FileNotFoundError
+        
+        if os.path.exists(filepath):
+            logging.error("An obstacle grid layer file with this path already exists!")
+            raise FileExistsError
+
+        with open(filepath + ".layer", "w") as f:
+            for i in range(int(self.y / self.grid_step)):
+                for j in range(int(self.x / self.grid_step)):
+                    f.write(str(self.grid[i][j]))
+                f.write('\n')
+        
+
+    def load_grid(self, filepath:str):
         """
         Load a saved ObsGrid object.
         """
-        pass
+        if not os.path.exists(filepath):
+            logging.error("The directory specified for saving obstacle grid file does not exist")
+            raise FileNotFoundError
+
+        temp_grid = []
+
+        with open(filepath, "r") as f:
+            idx = 0
+            for line in f:
+                int_line = [int(val) for val in line if val != '\n']
+                temp_grid.append(int_line)
+                idx += 1
+        
+        self.grid = temp_grid
+        self.y = len(self.grid) * self.grid_step
+        self.x = len(self.grid[0]) * self.grid_step
 
 
 class LunarModel(mesa.Model):
