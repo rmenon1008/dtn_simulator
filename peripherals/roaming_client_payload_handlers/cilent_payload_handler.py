@@ -63,7 +63,7 @@ class ClientClientPayloadHandler:
             desired_payload_ids = [payload_id for (payload_id, expiration_timestamp)
                                    in payloads_for_client_metadata
                                    if (payload_id, expiration_timestamp) not in self.already_received_payload_ids]
-
+            # TODO: track metrics for # bundles ignored by client bc they were duplicates
             # ask the RouterClientPayloadHandler for the ClientPayloads associated with desired_payload_ids.
             router_handler.handshake_4(self, desired_payload_ids)
 
@@ -85,11 +85,13 @@ class ClientClientPayloadHandler:
             self.num_payloads_received += 1
 
         # send the stored outgoing payloads to the router.
-        router_handler.handshake_6(copy(self.payloads_to_send))
-        self.num_payloads_sent += len(self.payloads_to_send)
-
-        # clear the list of payloads to send (since we've now sent them into the DTN network).
-        self.payloads_to_send.clear()
+        # note: if false, this if statement ends the handshake early
+        if len(self.payloads_to_send) > 0:
+            router_handler.handshake_6(copy(self.payloads_to_send))
+            self.num_payloads_sent += len(self.payloads_to_send)
+            print("client", self.client_id, "is sending", len(self.payloads_to_send), "payload(s) to router", router_handler.router_id)
+            # clear the list of payloads to send (since we've now sent them into the DTN network).
+            self.payloads_to_send.clear()
 
     """
     Refreshes the state of the ClientClientPayloadHandler.

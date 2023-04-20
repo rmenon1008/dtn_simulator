@@ -67,6 +67,7 @@ class RouterClientPayloadHandler:
     """
 
     def handle_payload(self, payload: ClientPayload):
+        print("router", self.router_id, "got a payload for a client. Need to wait for client", payload.dest_client_id, "to pick it up...")
         # if no list exists in the dict for the client, add one.
         if payload.dest_client_id not in self.payloads_received_for_client.keys():
             self.payloads_received_for_client[payload.dest_client_id] = []
@@ -111,7 +112,13 @@ class RouterClientPayloadHandler:
                               in desired_payload_ids]
 
         # send the payloads to the client.
-        client_handler.handshake_5(self, payloads_for_client)
+        # note: if false, this if statement ends the handshake early
+        if len(payloads_for_client) > 0:
+            print("router", self.router_id, "is now delivering", len(payloads_for_client), "payload(s) to client", client_handler.client_id)
+            for payload in payloads_for_client:
+                self.dtn.num_bundle_reached_destination += 1
+                self.dtn.delivery_latency.append(self.model.schedule.time - payload.creation_timestamp)
+            client_handler.handshake_5(self, payloads_for_client)
 
 
     """
@@ -139,6 +146,7 @@ class RouterClientPayloadHandler:
         for client_payload_list in self.payloads_received_for_client.values():
             for payload in client_payload_list:
                 if payload.expiration_timestamp <= self.model.schedule.time:
+                    print("dropping expired client payload...")
                     client_payload_list.remove(payload)
 
         # remove expired router-client mappings.
@@ -169,10 +177,12 @@ class RouterClientPayloadHandler:
         for payload in self.outgoing_payloads_to_send:
             # if payload has expired, do not process it.
             if payload.expiration_timestamp <= self.model.schedule.time:
+                print("dropping expired client payload...")
                 continue
 
             # see if we can get any router_id for a router associated with the payload's client
             router_ids_map = self.client_router_mapping_dict.get(payload.dest_client_id)
+            print("router id map for destination client", payload.dest_client_id, ":", router_ids_map)
 
             # if we have any router_id we can send to, send to them.
             if router_ids_map is not None:
