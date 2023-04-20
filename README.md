@@ -10,6 +10,7 @@
 ```
 -i                          used to provide path to json file containing initial agent states
 -m                          used to provide path to json file containing model parameters
+-nv                         if present, simulator runs without web server visualization
 --make-contact-plan         used to generate a contact plan between RouterAgents within the simulator
                                 (must have a max_step number in model params)
 ```
