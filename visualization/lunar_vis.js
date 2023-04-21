@@ -151,8 +151,9 @@ const LunarVis = function (maxSimX, maxSimY) {
       maxArrayItems: 100,
       exposePath: false
     });
-
-    tooltip.innerHTML = `<h3>Rover ${node.id}</h3>`;
+    let type = node.type;
+    type = type.charAt(0).toUpperCase() + type.slice(1);
+    tooltip.innerHTML = `<h3>${type} · ID: ${node.id}</h3>`;
     tooltip.appendChild(formatter.render());
 
     // Add the tooltip to the DOM
@@ -280,7 +281,8 @@ const LunarVis = function (maxSimX, maxSimY) {
         hasDataToDeliverToClientDirectly = true;
       }
       const sigcolor = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
-      drawShape(x=node.pos[0], y=node.pos[1], size=8 * SCALE, color=sigcolor, shape="circle", centerDot=hasData, gradientEdgeColor=null, outline=hasDataToDeliverToClientDirectly);
+      const shape = node.type === "client" ? "circle" : "square";
+      drawShape(x=node.pos[0], y=node.pos[1], size=8 * SCALE, color=sigcolor, shape, centerDot=hasData, gradientEdgeColor=null, outline=hasDataToDeliverToClientDirectly);
       addTooltip(node);
     });
 
