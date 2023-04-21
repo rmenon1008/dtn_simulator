@@ -19,6 +19,7 @@ SIM_HEIGHT = 650  # 650 m
 DEFAULT_MODEL_PARAMS = {
     # Max number of steps to run the model for (can be None)
     "max_steps": None,
+    "routing_protocol": 0,      # 0 -> DTN, 1 -> Epidemic, 2 -> Spray and Wait
     "rssi_noise_stdev": 2.0,    # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model
 
@@ -26,7 +27,7 @@ DEFAULT_MODEL_PARAMS = {
                                 # Drops can be picked up by any client that comes within 5 units
                                 # A payload is created from the drop and stored on the client
                                 # repeat_every can be used to repeat a drop every n ticks
-        { "time": 100, "pos": (475, 400), "target_id": 0 },
+        { "drop_id": 0, "time": 100, "pos": (475, 400), "target_id": 0 },
         # { "time": 100, "pos": (475, 100), "target_id": 0, "repeat_every": 100 },
     ]
 }
@@ -136,6 +137,7 @@ def main():
     argParser = argparse.ArgumentParser()
     argParser.add_argument("-i", help="path to json file with initial simulation state")
     argParser.add_argument("-m", help="path to json file with model params")
+    argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
     argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
     args = argParser.parse_args()
     init_state = DEFAULT_AGENT_STATE
@@ -163,6 +165,12 @@ def main():
         value=init_state,
     )
     
+    if args.nv:
+        model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
+        for i in range(model_params.value["max_steps"]):
+            model.step()
+        print("done")
+        exit()
     vis = LunarVis(SIM_WIDTH, SIM_HEIGHT)
     server = mesa.visualization.ModularServer(
         LunarModel,

@@ -19,6 +19,9 @@ class ClientClientPayloadHandler:
         # vars used to record stats for measurements + evaluation
         self.num_payloads_sent = 0
         self.num_payloads_received = 0
+        self.received_payload_latencies = []
+        self.received_payloads = []
+        self.num_drops_picked_up = 0
 
     """
     Stores a ClientPayload to be sent later over the network.
@@ -27,6 +30,7 @@ class ClientClientPayloadHandler:
     def store_payload(self, payload: ClientPayload):
         self.payloads_to_send.append(payload)
         self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
+        self.num_drops_picked_up += 1
 
     """
     Executes "step 1" of the handshake process described in README.md.
@@ -63,7 +67,7 @@ class ClientClientPayloadHandler:
             desired_payload_ids = [payload_id for (payload_id, expiration_timestamp)
                                    in payloads_for_client_metadata
                                    if (payload_id, expiration_timestamp) not in self.already_received_payload_ids]
-
+            # TODO: track metrics for # bundles ignored by client bc they were duplicates
             # ask the RouterClientPayloadHandler for the ClientPayloads associated with desired_payload_ids.
             router_handler.handshake_4(self, desired_payload_ids)
 
@@ -83,13 +87,27 @@ class ClientClientPayloadHandler:
         for payload in payloads_for_client:
             self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
             self.num_payloads_received += 1
+            latency = self.model.schedule.time - payload.creation_timestamp
+            received_payload_serialized = {
+                "drop_id": payload.drop_id,
+                "source_id": payload.source_client_id,
+                "dest_client_id": payload.dest_client_id,
+                "expiration_timestamp": payload.expiration_timestamp,
+                "creation_timestamp": payload.creation_timestamp,
+                "delivery_timestamp": self.model.schedule.time,
+                "delivery_latency": latency,
+            }
+            self.received_payloads.append(received_payload_serialized)
+            self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
 
         # send the stored outgoing payloads to the router.
-        router_handler.handshake_6(copy(self.payloads_to_send))
-        self.num_payloads_sent += len(self.payloads_to_send)
-
-        # clear the list of payloads to send (since we've now sent them into the DTN network).
-        self.payloads_to_send.clear()
+        # note: if false, this if statement ends the handshake early
+        if len(self.payloads_to_send) > 0:
+            router_handler.handshake_6(copy(self.payloads_to_send))
+            self.num_payloads_sent += len(self.payloads_to_send)
+            print("client", self.client_id, "is sending", len(self.payloads_to_send), "payload(s) to router", router_handler.router_id)
+            # clear the list of payloads to send (since we've now sent them into the DTN network).
+            self.payloads_to_send.clear()
 
     """
     Refreshes the state of the ClientClientPayloadHandler.

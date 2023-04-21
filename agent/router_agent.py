@@ -24,16 +24,18 @@ class RoutingProtocol(Enum):
     SPRAY_AND_WAIT = 2
 
 class RouterAgent(mesa.Agent):
-    ROUTING_PROTOCOL = RoutingProtocol.DTN  # <--- modify this value to change routing protocol.
 
     # Maximum length of the history to keep. Prevents the simulation from slowing down.
     MAX_HISTORY_LENGTH = 150
 
-    def __init__(self, model, node_options):
+    def __init__(self, model, node_options, protocol_type):
         super().__init__(node_options["id"], model)
+        self.routing_protocol_type = RoutingProtocol(protocol_type) # protocol_type is an int corresponding to enum
+        print("routing protocol type is", self.routing_protocol_type)
         self.name = try_getting(node_options, "name", default=None)
         self.history = []
         self.special_behavior = try_getting(node_options, "special_behavior", default=None)
+        self.contact_plan_filepath = try_getting(node_options, "cp_file", default=None)
 
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
@@ -47,7 +49,7 @@ class RouterAgent(mesa.Agent):
             "routing_protocol": self.routing_protocol.get_state(),
             "radio": self.radio.get_state(),
             "payloads_awaiting_dtn_transmission": len(self.payload_handler.outgoing_payloads_to_send),
-            "payloads_received_for_client": len(self.payload_handler.payloads_received_for_client.values()),
+            "curr_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
             "router_client_mappings": self.payload_handler.client_router_mapping_dict
         })
         self.history = self.history[-self.MAX_HISTORY_LENGTH:]
@@ -56,6 +58,7 @@ class RouterAgent(mesa.Agent):
         # update our peripherals.
         self.radio.refresh()
         self.routing_protocol.refresh()
+        self.payload_handler.refresh()
         self.update_history()
 
         self.__attempt_router_connection_and_exchange_client_mappings()
@@ -91,22 +94,35 @@ class RouterAgent(mesa.Agent):
             self.movement.step()
 
     def __get_routing_protocol_object(self):
-        if self.ROUTING_PROTOCOL == RoutingProtocol.DTN:
-            return Dtn(self.unique_id, self.model)
-        elif self.ROUTING_PROTOCOL == RoutingProtocol.EPIDEMIC:
+        if self.routing_protocol_type == RoutingProtocol.DTN:
+            return Dtn(self.unique_id, self.model, self.contact_plan_filepath)
+        elif self.routing_protocol_type == RoutingProtocol.EPIDEMIC:
             return Epidemic(self.unique_id, self.model, self)
-        elif self.ROUTING_PROTOCOL == RoutingProtocol.SPRAY_AND_WAIT:
+        elif self.routing_protocol_type == RoutingProtocol.SPRAY_AND_WAIT:
             return SprayAndWait(self.unique_id, self.model, self)
 
     def get_state(self):
+        curr_payloads_received_for_client = []
+        for client_id in self.payload_handler.payloads_received_for_client:
+            for payload in self.payload_handler.payloads_received_for_client[client_id]:
+                curr_payloads_received_for_client.append(payload.serialize())
         state = {
             "id": self.unique_id,
             "pos": self.pos,
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
+            "outgoing_payloads_to_send": len(self.payload_handler.outgoing_payloads_to_send),
+            "curr_num_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
+            "curr_payloads_received_for_client": curr_payloads_received_for_client,
             "radio": self.radio.get_state(),
             "type": "router"
         }
         if self.name:
             state["name"] = self.name
         return state
+    
+    def __get_curr_num_payloads_received_for_client(self):
+        counter = 0
+        for client_id in self.payload_handler.payloads_received_for_client:
+            counter += len(self.payload_handler.payloads_received_for_client[client_id])
+        return counter

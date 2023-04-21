@@ -25,19 +25,30 @@ class ClientMappingDictPayload(Payload):
 Payload class containing the payloads sent between the clients on the network.
 """
 class ClientPayload(Payload):
-    EXPIRATION_LIFESPAN = 20  # defines how long a ClientPayload should exist before expiration.
+    EXPIRATION_LIFESPAN = 5000  # defines how long a ClientPayload should exist before expiration.
                               # units = simulation steps
 
-    def __init__(self, source_client_id, dest_client_id, creation_timestamp):
+    def __init__(self, drop_id, source_client_id, dest_client_id, creation_timestamp):
+        self.drop_id = drop_id
         self.source_client_id = source_client_id
         self.dest_client_id = dest_client_id
         self.expiration_timestamp = creation_timestamp + ClientPayload.EXPIRATION_LIFESPAN
+        self.creation_timestamp = creation_timestamp # used for metrics, to calculate the total latency
 
     """
     Returns a string which can be used to identify this payload. 
     """
     def get_identifier(self):
         return "src:  " + str(self.source_client_id) + "\tdst:  " + str(self.dest_client_id) + "\texpiration_timestamp:  " + str(self.expiration_timestamp)
+    
+    def serialize(self):
+        return {
+                "drop_id": self.drop_id,
+                "source_id": self.source_client_id,
+                "dest_client_id": self.dest_client_id,
+                "expiration_timestamp": self.expiration_timestamp,
+                "creation_timestamp": self.creation_timestamp,
+            }
 
 
 """

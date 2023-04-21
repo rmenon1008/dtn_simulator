@@ -112,9 +112,13 @@ class SprayAndWait:
     Called by the agent and sent to the visualization for simulation history log.
     """
     def get_state(self):
+        curr_bundles = []
+        for bundle in self.waiting_bundles:
+            curr_bundles.append(bundle.serialize())
         return {
-            "num_repeated_bundle_receives": self.num_repeated_bundle_receives,
-            "num_bundle_sends": self.num_bundle_sends,
-            "num_bundle_reached_destination": self.num_bundle_reached_destination,
-            "num_stored_bundles": len(self.waiting_bundles),
+            "total_repeated_bundle_recv": self.num_repeated_bundle_receives,
+            "total_bundle_sends": self.num_bundle_sends,
+            "total_bundle_reached_dest_router": self.num_bundle_reached_destination,
+            "curr_num_stored_bundles": len(self.waiting_bundles),
+            "curr_stored_bundles": curr_bundles,
         }

@@ -58,7 +58,7 @@ class LunarModel(mesa.Model):
         # Set up the space and schedule
         self.space = mesa.space.ContinuousSpace(
             size[0], size[1], False)
-        self.schedule = mesa.time.RandomActivation(self)
+        self.schedule = mesa.time.BaseScheduler(self)
 
         # Used by mesa to know when the simulation is over
         self.running = True
@@ -89,7 +89,7 @@ class LunarModel(mesa.Model):
             # Place it on the space
             a = None
             if "type" not in options or options["type"] == "router":
-                a = RouterAgent(self, options)
+                a = RouterAgent(self, options, model_params["routing_protocol"])
                 self.router_agents[options["id"]] = a
             elif options["type"] == "client":
                 a = ClientAgent(self, options)
@@ -197,7 +197,7 @@ class LunarModel(mesa.Model):
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
                     # Make sure the agent is a client
                     if isinstance(agent, ClientAgent):
-                        agent.payload_handler.store_payload(ClientPayload(agent.unique_id, drop["target_id"], self.schedule.steps))
+                        agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps))
                         self.data_drops.remove(drop)
                         pass
 
