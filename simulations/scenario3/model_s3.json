@@ -1,7 +1,7 @@
 {
     "max_steps": 5000,
     "routing_protocol": 0,
-    "rssi_noise_stdev": 0,
+    "rssi_noise_stdev": 2,
     "model_speed_limit": 10,
     "data_drop_schedule": [
       {
@@ -12,16 +12,6 @@
           400
         ],
         "target_id": 6
-      },
-      {
-        "drop_id": 1,
-        "time": 0,
-        "pos": [
-          500,
-          380
-        ],
-        "target_id": 10
       }
-    ],
-    "make_contact_plan": true
+    ]
   }
