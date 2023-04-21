@@ -135,15 +135,15 @@ class ObjectOption(mesa.visualization.UserParam):
 
 def main():
     argParser = argparse.ArgumentParser()
-    argParser.add_argument("-i", help="path to json file with initial simulation state")
-    argParser.add_argument("-m", help="path to json file with model params")
+    argParser.add_argument("-a", help="path to json file with agent parameters")
+    argParser.add_argument("-m", help="path to json file with model parameters")
     argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
     argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
     args = argParser.parse_args()
     init_state = DEFAULT_AGENT_STATE
     init_model_params = DEFAULT_MODEL_PARAMS
-    if (args.i):
-        with open(args.i, "r") as init_json_file:
+    if (args.a):
+        with open(args.a, "r") as init_json_file:
             init_state = json.load(init_json_file)
 
     if (args.m):
