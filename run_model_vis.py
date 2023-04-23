@@ -138,6 +138,7 @@ def main():
     argParser.add_argument("-i", help="path to json file with initial simulation state")
     argParser.add_argument("-m", help="path to json file with model params")
     argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
+    argParser.add_argument("--log-metrics", default=False, action='store_true', help="path to file to log metrics in")
     argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
     args = argParser.parse_args()
     init_state = DEFAULT_AGENT_STATE
@@ -158,6 +159,11 @@ def main():
     if (args.make_contact_plan):
         new_json = model_params.value
         new_json["make_contact_plan"] = True
+        model_params.value = json.dumps(new_json)
+
+    if (args.log_metrics is not None):
+        new_json = model_params.value
+        new_json["log_metrics_to_file"] = True
         model_params.value = json.dumps(new_json)
 
     agent_state = ObjectOption(
