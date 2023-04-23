@@ -13,6 +13,7 @@ Test constants.
 """
 CLIENT_ID_0 = "c0"
 CLIENT_ID_1 = "c1"
+DROP_ID_0 = 0
 
 """
 Tests that payloads stored-to-be-sent can expire.
@@ -26,7 +27,7 @@ def test_store_payload_refresh_payload_expires():
     client_handler = ClientClientPayloadHandler(CLIENT_ID_0, dummy_model)
 
     # create a payload object.
-    payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time)
+    payload = ClientPayload(DROP_ID_0, CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time)
 
     # store the payload object.
     client_handler.store_payload(payload)

@@ -12,6 +12,10 @@ Test constants.
 CLIENT_0_ID = 'c0'
 CLIENT_1_ID = 'c1'
 ROUTER_ID = 'r0'
+DROP_ID_0 = 0
+DROP_ID_1 = 1
+DROP_ID_2 = 2
+DROP_ID_3 = 3
 
 """
 Tests the handshake process between the client and router.
@@ -33,10 +37,10 @@ def test_handshake():
     # set up the payloads used for testing.
     # c0 = the test client_handler
     # c1 = some other client_handler (we won't be initializing it though)
-    c0_to_c1_payload_0 = ClientPayload(CLIENT_0_ID, CLIENT_1_ID, 0)
-    c0_to_c1_payload_1 = ClientPayload(CLIENT_0_ID, CLIENT_1_ID, 1)
-    c1_to_c0_payload_0 = ClientPayload(CLIENT_1_ID, CLIENT_0_ID, 0)
-    c1_to_c0_payload_1 = ClientPayload(CLIENT_1_ID, CLIENT_0_ID, 1)
+    c0_to_c1_payload_0 = ClientPayload(DROP_ID_0, CLIENT_0_ID, CLIENT_1_ID, 0)
+    c0_to_c1_payload_1 = ClientPayload(DROP_ID_1, CLIENT_0_ID, CLIENT_1_ID, 1)
+    c1_to_c0_payload_0 = ClientPayload(DROP_ID_2, CLIENT_1_ID, CLIENT_0_ID, 0)
+    c1_to_c0_payload_1 = ClientPayload(DROP_ID_3, CLIENT_1_ID, CLIENT_0_ID, 1)
 
     # store the payloads stored in the router_handler which are meant for the client.
     router_handler.handle_payload(c1_to_c0_payload_0)
