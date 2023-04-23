@@ -45,7 +45,8 @@ def setup():
                                               "radio": {
                                                   "detection_thresh": 20,
                                                   "connection_thresh": 10}
-                                              }
+                                              },
+                                              0
                                )
 
     # mock the peripherals in the ClientAgent
