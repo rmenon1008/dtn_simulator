@@ -93,6 +93,28 @@
           ]
         }
       }
+    },
+    {
+      "name": "C1",
+      "type": "client",
+      "id": 6,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+            [500,400],
+            [200,300],
+            [600,200],
+            [800,400],
+            [500,400]
+          ],
+          "repeat": true
+        }
+      }
     }
   ]
 }
