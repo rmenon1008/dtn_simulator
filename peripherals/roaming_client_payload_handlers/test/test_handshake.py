@@ -5,6 +5,7 @@ from payload import ClientPayload
 from peripherals.roaming_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
 from peripherals.roaming_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 from mockito import mock, spy2, verify
+import mesa
 
 """
 Test constants.
@@ -25,8 +26,10 @@ and asserts that only the never-seen-before payloads are transferred.
 """
 def test_handshake():
     # set up the router_handler and client_handler such that we can spy upon their handshake method calls.
-    router_handler = RouterClientPayloadHandler(ROUTER_ID, mock(), mock())
-    client_handler = ClientClientPayloadHandler(CLIENT_0_ID, mock())
+    schedule = mesa.time.RandomActivation(mesa.Model())
+    dummy_model = mock({"schedule": schedule})
+    router_handler = RouterClientPayloadHandler(ROUTER_ID, dummy_model, mock())
+    client_handler = ClientClientPayloadHandler(CLIENT_0_ID, dummy_model)
     spy2(router_handler.handshake_2)
     spy2(router_handler.handshake_4)
     spy2(router_handler.handshake_6)
