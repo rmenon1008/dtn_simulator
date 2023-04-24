@@ -75,7 +75,7 @@ def test_update_client_mapping_refresh_mapping_expires():
     assert ROUTER_ID_0 in router_handler.client_router_mapping_dict.get(CLIENT_ID_0).keys()
 
     # move the schedule forward such that the entry expires.
-    expire_timestamp = RouterClientPayloadHandler.CLIENT_MAPPING_TIMEOUT + 1
+    expire_timestamp = router_handler.CLIENT_MAPPING_TIMEOUT + 1
     for i in range(0, expire_timestamp):
         schedule.step()
 

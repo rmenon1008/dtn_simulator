@@ -11,10 +11,8 @@ from peripherals.routing_protocol.routing_protocol_common import Bundle
 
 
 class RouterClientPayloadHandler:
-    CLIENT_MAPPING_TIMEOUT = 100  # defines how long a router-client should exist before it is considered expired.
-                                  # units = simulation steps
-
     def __init__(self, router_id, model, dtn):
+        self.CLIENT_MAPPING_TIMEOUT = model.model_params["host_router_mapping_timeout"]
         self.router_id = router_id
         self.model = model
         self.payloads_received_for_client = {}  # map of client_ids->[list of ClientPayloads]
