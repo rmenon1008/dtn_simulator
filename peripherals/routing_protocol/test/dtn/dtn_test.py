@@ -139,7 +139,9 @@ def test_construct_dtn_from_json():
 
     # setup a dummy model object used by the DTN objects.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
+    agents_dict = dict()
+    dummy_model = mock({"schedule": schedule, "agents": agents_dict})
+
 
     # construct dtns w/ the Schrouter being configured from a file.
     dtn_dict = {}
@@ -147,10 +149,15 @@ def test_construct_dtn_from_json():
     dtn_dict[1] = spy(Dtn(1, dummy_model, "peripherals/routing_protocol/test/dtn/test_contact_plans/contactPlan.json"))
     dtn_dict[2] = spy(Dtn(2, dummy_model, "peripherals/routing_protocol/test/dtn/test_contact_plans/contactPlan.json"))
 
-    # wire-up the dummy_model to use the dtn_dict for lookups.
-    when(dummy_model).get_routing_protocol_object(10).thenReturn(dtn_dict[10])
-    when(dummy_model).get_routing_protocol_object(1).thenReturn(dtn_dict[1])
-    when(dummy_model).get_routing_protocol_object(2).thenReturn(dtn_dict[2])
+    dummy_agent10 = mock({"routing_protocol": dtn_dict[10]})
+    dummy_agent1 = mock({"routing_protocol": dtn_dict[1]})
+    dummy_agent2 = mock({"routing_protocol": dtn_dict[2]})
+    agents_dict[10] = dummy_agent10
+    agents_dict[1] = dummy_agent1
+    agents_dict[2] = dummy_agent2
+    neighbors_for_10 = [{"id": 1, "connected": True}, {"id": 2, "connected": True}]
+
+    when(dummy_model).get_neighbors(dummy_agent10).thenReturn(neighbors_for_10)
 
     # topology loaded from file:
     #      1
@@ -164,6 +171,7 @@ def test_construct_dtn_from_json():
 
     # have node 10 handle the Bundle.
     dtn_dict[10].handle_bundle(bundle)
+    dtn_dict[10].refresh()
 
     # assert that the bundle was sent directly from node 10 to node 1.
     verify(dtn_dict[10], times=1).handle_bundle(...)
