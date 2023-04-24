@@ -26,8 +26,6 @@ class Dtn:
         self.num_repeated_bundle_receives = 0
         self.num_bundle_reached_destination = 0
 
-        self.local_storage = dict() # mapping of [next_hop] -> [list of bundles to send to that next hop]
-
     """
     Receives + handles bundles of data.
     
@@ -47,72 +45,71 @@ class Dtn:
             self.num_bundle_reached_destination += 1 
             return
         else:
-            print("wasn't for me", self.node_id, "looking for a next hop...")
+            print("wasn't for me", self.node_id, ", so I'll just store it and forward it later...")
         
-        # try to find a next hop for this bundle's destination
-        route = self.schrouter.get_best_route_dijkstra(self.node_id, bundle.dest_id, self.model.schedule.time)
-        if route is None:
-            # drop the bundle, the contact graph cant find a route for this, and we expect the contact plan to not change
-            # this could change in the future if we add expect the contact plan to be modified during a run
-            return 
-
-        next_hop_id = route.hops[0].to
-        print("the next hop for this bundle is:", next_hop_id)
-        if next_hop_id not in self.local_storage:
-            self.local_storage[next_hop_id] = [bundle]
-        else:
-            # check if we already have this bundle
-            if bundle not in self.local_storage[next_hop_id]:             
-                self.local_storage[next_hop_id].append(bundle)
-            else:
-                self.num_repeated_bundle_receives += 1
+        # On every refresh, this bundle will be considered for forwarding if theres a suitable next hop
+        has_already = self.storage.store_bundle(bundle.dest_id, bundle)
+        if has_already:
+            self.num_repeated_bundle_receives += 1
 
     """
     Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
     """
     def refresh(self):
-        # self.storage.refresh()  # refresh the storage so that any expired Bundles are deleted.
-        for bundle_list in self.local_storage.values():
-            for bundle in bundle_list:
-                if bundle.expiration_timestamp <= self.model.schedule.time:
-                    bundle_list.remove(bundle)
-        # iterate over the neighbors (if there are any)
+        # 1. Get the destination ids for all bundles
+        all_dest_ids = self.storage.get_all_bundle_dest_ids()        
+        next_hop_to_dest = dict()
+        # 2. Calculate the best next hop for all these destination IDs
+        # Must do this on refresh because best route is dependent on current time
+        for dest_id in all_dest_ids:
+            route = self.schrouter.get_best_route_dijkstra(self.node_id, dest_id, self.model.schedule.time)
+            if route is None:
+                continue
+            next_hop_id = route.hops[0].to
+            if next_hop_id not in next_hop_to_dest:
+                next_hop_to_dest[next_hop_id] = []
+            # print("\t(",self.node_id,") best next hop for", dest_id, "is", next_hop_id)
+            next_hop_to_dest[next_hop_id].append(dest_id)
+
+        # 3. Get rid of any expired bundles
+        self.storage.refresh()  # refresh the storage so that any expired Bundles are deleted.
+        
+        # 4. Iterate over the currently connnected neighbors
         my_agent = self.model.agents[self.node_id]
         for neighbor_data in self.model.get_neighbors(my_agent):
-            # obtain the agent associated with the neighbor
-            neighbor_agent = self.model.agents[neighbor_data["id"]]
-
+            neighbor_id = neighbor_data["id"]
+            neighbor_agent = self.model.agents[neighbor_id]
             # ignore exchanging data with ClientAgents or RouterAgents we're not connected to.
             if isinstance(neighbor_agent, ClientAgent) or not neighbor_data["connected"]:
                 continue
-
-            # if we've reached this point, the neighbor is a connected RouterAgent.
-            # send out bundles to the other RouterAgent.
-            self.send_bundles_for_next_hop(neighbor_data["id"], neighbor_agent)
+        
+            # If we've reached this point, the neighbor is a connected RouterAgent.
+            # 5. Send the relevant bundles to this next hop
+            bundles_to_send_thru_this_neighbor = []
+            if neighbor_id in next_hop_to_dest:
+                for dest_id in next_hop_to_dest[neighbor_id]:
+                    print("neighbor", neighbor_id, "is the next hop for bundles destined to", dest_id)
+                    bundles_to_send_thru_this_neighbor += self.storage.remove_all_bundles_for_dest(dest_id)
+                self.__send_bundles_to_neighbor(neighbor_agent, bundles_to_send_thru_this_neighbor)
     
     """
-    Given a node that we are currently connected to, return all bundles that we should send to this node
+    Given a node that we are currently connected to, sends a bunch of bundles to them
     Must make sure that you are actually "connected" to the next hop, before calling this
     Does nothing if there are no bundles to send
     """
-    def send_bundles_for_next_hop(self, next_hop_id, next_hop_agent):
-        if next_hop_id in self.local_storage:
-            bundles = self.local_storage.pop(next_hop_id)
-            for bundle in bundles:
-                print("router", self.node_id, "is sending", len(bundles), "bundle(s) to router", next_hop_id)
-                next_hop_agent.routing_protocol.handle_bundle(bundle)
-                self.num_bundle_sends += 1
+    def __send_bundles_to_neighbor(self, neighbor_agent, bundles_to_send):
+        for bundle in bundles_to_send:
+            neighbor_agent.routing_protocol.handle_bundle(bundle)
+            self.num_bundle_sends += 1
 
     """
     Called by the agent and sent to the visualization for simulation history log.
     """
     def get_state(self):
-        num_bundles = 0
         curr_bundles = []
-        for next_hop in self.local_storage:
-            for bundle in self.local_storage[next_hop]:
-                num_bundles += 1
-                curr_bundles.append(bundle.serialize())
+        for bundle in self.storage.get_all_bundles():
+            curr_bundles.append(bundle.serialize())
+        num_bundles = len(curr_bundles)
 
         return {
             "total_repeated_bundle_recv": self.num_repeated_bundle_receives,
@@ -135,12 +132,6 @@ class Dtn:
                     confidence=1.):
         self.schrouter.add_contact(source, dest, start_time, end_time, rate, owlt, confidence)
 
-        # check to see if the contact plan containing this new link now has a route between this node + dest.
-        if self.schrouter.get_best_route_dijkstra(self.node_id, dest, self.model.schedule.time) is not None:
-            # if there is a valid route between this node + dest, flush all bundles stored for dest from storage.
-            # NOTE:  if this method is called while no bundles are currently stored, nothing will happen.
-            self.__flush_bundles(dest)
-
     """
     Removes all contacts for the given node from the Schrouter.
     """
@@ -152,34 +143,3 @@ class Dtn:
     """
     def remove_contacts_in_time_window(self, node_1_id, node_2_id, start_time, end_time):
         self.schrouter.remove_contacts_in_time_window(node_1_id, node_2_id, start_time, end_time)
-
-    """
-    Private function used to flush-out stored Bundles for the specified destination node in the network.
-    
-    NOTE:  This method ignores the connection status with the destination node in the Schrouter, so it should only be 
-           used when we've verified that the connection is valid in the Schrouter beforehand.
-    """
-    def __flush_bundles(self, dest_id):
-        # get the route to the dest_id from the Schrouter.
-        # compute the route.
-        route = self.schrouter.get_best_route_dijkstra(self.node_id, dest_id, self.model.schedule.time)
-
-        # get the ID of the next node on the route.
-        next_hop_dest_id = route.hops[0].to
-
-        # iteratively go thru the stored bundles for the dest_id and send them out.
-        bundle_to_send = self.storage.get_next_bundle_for_id(dest_id)
-        while bundle_to_send is not None:
-            # send the bundle onto the next node on the route.
-            self.__send_bundle(bundle_to_send, next_hop_dest_id)
-
-            # get the next bundle to send.
-            bundle_to_send = self.storage.get_next_bundle_for_id(dest_id, bundle_to_send)
-
-    """
-    Private function used to send the passed Bundle to the specified node in the network.
-    """
-    def __send_bundle(self, bundle: Bundle, dest_id):
-        dest_dtn_node = self.model.get_routing_protocol_object(dest_id)
-        dest_dtn_node.handle_bundle(bundle)
-        self.num_bundle_sends += 1

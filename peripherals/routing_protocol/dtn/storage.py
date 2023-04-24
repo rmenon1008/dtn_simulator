@@ -11,20 +11,40 @@ class Storage:
 
         # key = destination
         # value = list containing bundles which need to be sent to that destination.
-        self.stored_message_dict = {}
+        # implementation invariant: there are no empty lists. if there are no bundles, there should be no key
+        self.stored_message_dict = dict()
 
     """
     Adds a bundle to the storage.
+    Returns true iff this bundle was already in storage and doesn't change anything
     """
     def store_bundle(self, dest_id, bundle):
-
-        # if we've never stored a bundle for this dest_id, add an empty list to the dict.
+        if self.bundle_is_in_storage(bundle):
+            return True
+    
         if dest_id not in self.stored_message_dict:
             self.stored_message_dict[dest_id] = []
-
-        # store the bundle in the dict.
         self.stored_message_dict[dest_id].append(bundle)
+        return False
 
+    """
+    Returns list of all destination IDs for the bundles in storage
+    Returns an empty list if there are no bundles
+    """
+    def get_all_bundle_dest_ids(self):
+        return list(self.stored_message_dict.keys())
+
+    """
+    Returns a list of all bundles in storage.
+
+    Returns an empty list if there are no bundles
+    """
+    def get_all_bundles(self):
+        all_bundles = []
+        for bundle_list in self.stored_message_dict.values():
+            all_bundles += bundle_list
+        return all_bundles
+        
     """
     Returns if we already have the passed Bundle in storage.
     """
@@ -36,6 +56,28 @@ class Storage:
 
         # check if the bundle is stored
         return bundle in self.stored_message_dict[bundle.dest_id]
+    
+    """
+    Returns list of bundles destined to the given dest_id
+
+    Returns None if no bundles are available
+    """
+    def get_all_bundles_for_dest(self, dest_id):
+        if dest_id not in self.stored_message_dict:
+            return None
+        return self.stored_message_dict[dest_id]
+    
+    """
+    Returns list of bundles that we should send to the given next hop,
+    and removes them from storage.
+
+    Returns None if no bundles are available
+    """
+    def remove_all_bundles_for_dest(self, dest_id):
+        if dest_id not in self.stored_message_dict:
+            return None
+
+        return self.stored_message_dict.pop(dest_id)
 
     """
     Retrieves a bundle for us to send from storage.
@@ -49,7 +91,7 @@ class Storage:
     def get_next_bundle_for_id(self, dest_id, last_bundle=None):
 
         # if we have no list of bundles on-hand for the specified ID, return "None".
-        if dest_id not in self.stored_message_dict or len(self.stored_message_dict[dest_id]) == 0:
+        if dest_id not in self.stored_message_dict:
             return None
 
         # if last_bundle was provided and last_bundle == front of the list,
@@ -59,6 +101,8 @@ class Storage:
 
         # if no bundles exist in the list, return None.
         if not self.stored_message_dict[dest_id]:
+            # Get rid of this key because it's empty
+            self.stored_message_dict.pop(dest_id)
             return None
 
         # return the bundle at the front of the list.
@@ -68,7 +112,14 @@ class Storage:
     Refreshes the storage to delete any expired Bundles.
     """
     def refresh(self):
-        for bundle_list in self.stored_message_dict.values():
+        dest_ids_to_remove = []
+        for dest_id in self.stored_message_dict:
+            bundle_list = self.stored_message_dict[dest_id]
             for bundle in bundle_list:
                 if bundle.expiration_timestamp <= self.model.schedule.time:
                     bundle_list.remove(bundle)
+            if len(bundle_list) == 0:
+                dest_ids_to_remove.append(dest_id)
+        
+        for id in dest_ids_to_remove:
+            self.stored_message_dict.pop(id)

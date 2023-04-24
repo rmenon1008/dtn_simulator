@@ -13,6 +13,7 @@ Test constants.
 """
 CLIENT_ID_0 = "c0"
 CLIENT_ID_1 = "c1"
+DROP_ID_0 = 0
 
 PAYLOAD_LIFESPAN = 5000
 """
@@ -27,7 +28,7 @@ def test_store_payload_refresh_payload_expires():
     client_handler = ClientClientPayloadHandler(CLIENT_ID_0, dummy_model)
 
     # create a payload object.
-    payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time, PAYLOAD_LIFESPAN)
+    payload = ClientPayload(DROP_ID_0, CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time, PAYLOAD_LIFESPAN)
 
     # store the payload object.
     client_handler.store_payload(payload)

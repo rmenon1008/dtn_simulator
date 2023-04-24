@@ -4,6 +4,7 @@ import mesa
 import itertools
 import json
 
+from metrics_parser import parse_and_plot
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
 from agent.client_agent import ClientAgent
@@ -68,6 +69,10 @@ class LunarModel(mesa.Model):
         self.router_agents = {}
         self.client_agents = {}
 
+        # An array of objects containing model metrics
+        self.metrics_file = "metrics.json"
+        self.metrics = []
+
         for agent_options in initial_state["agents"]:
 
             # Merge the node defaults with the individual node options
@@ -110,6 +115,8 @@ class LunarModel(mesa.Model):
             self.__track_contacts()
 
         self.schedule.step()
+        
+        self.__update_metrics()
 
         if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
             if self.schedule.steps >= self.model_params["max_steps"]:
@@ -119,7 +126,12 @@ class LunarModel(mesa.Model):
         self.running = False
         if "make_contact_plan" in self.model_params:
             self.__generate_contact_plan()
-            # self.contacts = [] # to clear contacts for next run?
+        
+        if "log_metrics_to_file" in self.model_params:
+            self.__log_metrics_to_file()
+
+        if "metrics_to_plot" in self.model_params:
+            parse_and_plot(self.metrics, self.model_params["metrics_to_plot"])
 
     def __track_contacts(self):
         curr_step = self.schedule.steps
@@ -277,6 +289,28 @@ class LunarModel(mesa.Model):
             return
 
         self.space.move_agent(agent, pos)
+
+    def __update_metrics(self):
+        """Logs the metrics for the current step"""
+        agent_list = []
+        for agent in self.schedule.agents:
+            metrics = agent.get_state()
+            del metrics["pos"]
+            del metrics["radio"]
+            del metrics["history"]
+            agent_list.append(metrics)
+
+        metric_entry = {
+            "step": self.schedule.steps,
+            "agents": agent_list,
+        }
+
+        self.metrics.append(metric_entry)
+
+    def __log_metrics_to_file(self):
+        """Logs the metrics to a file"""
+        with open(self.metrics_file, "w") as outfile:
+            outfile.write(json.dumps(self.metrics, indent=2))
 
     """
     Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.

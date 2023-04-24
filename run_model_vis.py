@@ -5,6 +5,7 @@ import json
 import argparse
 
 from peripherals.movement import *
+from agent.router_agent import RoutingProtocol
 
 SIM_WIDTH = 1000  # 1 km
 SIM_HEIGHT = 650  # 650 m
@@ -28,6 +29,7 @@ def main():
     argParser.add_argument("-a", default="simulations/demo/agents_d1.json", help="path to json file with agent parameters")
     argParser.add_argument("-m", default="simulations/demo/model_d1.json", help="path to json file with model parameters")
     argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
+    argParser.add_argument("--log-metrics", default=False, action='store_true', help="path to file to log metrics in")
     argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
     args = argParser.parse_args()
     
@@ -50,11 +52,16 @@ def main():
         new_json["make_contact_plan"] = True
         model_params.value = json.dumps(new_json)
 
+    if (args.log_metrics is not None):
+        new_json = model_params.value
+        new_json["log_metrics_to_file"] = True
+        model_params.value = json.dumps(new_json)
+
     agent_state = ObjectOption(
         "Initial agent states",
         value=init_agent_params,
     )
-    
+    print("Routing protocol for this simulation is: ", RoutingProtocol(model_params.value["routing_protocol"]))
     if args.nv:
         model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
         for i in range(model_params.value["max_steps"]):
