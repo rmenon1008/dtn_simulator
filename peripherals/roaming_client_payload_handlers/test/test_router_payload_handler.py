@@ -20,6 +20,8 @@ ROUTER_ID_1 = "r1"
 CLIENT_ID_0 = "c0"
 CLIENT_ID_1 = "c1"
 
+PAYLOAD_LIFESPAN = 5000
+
 """
 Tests that payloads stored-to-be-sent-to-a-client can expire.
 """
@@ -32,7 +34,7 @@ def test_handle_payload_refresh_payload_expires():
     router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Dtn(0, dummy_model))
 
     # create a payload object.
-    payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time)
+    payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time, PAYLOAD_LIFESPAN)
 
     # make the router handle the payload.
     router_handler.handle_payload(payload)
@@ -104,9 +106,9 @@ def test_send_stored_outgoing_payloads():
     router_handler.client_router_mapping_dict = {CLIENT_ID_1: {ROUTER_ID_1: sys.maxsize}}
 
     # create + store the three payloads in the router_handler.
-    known_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time)
-    unknown_payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, schedule.time)
-    expired_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time - ClientPayload.EXPIRATION_LIFESPAN - 1)
+    known_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time, PAYLOAD_LIFESPAN)
+    unknown_payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, schedule.time, PAYLOAD_LIFESPAN)
+    expired_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time - PAYLOAD_LIFESPAN - 1, PAYLOAD_LIFESPAN)
     router_handler.handshake_6([known_payload, unknown_payload, expired_payload])
 
     # assert that the three payloads are in the router_handler.

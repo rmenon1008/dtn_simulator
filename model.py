@@ -204,7 +204,7 @@ class LunarModel(mesa.Model):
                         # Someone else will pick it up eventually
                         # Added this condition check bc I witnessed a client taking 2000 steps to get a bundle delivered to itself.
                         if drop["target_id"] != agent.unique_id:
-                            agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps))
+                            agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps, self.model_params["payload_lifespan"]))
                             self.data_drops.remove(drop)
 
     def get_rssi(self, agent, other):
