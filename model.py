@@ -197,9 +197,14 @@ class LunarModel(mesa.Model):
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
                     # Make sure the agent is a client
                     if isinstance(agent, ClientAgent):
-                        agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps))
-                        self.data_drops.remove(drop)
-                        pass
+                        # TODO: Maybe we need to add a field to drops so that only specific clients can pick up the drop
+                        #       This would help for reasoning about the simulation scenarios being made
+                        # If the drop's target is the nearby client agent, the client will ignore it
+                        # Someone else will pick it up eventually
+                        # Added this condition check bc I witnessed a client taking 2000 steps to get a bundle delivered to itself.
+                        if drop["target_id"] != agent.unique_id:
+                            agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps))
+                            self.data_drops.remove(drop)
 
     def get_rssi(self, agent, other):
         """Returns the RSSI of the agent to the other agent in dBm"""
