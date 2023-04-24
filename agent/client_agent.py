@@ -14,7 +14,7 @@ from agent.agent_common import try_getting, rssi_find_router_target
 from payload import ClientBeaconPayload
 from peripherals.movement import Movement
 from peripherals.radio import Radio
-from peripherals.roaming_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.client_payload_handler import ClientClientPayloadHandler
 
 """
 Used to represent the current mode of the ClientAgent.
