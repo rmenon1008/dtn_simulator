@@ -3,6 +3,7 @@
     "routing_protocol": 0,
     "rssi_noise_stdev": 2,
     "model_speed_limit": 10,
+    "payload_lifespan": 5000,
     "data_drop_schedule": [
       {
         "drop_id": 0,
