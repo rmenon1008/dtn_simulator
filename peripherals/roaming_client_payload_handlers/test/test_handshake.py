@@ -28,7 +28,7 @@ and asserts that only the never-seen-before payloads are transferred.
 def test_handshake():
     # set up the router_handler and client_handler such that we can spy upon their handshake method calls.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
+    dummy_model = mock({"schedule": schedule, "model_params": {"host_router_mapping_timeout": 2500}})
     router_handler = RouterClientPayloadHandler(ROUTER_ID, dummy_model, mock())
     client_handler = ClientClientPayloadHandler(CLIENT_0_ID, dummy_model)
     spy2(router_handler.handshake_2)

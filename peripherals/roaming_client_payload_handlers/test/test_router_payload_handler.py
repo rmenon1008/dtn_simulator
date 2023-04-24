@@ -31,7 +31,7 @@ Tests that payloads stored-to-be-sent-to-a-client can expire.
 def test_handle_payload_refresh_payload_expires():
     # set up a dummy model object used by the RouterClientPayloadHandler object.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
+    dummy_model = mock({"schedule": schedule, "model_params": {"host_router_mapping_timeout": 2500}})
 
     # create the router_handler
     router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Dtn(0, dummy_model))
@@ -63,7 +63,7 @@ Tests that payloads stored-to-be-sent-to-a-client can expire.
 def test_update_client_mapping_refresh_mapping_expires():
     # set up a dummy model object used by the RouterClientPayloadHandler object.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
+    dummy_model = mock({"schedule": schedule, "model_params": {"host_router_mapping_timeout": 2500}})
 
     # create the router_handler
     router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Dtn(0, dummy_model))
@@ -98,7 +98,7 @@ Tests that with each refresh...
 def test_send_stored_outgoing_payloads():
     # set up a dummy model object used by the RouterClientPayloadHandler object.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
+    dummy_model = mock({"schedule": schedule, "model_params": {"host_router_mapping_timeout": 2500, "bundle_lifespan": 2500}})
     dtn = Dtn(0, dummy_model)
     spy2(dtn.handle_bundle)
 
@@ -149,7 +149,8 @@ This means two particular cases:
 """
 def test_handle_mapping_dict():
     # create the router_handler
-    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, mock(), mock())
+    dummy_model = mock({"model_params": {"host_router_mapping_timeout": 2500}})
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, mock())
 
     # add two entries to the dict:
     # - c1: r0: timestamp = 1
