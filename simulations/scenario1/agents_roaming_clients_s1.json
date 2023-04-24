@@ -4,7 +4,7 @@
       "detection_thresh": -60,
       "connection_thresh": -50
     },
-    "cp_file": "simulations/demo/5000steps_cp_d1.json"
+    "cp_file": "simulations/scenario1/5000steps_cp_s1.json"
   },
   "agents": [
     {
@@ -18,7 +18,7 @@
             "control_points": [
               [0, 0],
               [0, 650],
-              [250, 325]
+              [200, 325]
             ],
             "repeat": true,
             "bounce": false
@@ -30,13 +30,12 @@
       "type": "router",
       "id": 2,
       "movement": {
-        "pattern": "arc",
-        "speed": 3,
+        "pattern": "waypoints",
+        "speed": 2.5,
         "options": {
-            "control_points": [
-              [200, 0],
-              [200, 650],
-              [50, 325]
+            "waypoints": [
+              [200, 649],
+              [200, 0]
             ],
             "repeat": true,
             "bounce": false
@@ -45,16 +44,15 @@
     },
     {
       "name": "P3",
-      "type": "router",
       "id": 3,
+      "type": "router",
       "movement": {
-        "pattern": "arc",
-        "speed": 4,
+        "pattern": "waypoints",
+        "speed": 2.5,
         "options": {
-            "control_points": [
-              [325, 0],
-              [325, 650],
-              [50, 400]
+            "waypoints": [
+              [300, 0],
+              [300, 649]
             ],
             "repeat": true,
             "bounce": false
@@ -63,16 +61,15 @@
     },
     {
       "name": "P4",
-      "type": "router",
       "id": 4,
+      "type": "router",
       "movement": {
-        "pattern": "arc",
-        "speed": 4,
+        "pattern": "waypoints",
+        "speed": 2.5,
         "options": {
-            "control_points": [
-              [600, 0],
-              [650, 650],
-              [40, 800]
+            "waypoints": [
+              [700, 649],
+              [700, 0]
             ],
             "repeat": true,
             "bounce": false
@@ -85,7 +82,7 @@
       "id": 5,
       "movement": {
         "pattern": "circle",
-        "speed": 6,
+        "speed": 3.5,
         "options": {
             "radius": 324,
             "center": [
@@ -99,16 +96,13 @@
       "name": "L1",
       "type": "router",
       "id": 6,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-           515,
-            100
+            50,
+            550
           ]
         }
       }
@@ -117,16 +111,13 @@
       "name": "L2",
       "type": "router",
       "id": 7,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-            70,
-            550
+            400,
+            100
           ]
         }
       }
@@ -135,23 +126,20 @@
       "name": "L3",
       "type": "router",
       "id": 8,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-           825,
-            535
+            650,
+            500
           ]
         }
       }
     },
     {
       "name": "C1",
-      "comment": "stays in top left corner",
+      "comment": "loops left of map -> loops right of map -> loops bottom of map -> repeat",
       "type": "client",
       "id": 9,
       "radio": {
@@ -162,13 +150,33 @@
         "speed": 3.5,
         "options": {
           "control_points": [
-            [100,50],
-            [150,50],
-            [275,100],
-            [250,200],
-            [130,300],
-            [175,160],
-            [100,50]
+            [100,150],
+            [150,150],
+            [275,200],
+            [250,300],
+            [130,400],
+            [175,260],
+            [100,150],
+
+            [750,150],
+            [750,200],
+            [950,150],
+            [850,275],
+            [950,300],
+            [700,400],
+            [850,150],
+            [750,150],
+
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600],
+
+            [100,150]
           ],
           "repeat": true
         }
@@ -176,7 +184,7 @@
     },
     {
       "name": "C2",
-      "comment": "stays in top right corner",
+      "comment": "loops right of map -> loops bottom of map -> loops left of map -> repeat",
       "type": "client",
       "id": 10,
       "radio": {
@@ -187,14 +195,34 @@
         "speed": 3.5,
         "options": {
           "control_points": [
-            [750,50],
-            [750,100],
-            [950,50],
-            [850,175],
-            [950,200],
-            [700,300],
-            [850,50],
-            [750,50]
+
+            [750,150],
+            [750,200],
+            [950,150],
+            [850,275],
+            [950,300],
+            [700,400],
+            [850,150],
+            [750,150],
+
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600],
+
+            [100,150],
+            [150,150],
+            [275,200],
+            [250,300],
+            [130,400],
+            [175,260],
+            [100,150],
+
+            [750,150]
           ],
           "repeat": true
         }
@@ -202,7 +230,7 @@
     },
     {
       "name": "C3",
-      "comment": "stays in bottom middle",
+      "comment": "loops bottom of map -> loops left of map -> loops right of map -> repeat",
       "type": "client",
       "id": 11,
       "radio": {
@@ -213,6 +241,7 @@
         "speed": 3.5,
         "options": {
           "control_points": [
+
             [500,600],
             [600,400],
             [500,500],
@@ -220,6 +249,25 @@
             [400,500],
             [400,550],
             [450,625],
+            [500,600],
+
+            [100,150],
+            [150,150],
+            [275,200],
+            [250,300],
+            [130,400],
+            [175,260],
+            [100,150],
+
+            [750,150],
+            [750,200],
+            [950,150],
+            [850,275],
+            [950,300],
+            [700,400],
+            [850,150],
+            [750,150],
+            
             [500,600]
           ],
           "repeat": true

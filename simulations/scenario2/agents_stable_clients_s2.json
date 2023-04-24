@@ -62,9 +62,6 @@
       "name": "L1",
       "type": "router",
       "id": 4,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
@@ -80,9 +77,6 @@
       "name": "L2",
       "type": "router",
       "id": 5,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
@@ -96,6 +90,7 @@
     },
     {
       "name": "C1",
+      "comment": "stays in top left corner",
       "type": "client",
       "id": 6,
       "radio": {
@@ -106,11 +101,65 @@
         "speed": 3.5,
         "options": {
           "control_points": [
-            [500,400],
-            [200,300],
-            [600,200],
-            [800,400],
-            [500,400]
+            [100,50],
+            [150,50],
+            [275,100],
+            [250,200],
+            [130,300],
+            [175,160],
+            [100,50]
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "name": "C2",
+      "comment": "stays in top right corner",
+      "type": "client",
+      "id": 7,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+            [750,50],
+            [750,100],
+            [950,50],
+            [850,175],
+            [950,200],
+            [700,300],
+            [850,50],
+            [750,50]
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "name": "C3",
+      "comment": "stays in bottom middle",
+      "type": "client",
+      "id": 8,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600]
           ],
           "repeat": true
         }

@@ -4,7 +4,7 @@
       "detection_thresh": -60,
       "connection_thresh": -50
     },
-    "cp_file": "simulations/scenario1/5000steps_cp_s1.json"
+    "cp_file": "simulations/demo/5000steps_cp_d1.json"
   },
   "agents": [
     {
@@ -18,7 +18,7 @@
             "control_points": [
               [0, 0],
               [0, 650],
-              [200, 325]
+              [250, 325]
             ],
             "repeat": true,
             "bounce": false
@@ -30,12 +30,13 @@
       "type": "router",
       "id": 2,
       "movement": {
-        "pattern": "waypoints",
-        "speed": 2.5,
+        "pattern": "arc",
+        "speed": 3,
         "options": {
-            "waypoints": [
-              [200, 649],
-              [200, 0]
+            "control_points": [
+              [200, 0],
+              [200, 650],
+              [50, 325]
             ],
             "repeat": true,
             "bounce": false
@@ -44,15 +45,16 @@
     },
     {
       "name": "P3",
-      "id": 3,
       "type": "router",
+      "id": 3,
       "movement": {
-        "pattern": "waypoints",
-        "speed": 2.5,
+        "pattern": "arc",
+        "speed": 4,
         "options": {
-            "waypoints": [
-              [300, 0],
-              [300, 649]
+            "control_points": [
+              [325, 0],
+              [325, 650],
+              [50, 400]
             ],
             "repeat": true,
             "bounce": false
@@ -61,15 +63,16 @@
     },
     {
       "name": "P4",
-      "id": 4,
       "type": "router",
+      "id": 4,
       "movement": {
-        "pattern": "waypoints",
-        "speed": 2.5,
+        "pattern": "arc",
+        "speed": 4,
         "options": {
-            "waypoints": [
-              [700, 649],
-              [700, 0]
+            "control_points": [
+              [600, 0],
+              [650, 650],
+              [40, 800]
             ],
             "repeat": true,
             "bounce": false
@@ -82,7 +85,7 @@
       "id": 5,
       "movement": {
         "pattern": "circle",
-        "speed": 3.5,
+        "speed": 6,
         "options": {
             "radius": 324,
             "center": [
@@ -96,16 +99,13 @@
       "name": "L1",
       "type": "router",
       "id": 6,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-            50,
-            550
+           515,
+            100
           ]
         }
       }
@@ -114,16 +114,13 @@
       "name": "L2",
       "type": "router",
       "id": 7,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-            400,
-            100
+            70,
+            550
           ]
         }
       }
@@ -132,52 +129,91 @@
       "name": "L3",
       "type": "router",
       "id": 8,
-      "radio": {
-        "detection_thresh": -65
-      },
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-            650,
-            500
+           825,
+            535
           ]
         }
       }
     },
     {
       "name": "C1",
+      "comment": "stays in top left corner",
       "type": "client",
       "id": 9,
       "radio": {
         "detection_thresh": -65
       },
       "movement": {
-        "pattern": "spiral",
+        "pattern": "spline",
         "speed": 3.5,
         "options": {
-          "center": [500,400],
-          "separation": 10
+          "control_points": [
+            [100,50],
+            [150,50],
+            [275,100],
+            [250,200],
+            [130,300],
+            [175,160],
+            [100,50]
+          ],
+          "repeat": true
         }
       }
     },
     {
       "name": "C2",
+      "comment": "stays in top right corner",
       "type": "client",
       "id": 10,
       "radio": {
         "detection_thresh": -65
       },
       "movement": {
-        "pattern": "circle",
+        "pattern": "spline",
         "speed": 3.5,
         "options": {
-            "radius": 25,
-            "center": [
-              50,
-              600],
-            "repeat": true
+          "control_points": [
+            [750,50],
+            [750,100],
+            [950,50],
+            [850,175],
+            [950,200],
+            [700,300],
+            [850,50],
+            [750,50]
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "name": "C3",
+      "comment": "stays in bottom middle",
+      "type": "client",
+      "id": 11,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600]
+          ],
+          "repeat": true
         }
       }
     }
