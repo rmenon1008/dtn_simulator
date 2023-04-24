@@ -6,19 +6,10 @@
     "data_drop_schedule": [
       {
         "drop_id": 0,
-        "time": 5000,
+        "time": 0,
         "pos": [
           475,
           400
-        ],
-        "target_id": 6
-      },
-      {
-        "drop_id": 1,
-        "time": 0,
-        "pos": [
-          500,
-          380
         ],
         "target_id": 10
       }

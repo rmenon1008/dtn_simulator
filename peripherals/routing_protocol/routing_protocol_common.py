@@ -24,7 +24,7 @@ def handle_payload(model, local_node_id, payload):
 Represents a Bundle on the network.
 """
 class Bundle:
-    EXPIRATION_LIFESPAN = 5000  # defines how long a Bundle should exist before expiration.
+    EXPIRATION_LIFESPAN = 2500  # defines how long a Bundle should exist before expiration.
                                # units = simulation steps
 
     def __init__(self, bundle_id, dest_id, payload:  Payload, creation_timestamp):

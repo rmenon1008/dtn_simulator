@@ -188,6 +188,7 @@ class LunarModel(mesa.Model):
             if drop["time"] == self.schedule.steps:
                 self.data_drops.append(drop)
             elif "repeat_every" in drop:
+                # TODO: Have an option to stop repeating after a certain amount of time
                 if (self.schedule.steps - drop["time"]) % drop["repeat_every"] == 0 and self.schedule.steps > drop["time"]:
                     self.data_drops.append(drop)
 
