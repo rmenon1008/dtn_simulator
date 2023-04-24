@@ -15,6 +15,8 @@ ROUTER_ID_1 = 1
 ROUTER_ID_2 = 2
 NONEXISTENT_ROUTER_ID = 3
 
+BUNDLE_LIFESPAN = 2500
+
 def test_epidemic_propagation():
     # create the mocked model object.
     schedule = mesa.time.RandomActivation(mesa.Model())
@@ -60,7 +62,7 @@ def test_epidemic_propagation():
     # feed a Bundle to e0.
     # NOTE:  The Bundle has a nonexistent router as its destination, ensuring that it will bounce around the network
     # until it expires.
-    bundle = Bundle(0, NONEXISTENT_ROUTER_ID, Payload(), schedule.time)
+    bundle = Bundle(0, NONEXISTENT_ROUTER_ID, Payload(), schedule.time, BUNDLE_LIFESPAN)
     e0.handle_bundle(bundle)
 
     # verify that the Bundle is only at e0 (and not at e1 or e2).
@@ -85,7 +87,7 @@ def test_epidemic_propagation():
     assert bundle in e2.known_bundles
 
     # move forward the time + refresh the Epidemics so that the bundle expires.
-    for i in range(0, Bundle.EXPIRATION_LIFESPAN):
+    for i in range(0, BUNDLE_LIFESPAN):
         schedule.step()
     e0.refresh()
     e1.refresh()

@@ -1,0 +1,101 @@
+{
+    "max_steps": 10000,
+    "routing_protocol": 0,
+    "rssi_noise_stdev": 2,
+    "model_speed_limit": 10,
+    "host_router_mapping_timeout": 2000,
+    "payload_lifespan": 5000,
+    "bundle_lifespan": 5000,
+    "data_drop_schedule": [
+      {
+        "drop_id": 0,
+        "time": 0,
+        "pos": [150,150],
+        "target_id": 10,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 1,
+        "time": 0,
+        "pos": [250,300],
+        "target_id": 11,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 2,
+        "time": 0,
+        "pos": [175,260],
+        "target_id": 10,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 3,
+        "time": 50,
+        "pos": [100,150],
+        "target_id": 10,
+        "repeat_every": 600
+      },
+
+
+      
+      {
+        "drop_id": 4,
+        "time": 0,
+        "pos": [750,200],
+        "target_id": 9,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 5,
+        "time": 0,
+        "pos": [850,275],
+        "target_id": 11,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 6,
+        "time": 0,
+        "pos": [850,150],
+        "target_id": 11,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 7,
+        "time": 50,
+        "pos": [750,150],
+        "target_id": 9,
+        "repeat_every": 600
+      },
+
+
+
+      {
+        "drop_id": 8,
+        "time": 0,
+        "pos": [600,400],
+        "target_id": 9,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 9,
+        "time": 0,
+        "pos": [550,450],
+        "target_id": 10,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 10,
+        "time": 0,
+        "pos": [450,625],
+        "target_id": 10,
+        "repeat_every": 600
+      },
+      {
+        "drop_id": 10,
+        "time": 50,
+        "pos": [500,600],
+        "target_id": 9,
+        "repeat_every": 600
+      }
+    ]
+  }

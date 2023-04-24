@@ -6,7 +6,7 @@ from mockito import mock
 import mesa
 
 from payload import ClientPayload
-from peripherals.roaming_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.client_payload_handler import ClientClientPayloadHandler
 
 """
 Test constants.
@@ -15,6 +15,7 @@ CLIENT_ID_0 = "c0"
 CLIENT_ID_1 = "c1"
 DROP_ID_0 = 0
 
+PAYLOAD_LIFESPAN = 5000
 """
 Tests that payloads stored-to-be-sent can expire.
 """
@@ -27,7 +28,7 @@ def test_store_payload_refresh_payload_expires():
     client_handler = ClientClientPayloadHandler(CLIENT_ID_0, dummy_model)
 
     # create a payload object.
-    payload = ClientPayload(DROP_ID_0, CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time)
+    payload = ClientPayload(DROP_ID_0, CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time, PAYLOAD_LIFESPAN)
 
     # store the payload object.
     client_handler.store_payload(payload)
@@ -36,7 +37,7 @@ def test_store_payload_refresh_payload_expires():
     assert payload in client_handler.payloads_to_send
 
     # move the schedule forward such that the payload expires.
-    expire_timestamp = ClientPayload.EXPIRATION_LIFESPAN + 1
+    expire_timestamp = PAYLOAD_LIFESPAN + 1
     for i in range(0, expire_timestamp):
         schedule.step()
 
