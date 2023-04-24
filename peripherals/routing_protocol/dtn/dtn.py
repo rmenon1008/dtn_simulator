@@ -68,7 +68,7 @@ class Dtn:
             next_hop_id = route.hops[0].to
             if next_hop_id not in next_hop_to_dest:
                 next_hop_to_dest[next_hop_id] = []
-            print("\t(",self.node_id,") best next hop for", dest_id, "is", next_hop_id)
+            # print("\t(",self.node_id,") best next hop for", dest_id, "is", next_hop_id)
             next_hop_to_dest[next_hop_id].append(dest_id)
 
         # 3. Get rid of any expired bundles

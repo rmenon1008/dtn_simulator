@@ -5,6 +5,7 @@ import json
 import argparse
 
 from peripherals.movement import *
+from agent.router_agent import RoutingProtocol
 
 # AGENT UNITS
 # Agent top speed = 3.5 m/s (7.8 mph, max speed of the Lunar Roving Vehicle)
@@ -164,7 +165,7 @@ def main():
         "Initial agent states",
         value=init_state,
     )
-    
+    print("Routing protocol for this simulation is: ", RoutingProtocol(model_params.value["routing_protocol"]))
     if args.nv:
         model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
         for i in range(model_params.value["max_steps"]):

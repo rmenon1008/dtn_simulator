@@ -31,7 +31,6 @@ class RouterAgent(mesa.Agent):
     def __init__(self, model, node_options, protocol_type):
         super().__init__(node_options["id"], model)
         self.routing_protocol_type = RoutingProtocol(protocol_type) # protocol_type is an int corresponding to enum
-        print("routing protocol type is", self.routing_protocol_type)
         self.name = try_getting(node_options, "name", default=None)
         self.history = []
         self.special_behavior = try_getting(node_options, "special_behavior", default=None)
