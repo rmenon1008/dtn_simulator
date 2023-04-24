@@ -9,6 +9,9 @@ Model parameters defines model-wide constants
     "routing_protocol": 0,      # Protocol used by backbone (0 -> DTN, 1 -> Epidemic, 2 -> Spray and Wait)
     "rssi_noise_stdev": 0,      # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model in m/s
+    "host_router_mapping_timeout": 1000, # How long a client to host router mapping should be valid for
+    "bundle_lifespan": 5000, # How long a bundle should be valid for
+    "payload_lifespan": 5000, # How long a raw payload should be valid for
     "data_drop_schedule": [
         # Schedule of data drops
         #   - Drops can be picked up by any client that comes within 5 units

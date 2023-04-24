@@ -43,7 +43,7 @@ def test_handle_payload_refresh_payload_expires():
     assert payload in router_handler.payloads_received_for_client.get(CLIENT_ID_0)
 
     # move the schedule forward such that the payload expires.
-    expire_timestamp = ClientPayload.EXPIRATION_LIFESPAN + 1
+    expire_timestamp = PAYLOAD_LIFESPAN + 1
     for i in range(0, expire_timestamp):
         schedule.step()
 

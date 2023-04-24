@@ -5,6 +5,7 @@
     "model_speed_limit": 10,
     "host_router_mapping_timeout": 2000,
     "payload_lifespan": 5000,
+    "bundle_lifespan": 5000,
     "data_drop_schedule": [
       {
         "drop_id": 0,

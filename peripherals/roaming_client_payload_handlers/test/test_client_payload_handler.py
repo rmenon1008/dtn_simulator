@@ -36,7 +36,7 @@ def test_store_payload_refresh_payload_expires():
     assert payload in client_handler.payloads_to_send
 
     # move the schedule forward such that the payload expires.
-    expire_timestamp = ClientPayload.EXPIRATION_LIFESPAN + 1
+    expire_timestamp = PAYLOAD_LIFESPAN + 1
     for i in range(0, expire_timestamp):
         schedule.step()
 

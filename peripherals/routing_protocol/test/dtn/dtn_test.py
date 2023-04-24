@@ -8,6 +8,8 @@ from payload import Payload
 from peripherals.routing_protocol.dtn.dtn import Dtn
 from peripherals.routing_protocol.routing_protocol_common import Bundle
 
+BUNDLE_LIFESPAN = 2500
+
 """
 Method used to setup DTN objects for this file's unit tests.
 """
@@ -56,7 +58,7 @@ def test_handle_bundle_best_route_indirect(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 1, Payload(), schedule.time)
+    bundle = Bundle(0, 1, Payload(), schedule.time, BUNDLE_LIFESPAN)
 
     # have node 0 handle the Bundle.
     dtn_dict[0].handle_bundle(bundle)
@@ -76,7 +78,7 @@ def test_handle_bundle_best_route_direct(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 1, Payload(), schedule.time)
+    bundle = Bundle(0, 1, Payload(), schedule.time, BUNDLE_LIFESPAN)
 
     # move all Dtn objects forward to timestamp=3
     schedule.step()
@@ -100,7 +102,7 @@ def test_handle_bundle_stores_bundle_sends_once_linked(setup):
     schedule, dtn_dict = setup
 
     # create the Bundle to send.
-    bundle = Bundle(0, 4, Payload(), schedule.time)
+    bundle = Bundle(0, 4, Payload(), schedule.time, BUNDLE_LIFESPAN)
 
     # have node 0 handle the Bundle.
     dtn_dict[0].handle_bundle(bundle)
@@ -160,7 +162,7 @@ def test_construct_dtn_from_json():
     #      2
 
     # create a Bundle to send from 10 to 1.
-    bundle = Bundle(10, 1, Payload(), schedule.time)
+    bundle = Bundle(10, 1, Payload(), schedule.time, BUNDLE_LIFESPAN)
 
     # have node 10 handle the Bundle.
     dtn_dict[10].handle_bundle(bundle)
