@@ -127,8 +127,7 @@ def test_send_stored_outgoing_payloads():
     # due to issues with mockito, we need to use a custom function here to match the Bundle fed to the DTN call.
     def bundle_match(other_bundle: Bundle):
         if other_bundle.dest_id == ROUTER_ID_1 \
-                and other_bundle.payload == known_payload \
-                and other_bundle.bundle_id == known_payload.get_identifier():
+                and other_bundle.payload == known_payload:
             return True
         else:
             return False

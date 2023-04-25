@@ -4,7 +4,7 @@ import mesa
 import itertools
 import json
 
-from metrics_parser import parse_and_plot
+from metrics_parser import parse_and_plot, summary_statistics
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
 from agent.client_agent import ClientAgent
@@ -116,6 +116,7 @@ class LunarModel(mesa.Model):
 
         self.schedule.step()
         
+        # TODO: only do this when asked to?
         self.__update_metrics()
 
         if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
@@ -129,6 +130,8 @@ class LunarModel(mesa.Model):
         
         if "log_metrics_to_file" in self.model_params:
             self.__log_metrics_to_file()
+            summary_statistics(self.metrics)
+            
 
         if "metrics_to_plot" in self.model_params:
             parse_and_plot(self.metrics, self.model_params["metrics_to_plot"])
@@ -309,6 +312,7 @@ class LunarModel(mesa.Model):
 
     def __log_metrics_to_file(self):
         """Logs the metrics to a file"""
+        print("logging metrics to file...")
         with open(self.metrics_file, "w") as outfile:
             outfile.write(json.dumps(self.metrics, indent=2))
 

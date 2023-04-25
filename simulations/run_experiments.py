@@ -5,10 +5,14 @@ import argparse
 def main():
     argParser = argparse.ArgumentParser()
     argParser.add_argument("scenario_id", help="scenario id")
+    argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
     argParser.add_argument("--clients-are-roaming", default=False, action='store_true', help="if present, clients roam around instead of staying in one region of the map")
     args = argParser.parse_args()
 
-    cmd_str = "python run_model_vis.py "
+    cmd_str = "python run_model_vis.py --log-metrics "
+    
+    if args.nv:
+        cmd_str += "-nv "
 
     agent_arg = "-a "
     if args.clients_are_roaming:

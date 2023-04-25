@@ -29,6 +29,7 @@ def main():
     argParser.add_argument("-a", default="simulations/demo/agents_d1.json", help="path to json file with agent parameters")
     argParser.add_argument("-m", default="simulations/demo/model_d1.json", help="path to json file with model parameters")
     argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
+    argParser.add_argument("--debug", default=False, action='store_true', help="run with debug print statements")
     argParser.add_argument("--log-metrics", default=False, action='store_true', help="path to file to log metrics in")
     argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
     args = argParser.parse_args()
@@ -47,12 +48,17 @@ def main():
     )
 
     # Insert a new field into model parameters
-    if (args.make_contact_plan):
+    if args.debug:
+        new_json = model_params.value
+        new_json["debug"] = True
+        model_params.value = json.dumps(new_json)
+
+    if args.make_contact_plan:
         new_json = model_params.value
         new_json["make_contact_plan"] = True
         model_params.value = json.dumps(new_json)
 
-    if (args.log_metrics is not None):
+    if args.log_metrics:
         new_json = model_params.value
         new_json["log_metrics_to_file"] = True
         model_params.value = json.dumps(new_json)
@@ -64,9 +70,11 @@ def main():
     print("Routing protocol for this simulation is: ", RoutingProtocol(model_params.value["routing_protocol"]))
     if args.nv:
         model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
-        for i in range(model_params.value["max_steps"]):
+        max_steps = model_params.value["max_steps"]
+        for i in range(max_steps):
+            if i % (max_steps / 10) == 0:
+                print("\t step {} out of {}".format(i, max_steps))
             model.step()
-        print("done")
         exit()
 
     # To run simulation with web server

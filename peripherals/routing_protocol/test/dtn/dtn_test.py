@@ -18,7 +18,7 @@ def setup():
     # setup a dummy model object used by the DTN objects.
     schedule = mesa.time.RandomActivation(mesa.Model())
     agents_dict = dict()
-    dummy_model = mock({"schedule": schedule, "agents": agents_dict})
+    dummy_model = mock({"schedule": schedule, "agents": agents_dict, "model_params": dict()})
 
     # setup the 5 nodes (0, 1, 2, 3, 4) + save them in the dtn_dict for easy access.
     # we set them up wrapped in a "spy" so we can easily peek into method call stats.
@@ -186,7 +186,7 @@ def test_construct_dtn_from_json():
     # setup a dummy model object used by the DTN objects.
     schedule = mesa.time.RandomActivation(mesa.Model())
     agents_dict = dict()
-    dummy_model = mock({"schedule": schedule, "agents": agents_dict})
+    dummy_model = mock({"schedule": schedule, "agents": agents_dict, "model_params" : dict()})
 
 
     # construct dtns w/ the Schrouter being configured from a file.
