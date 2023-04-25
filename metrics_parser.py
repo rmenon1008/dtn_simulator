@@ -23,6 +23,9 @@ def agg_metric_for_agents(agents, key, agg):
         else:
             metric_vals.append(val)
 
+    if len(metric_vals) == 0:
+        return None
+
     if agg == "sum":
         return sum(metric_vals)
     elif agg == "ave":
@@ -31,6 +34,8 @@ def agg_metric_for_agents(agents, key, agg):
         return min(metric_vals)
     elif agg == "max":
         return max(metric_vals)
+    elif agg == "sum_array":
+        return sum(sum(x) for x in metric_vals)
     
 
 def parse_and_plot(metrics, metrics_to_plot):
@@ -51,13 +56,38 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.legend()
     plt.savefig("plotted_metrics.png")
 
-def __main__():
+
+    # Model final metrics
+    final_entry = metrics[-1]
+
+    # Metric 0 
+    # Average payload delivery latency
+    num_payloads_recv = agg_metric_for_agents(final_entry["agents"], "total_pay_recv_from_router", "sum")
+    total_payload_latency = agg_metric_for_agents(final_entry["agents"], "pay_recv_latencies", "sum_array")
+    avg_payload_latency = total_payload_latency / num_payloads_recv
+    print("Average payload delivery latency: {} ticks".format(avg_payload_latency))
+
+    # Metric 1
+    # Payload delivery success rate
+    num_payloads_recv = agg_metric_for_agents(final_entry["agents"], "total_pay_recv_from_router", "sum")
+    num_payloads_picked_up = agg_metric_for_agents(final_entry["agents"], "total_drops_picked_up_from_ground", "sum")
+    payload_delivery_success_rate = num_payloads_picked_up / num_payloads_recv
+    print("Payload delivery success rate: {}%".format(payload_delivery_success_rate * 100))
+
+    # Metric 2
+    # Average bundle storage overhead
+    bundles_stored_at_each_step = [agg_metric_for_agents(entry["agents"], "routing_protocol.curr_num_stored_bundles", "sum") for entry in metrics]
+    avg_bundle_storage_overhead = sum(bundles_stored_at_each_step) / len(bundles_stored_at_each_step)
+    print("Average bundle storage overhead: {}".format(avg_bundle_storage_overhead))
+
+
+if __name__ == "__main__":
     metrics = json.load(open("metrics.json", "r"))
     metrics_to_plot = [
-        ("agent.client_agent.ClientAgent.num_data_drops", "sum"),
-        ("agent.client_agent.ClientAgent.num_data_drops", "mean"),
-        ("agent.client_agent.ClientAgent.num_data_drops", "min"),
-        ("agent.client_agent.ClientAgent.num_data_drops", "max"),
+        ("routing_protocol.total_bundle_sends", "sum"),
+        ("routing_protocol.curr_num_stored_bundles", "sum"),
+        ("curr_num_stored_payloads", "mean"),
+        ("total_pay_recv_from_router", "sum")
     ]
 
     parse_and_plot(metrics, metrics_to_plot)
