@@ -47,12 +47,12 @@ def main():
     )
 
     # Insert a new field into model parameters
-    if (args.make_contact_plan):
+    if args.make_contact_plan:
         new_json = model_params.value
         new_json["make_contact_plan"] = True
         model_params.value = json.dumps(new_json)
 
-    if (args.log_metrics is not None):
+    if args.log_metrics:
         new_json = model_params.value
         new_json["log_metrics_to_file"] = True
         model_params.value = json.dumps(new_json)
@@ -66,7 +66,6 @@ def main():
         model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
         for i in range(model_params.value["max_steps"]):
             model.step()
-        print("done")
         exit()
 
     # To run simulation with web server
