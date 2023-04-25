@@ -32,20 +32,22 @@ class Dtn:
     This effectively behaves akin to the `ingress` + `egress` modules in HDTN.
     """
     def handle_bundle(self, bundle: Bundle):
-        print("Agent {} received bundle {}".format(
-            self.node_id, bundle))
+        if "debug" in self.model.model_params:
+            print("Agent {} received {}".format(self.node_id, bundle.bundle_id))
 
         # Ingress
         # Process received bundle.
 
         # if this is the intended destination for the bundle, "receive" it and exit.
         if bundle.dest_id == self.node_id:
-            print("this bundle was for me, router", self.node_id)
+            if "debug" in self.model.model_params:
+                print("this bundle was for me, router", self.node_id)
             handle_payload(self.model, self.node_id, bundle.payload)
             self.num_bundle_reached_destination += 1 
             return
         else:
-            print("wasn't for me", self.node_id, ", so I'll just store it and forward it later...")
+            if "debug" in self.model.model_params:
+                print("wasn't for me", self.node_id, ", so I'll just store it and forward it later...")
         
         # On every refresh, this bundle will be considered for forwarding if theres a suitable next hop
         has_already = self.storage.store_bundle(bundle.dest_id, bundle)
@@ -68,7 +70,6 @@ class Dtn:
             next_hop_id = route.hops[0].to
             if next_hop_id not in next_hop_to_dest:
                 next_hop_to_dest[next_hop_id] = []
-            # print("\t(",self.node_id,") best next hop for", dest_id, "is", next_hop_id)
             next_hop_to_dest[next_hop_id].append(dest_id)
 
         # 3. Get rid of any expired bundles
@@ -88,7 +89,8 @@ class Dtn:
             bundles_to_send_thru_this_neighbor = []
             if neighbor_id in next_hop_to_dest:
                 for dest_id in next_hop_to_dest[neighbor_id]:
-                    print("neighbor", neighbor_id, "is the next hop for bundles destined to", dest_id)
+                    if "debug" in self.model.model_params:
+                        print("neighbor", neighbor_id, "is the next hop for bundles destined to", dest_id)
                     bundles_to_send_thru_this_neighbor += self.storage.remove_all_bundles_for_dest(dest_id)
                 self.__send_bundles_to_neighbor(neighbor_agent, bundles_to_send_thru_this_neighbor)
     

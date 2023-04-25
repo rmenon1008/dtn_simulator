@@ -66,7 +66,8 @@ class RouterClientPayloadHandler:
     """
 
     def handle_payload(self, payload: ClientPayload):
-        print("router", self.router_id, "got a payload for a client. Need to wait for client", payload.dest_client_id, "to pick it up...")
+        if "debug" in self.model.model_params:
+            print("router", self.router_id, "got a payload for a client. Need to wait for client", payload.dest_client_id, "to pick it up...")
         # if no list exists in the dict for the client, add one.
         if payload.dest_client_id not in self.payloads_received_for_client.keys():
             self.payloads_received_for_client[payload.dest_client_id] = []
@@ -83,7 +84,6 @@ class RouterClientPayloadHandler:
            before this method is called.
     """
     def handshake_2(self, client_handler):
-        print(self.router_id, ": handshake_2()")
         # get a list of metadata for the payloads waiting for the client.
         payloads_for_client_metadata = []
         if client_handler.client_id in self.payloads_received_for_client.keys():
@@ -105,7 +105,6 @@ class RouterClientPayloadHandler:
     """
 
     def handshake_4(self, client_handler, desired_payload_ids: list):
-        print(self.router_id, ": handshake_4()")
         # obtain the payloads the client wants.
         payloads_for_client = [payload for payload
                               in self.payloads_received_for_client[client_handler.client_id]
@@ -115,7 +114,8 @@ class RouterClientPayloadHandler:
         # send the payloads to the client.
         # note: if false, this if statement ends the handshake early
         if len(payloads_for_client) > 0:
-            print("router", self.router_id, "is now delivering", len(payloads_for_client), "payload(s) to client", client_handler.client_id)
+            if "debug" in self.model.model_params:
+                print("router", self.router_id, "is now delivering", len(payloads_for_client), "payload(s) to client", client_handler.client_id)
             # Metrics are not tracked here for delivery to clients because they are tracked on the client's side
             # See client_agent.py
             client_handler.handshake_5(self, payloads_for_client)
@@ -134,7 +134,6 @@ class RouterClientPayloadHandler:
     """
 
     def handshake_6(self, payloads_from_client: list):
-        print(self.router_id, ": handshake_6()")
         # store the payloads so that they can be sent out at the next refresh.
         self.outgoing_payloads_to_send.extend(payloads_from_client)
 
@@ -148,7 +147,8 @@ class RouterClientPayloadHandler:
         for client_payload_list in self.payloads_received_for_client.values():
             for payload in client_payload_list:
                 if payload.expiration_timestamp <= self.model.schedule.time:
-                    print("dropping expired client payload...")
+                    if "debug" in self.model.model_params:
+                        print(self.router_id, "dropping expired client payload", payload.drop_id)
                     client_payload_list.remove(payload)
 
         # remove expired router-client mappings.
@@ -179,19 +179,23 @@ class RouterClientPayloadHandler:
         for payload in self.outgoing_payloads_to_send:
             # if payload has expired, do not process it.
             if payload.expiration_timestamp <= self.model.schedule.time:
-                print("dropping expired client payload...")
+                if "debug" in self.model.model_params:
+                    print("dropping expired client payload...")
                 continue
 
             # see if we can get any router_id for a router associated with the payload's client
             router_ids_map = self.client_router_mapping_dict.get(payload.dest_client_id)
-            print("router id map for destination client", payload.dest_client_id, ":", router_ids_map)
+            if "debug" in self.model.model_params:
+                print("router id map for destination client", payload.dest_client_id, ":", router_ids_map)
 
             # if we have any router_id we can send to, send to them.
             if router_ids_map is not None:
                 for router_id in router_ids_map.keys():
                     # create the Bundle.
-                    print("creating bundle destined to host router:", router_id)
-                    bundle = Bundle(payload.get_identifier(), router_id, payload, self.model.schedule.time, self.model.model_params["bundle_lifespan"])
+                    if "debug" in self.model.model_params:
+                        print("creating bundle destined to host router:", router_id)
+                    bundle_id = "bundle(routerdst=[{}],{})".format(router_id, payload.get_identifier())
+                    bundle = Bundle(bundle_id, router_id, payload, self.model.schedule.time, self.model.model_params["bundle_lifespan"])
 
                     # send the Bundle.
                     self.dtn.handle_bundle(bundle)
@@ -199,7 +203,8 @@ class RouterClientPayloadHandler:
             # if we were unable to send out the payload, store it for later.
             else:
                 unhandled_payloads.append(payload)
-                print("router", self.router_id, "couldn't find a host router for outgoing payload")
+                if "debug" in self.model.model_params:
+                    print("router", self.router_id, "couldn't find a host router for outgoing payload")
 
         # update the locally-stored payloads.
         self.outgoing_payloads_to_send = unhandled_payloads

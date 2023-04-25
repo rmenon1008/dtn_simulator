@@ -97,6 +97,8 @@ class ClientClientPayloadHandler:
                 "delivery_timestamp": self.model.schedule.time,
                 "delivery_latency": latency,
             }
+            if "debug" in self.model.model_params:
+                print("client", self.client_id, "received payload", payload.drop_id)
             self.received_payloads.append(received_payload_serialized)
             self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
 
@@ -105,7 +107,8 @@ class ClientClientPayloadHandler:
         if len(self.payloads_to_send) > 0:
             router_handler.handshake_6(copy(self.payloads_to_send))
             self.num_payloads_sent += len(self.payloads_to_send)
-            print("client", self.client_id, "is sending", len(self.payloads_to_send), "payload(s) to router", router_handler.router_id)
+            if "debug" in self.model.model_params:
+                print("client", self.client_id, "is sending", len(self.payloads_to_send), "payload(s) to router", router_handler.router_id)
             # clear the list of payloads to send (since we've now sent them into the DTN network).
             self.payloads_to_send.clear()
 
