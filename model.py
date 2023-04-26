@@ -309,7 +309,15 @@ class LunarModel(mesa.Model):
         for agent in self.schedule.agents:
             metrics = agent.get_state()
             if "routing_protocol" not in metrics:
-                continue
+                continue # ignore clients
+            # can assume agent is a router
+            seen_bundles = set()
+            for bundle in metrics["routing_protocol"]["curr_stored_bundles"]:
+                unique_tuple = (bundle["bundle_id"], bundle["dest_id"], bundle["creation_timestamp"])
+                if unique_tuple in seen_bundles:
+                    print("found a dupe bundle!")
+                else:
+                    seen_bundles.add(unique_tuple)
             # Currently tracking only 1 cumulative metric for router agents only
             self.metrics["total_bundles_stored_so_far"] += metrics["routing_protocol"]["curr_num_stored_bundles"]
 
