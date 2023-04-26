@@ -37,7 +37,7 @@ class ClientPayload(Payload):
     Returns a string which can be used to identify this payload. 
     """
     def get_identifier(self):
-        id_str = "payload(src[{}],dst[{}],exp[{}])".format(self.source_client_id, self.dest_client_id, self.expiration_timestamp)
+        id_str = "payload(drop[{}],src[{}],dst[{}],exp[{}])".format(self.drop_id, self.source_client_id, self.dest_client_id, self.expiration_timestamp)
         return id_str
     
     def serialize(self):

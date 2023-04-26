@@ -37,6 +37,10 @@ class Dtn:
 
         # Ingress
         # Process received bundle.
+        # Ignore if we've already seen it
+        if self.storage.seen_before(bundle):
+            self.num_repeated_bundle_receives += 1
+            return
 
         # if this is the intended destination for the bundle, "receive" it and exit.
         if bundle.dest_id == self.node_id:
@@ -52,7 +56,7 @@ class Dtn:
         # On every refresh, this bundle will be considered for forwarding if theres a suitable next hop
         has_already = self.storage.store_bundle(bundle.dest_id, bundle)
         if has_already:
-            self.num_repeated_bundle_receives += 1
+            print("INVARIANT VIOLATION. this should never happen")
 
     """
     Refreshes the state of the DTN object.  Called by the simulation at each timestamp.

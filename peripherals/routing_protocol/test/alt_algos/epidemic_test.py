@@ -66,25 +66,25 @@ def test_epidemic_propagation():
     e0.handle_bundle(bundle)
 
     # verify that the Bundle is only at e0 (and not at e1 or e2).
-    assert bundle in e0.known_bundles
-    assert bundle not in e1.known_bundles
-    assert bundle not in e2.known_bundles
+    assert bundle in e0.curr_bundles
+    assert bundle not in e1.curr_bundles
+    assert bundle not in e2.curr_bundles
 
     # refresh e0.
     e0.refresh()
 
     # verify that the Bundle is now at e1 (and not at e2).
-    assert bundle in e0.known_bundles
-    assert bundle in e1.known_bundles
-    assert bundle not in e2.known_bundles
+    assert bundle in e0.curr_bundles
+    assert bundle in e1.curr_bundles
+    assert bundle not in e2.curr_bundles
 
     # refresh e1.
     e1.refresh()
 
     # verify that the Bundle is now at e2.
-    assert bundle in e0.known_bundles
-    assert bundle in e1.known_bundles
-    assert bundle in e2.known_bundles
+    assert bundle in e0.curr_bundles
+    assert bundle in e1.curr_bundles
+    assert bundle in e2.curr_bundles
 
     # move forward the time + refresh the Epidemics so that the bundle expires.
     for i in range(0, BUNDLE_LIFESPAN):
@@ -94,6 +94,6 @@ def test_epidemic_propagation():
     e2.refresh()
 
     # verify that the Bundle is no longer stored in any of the Epidemics.
-    assert bundle not in e0.known_bundles
-    assert bundle not in e1.known_bundles
-    assert bundle not in e2.known_bundles
+    assert bundle not in e0.curr_bundles
+    assert bundle not in e1.curr_bundles
+    assert bundle not in e2.curr_bundles

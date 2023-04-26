@@ -4,7 +4,7 @@ import mesa
 import itertools
 import json
 
-from metrics_parser import parse_and_plot, summary_statistics
+from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
 from agent.client_agent import ClientAgent
@@ -69,9 +69,8 @@ class LunarModel(mesa.Model):
         self.router_agents = {}
         self.client_agents = {}
 
-        # An array of objects containing model metrics
-        self.metrics_file = "metrics.json"
-        self.metrics = []
+        # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
+        self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0}
 
         for agent_options in initial_state["agents"]:
 
@@ -116,8 +115,8 @@ class LunarModel(mesa.Model):
 
         self.schedule.step()
         
-        # TODO: only do this when asked to?
-        self.__update_metrics()
+        if "log_metrics" in self.model_params:
+            self.__update_metrics()
 
         if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
             if self.schedule.steps >= self.model_params["max_steps"]:
@@ -128,13 +127,25 @@ class LunarModel(mesa.Model):
         if "make_contact_plan" in self.model_params:
             self.__generate_contact_plan()
         
-        if "log_metrics_to_file" in self.model_params:
-            self.__log_metrics_to_file()
-            summary_statistics(self.metrics)
-            
-
-        if "metrics_to_plot" in self.model_params:
-            parse_and_plot(self.metrics, self.model_params["metrics_to_plot"])
+        if "log_metrics" in self.model_params:
+            # Log metrics for the last step
+            agent_list = []
+            for agent in self.schedule.agents:
+                metrics = agent.get_state()
+                if metrics["type"] == "router":
+                    continue
+                del metrics["pos"]
+                del metrics["radio"]
+                del metrics["history"]
+                agent_list.append(metrics)
+            final_metric_entry = {
+                "step": self.schedule.steps,
+                "agents": agent_list,
+            }
+            with open("out_agents.json", "w") as outfile:
+                outfile.write(json.dumps(final_metric_entry, indent=2))
+            # Plug in the final metrics + the cumulative metrics
+            summary_statistics(final_metric_entry, self.metrics, self.model_params["correctness"])
 
     def __track_contacts(self):
         curr_step = self.schedule.steps
@@ -295,26 +306,21 @@ class LunarModel(mesa.Model):
 
     def __update_metrics(self):
         """Logs the metrics for the current step"""
-        agent_list = []
         for agent in self.schedule.agents:
             metrics = agent.get_state()
-            del metrics["pos"]
-            del metrics["radio"]
-            del metrics["history"]
-            agent_list.append(metrics)
-
-        metric_entry = {
-            "step": self.schedule.steps,
-            "agents": agent_list,
-        }
-
-        self.metrics.append(metric_entry)
-
-    def __log_metrics_to_file(self):
-        """Logs the metrics to a file"""
-        print("logging metrics to file...")
-        with open(self.metrics_file, "w") as outfile:
-            outfile.write(json.dumps(self.metrics, indent=2))
+            if "routing_protocol" not in metrics:
+                continue # ignore clients
+            # can assume agent is a router
+            if self.model_params["correctness"]:
+                # check if the router is holding any duplicate bundles
+                seen_bundles = set()
+                for bundle in metrics["routing_protocol"]["curr_stored_bundles"]:
+                    if str(bundle) in seen_bundles:
+                        print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
+                    else:
+                        seen_bundles.add(str(bundle))
+            # Currently tracking only 1 cumulative metric for router agents only
+            self.metrics["total_bundles_stored_so_far"] += metrics["routing_protocol"]["curr_num_stored_bundles"]
 
     """
     Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.
