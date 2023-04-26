@@ -21,7 +21,6 @@ class RouterClientPayloadHandler:
         self.client_router_mapping_dict = {}  # dict of client_id->(dict of router_id->(expiration timestamp))
                                               # which represents DTN router(s) known to be associated with the specified
                                               # client.
-        self.num_bundles_delivered_to_client = 0
         self.routing_protocol = routing_protocol  # the routing protocol object we can use to send out Bundles over the DTN network.
 
     """
