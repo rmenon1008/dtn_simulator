@@ -65,7 +65,7 @@ def summary_statistics(final_client_metrics, metrics):
         for payload_dict in agent["received_payloads"]:
             unique_tuple = (payload_dict["drop_id"], payload_dict["creation_timestamp"])
             if unique_tuple in seen_payloads:
-                print("dupe payload:", unique_tuple[0], unique_tuple[1])
+                print("INVARIANT VIOLATION dupe payload:", unique_tuple[0], unique_tuple[1])
             else:
                 seen_payloads.add(unique_tuple)
 

@@ -316,7 +316,7 @@ class LunarModel(mesa.Model):
             seen_bundles = set()
             for bundle in metrics["routing_protocol"]["curr_stored_bundles"]:
                 if str(bundle) in seen_bundles:
-                    print("METRIC INVARIANT VIOLATION: found a dupe bundle {}".format(str(bundle)))
+                    print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
                 else:
                     seen_bundles.add(str(bundle))
             # Currently tracking only 1 cumulative metric for router agents only

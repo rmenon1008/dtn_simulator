@@ -96,7 +96,7 @@ class ClientClientPayloadHandler:
             if unique_tuple in self.already_received_payload_ids:
                 # TODO: find out why this is happening.
                 # handshake_3() should have prevented this from happening
-                print("found a dupe in handshake_5")
+                print("INVARIANT VIOLATION: handshake_5 found a dupe")
             else:
                 self.already_received_payload_ids.add(unique_tuple)
                 self.num_payloads_received += 1

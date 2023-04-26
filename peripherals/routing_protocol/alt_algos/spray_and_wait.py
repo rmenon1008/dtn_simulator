@@ -23,18 +23,27 @@ class SprayAndWait:
         self.num_bundle_sends = 0
         self.num_repeated_bundle_receives = 0
         self.num_bundle_reached_destination = 0
+        self.seen_bundle_ids = set() # used for deduping
 
     """
     Receives bundles of data + holds on to them for spraying during `refresh()`.
     """
     def handle_bundle(self, bundle: Bundle):
-        self.bundle_sprays_map[bundle] = []
+        if bundle.bundle_id in self.seen_bundle_ids:
+            self.num_repeated_bundle_receives += 1
+        else:
+            self.seen_bundle_ids.add(bundle.bundle_id)
+            self.bundle_sprays_map[bundle] = []
 
     """
     Receives bundles and stores them for the "wait" part of the algorithm.
     """
     def handle_bundle_wait(self, bundle: Bundle):
-        self.waiting_bundles.append(bundle)
+        if bundle.bundle_id in self.seen_bundle_ids:
+            self.num_repeated_bundle_receives += 1
+        else:
+            self.seen_bundle_ids.add(bundle.bundle_id)
+            self.waiting_bundles.append(bundle)
 
     def handle_bundle_destination(self, bundle: Bundle):
         handle_payload(self.model, self.node_id, bundle.payload)
@@ -83,6 +92,7 @@ class SprayAndWait:
                     continue
 
                 # otherwise, spray the neighbor w/ the bundle + record the spraying
+                # print("{} spraying bundle to {}".format(self.node_id, neighbor_agent.unique_id))
                 neighbor_agent.routing_protocol.handle_bundle_wait(bundle)
                 self.bundle_sprays_map[bundle].append(neighbor_agent)
                 self.num_bundle_sends += 1
@@ -100,6 +110,7 @@ class SprayAndWait:
                                         # delete from local storage after iteration completes.
             for bundle in self.waiting_bundles:
                 if bundle.dest_id == neighbor_data["id"]:
+                    # print("{} spraying bundle to {}".format(self.node_id, neighbor_data["id"]))
                     neighbor_agent.routing_protocol.handle_bundle_destination(bundle)
                     finished_waiting_list.append(bundle)
                     self.num_bundle_sends += 1
@@ -112,13 +123,26 @@ class SprayAndWait:
     Called by the agent and sent to the visualization for simulation history log.
     """
     def get_state(self):
+        # The bundles held by this router are the # of bundles to be sprayed + # of bundles waiting
+        seen_bundles = set() # just to double check that waiting + spray map have unique bundles
         curr_bundles = []
         for bundle in self.waiting_bundles:
-            curr_bundles.append(bundle.serialize())
+            if bundle.bundle_id in seen_bundles:
+                print("INVARIANT VIOLATION: spray-and-wait found dupe in bundles waiting for clients")
+            else:
+                seen_bundles.add(bundle.bundle_id)
+                curr_bundles.append(bundle.serialize())
+        for bundle in self.bundle_sprays_map.keys():
+            if bundle.bundle_id in seen_bundles:
+                print("INVARIANT VIOLATION: spray-and-wait found dupe in bundles waiting to be sprayed")
+            else:
+                seen_bundles.add(bundle.bundle_id)
+                curr_bundles.append(bundle.serialize())
+
         return {
             "total_repeated_bundle_recv": self.num_repeated_bundle_receives,
             "total_bundle_sends": self.num_bundle_sends,
             "total_bundle_reached_dest_router": self.num_bundle_reached_destination,
-            "curr_num_stored_bundles": len(self.waiting_bundles),
+            "curr_num_stored_bundles": len(curr_bundles),
             "curr_stored_bundles": curr_bundles,
         }
