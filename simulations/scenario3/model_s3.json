@@ -1,5 +1,5 @@
 {
-    "title": "Scenario 3",
+    "scenario_name": "Scenario 3",
     "max_steps": 10000,
     "routing_protocol": 0,
     "rssi_noise_stdev": 2,
