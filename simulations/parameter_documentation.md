@@ -6,7 +6,7 @@ Model parameters defines model-wide constants
 ```
 {
     "max_steps": 10000,         # Max number of steps to run the model for (can be None)
-    "routing_protocol": 0,      # Protocol used by backbone (0 -> DTN, 1 -> Epidemic, 2 -> Spray and Wait)
+    "routing_protocol": 0,      # Protocol used by backbone (0 -> CGR, 1 -> Epidemic, 2 -> Spray and Wait)
     "rssi_noise_stdev": 0,      # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model in m/s
     "host_router_mapping_timeout": 1000, # How long a client to host router mapping should be valid for
@@ -16,7 +16,7 @@ Model parameters defines model-wide constants
         # Schedule of data drops
         #   - Drops can be picked up by any client that comes within 5 units
         #   - A payload is created from the drop and stored on the client
-        #   - repeat_every is optional and can be used to repeat a drop every n ticks
+        #   - repeat_every is optional and can be used to repeat a drop every n steps
       {
         "drop_id": 0,
         "time": 5000,
@@ -26,6 +26,7 @@ Model parameters defines model-wide constants
         ],
         "target_id": 9,
         "repeat_every": 100 
+        "until": 750        # optional parameter for "repeat_every". Repeat this drop until "until" steps is reached.
       },
       {
         "drop_id": 1,

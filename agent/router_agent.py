@@ -7,7 +7,7 @@ from agent.client_agent import ClientAgent
 from payload import ClientMappingDictPayload
 from peripherals.routing_protocol.alt_algos.epidemic import Epidemic
 from peripherals.routing_protocol.alt_algos.spray_and_wait import SprayAndWait
-from peripherals.routing_protocol.dtn.dtn import Dtn
+from peripherals.routing_protocol.cgr.cgr import Cgr
 
 from peripherals.radio import Radio
 from peripherals.movement import Movement
@@ -19,7 +19,7 @@ Used to communicate which routing protocol we want this RouterAgent to use.
 All RouterAgent on the network _must_ use the same protocol, or nothing will work.
 """
 class RoutingProtocol(Enum):
-    DTN = 0
+    CGR = 0
     EPIDEMIC = 1
     SPRAY_AND_WAIT = 2
 
@@ -93,8 +93,8 @@ class RouterAgent(mesa.Agent):
             self.movement.step()
 
     def __get_routing_protocol_object(self):
-        if self.routing_protocol_type == RoutingProtocol.DTN:
-            return Dtn(self.unique_id, self.model, self.contact_plan_filepath)
+        if self.routing_protocol_type == RoutingProtocol.CGR:
+            return Cgr(self.unique_id, self.model, self.contact_plan_filepath)
         elif self.routing_protocol_type == RoutingProtocol.EPIDEMIC:
             return Epidemic(self.unique_id, self.model, self)
         elif self.routing_protocol_type == RoutingProtocol.SPRAY_AND_WAIT:

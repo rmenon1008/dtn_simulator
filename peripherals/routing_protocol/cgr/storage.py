@@ -1,5 +1,5 @@
 """
-Contains the Storage class, which is a simplified version of HDTN Storage.
+Contains the Storage class, for holding bundles to be transmitted.
 """
 
 

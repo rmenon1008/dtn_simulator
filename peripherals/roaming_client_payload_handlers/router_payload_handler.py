@@ -11,7 +11,7 @@ from peripherals.routing_protocol.routing_protocol_common import Bundle
 
 
 class RouterClientPayloadHandler:
-    def __init__(self, router_id, model, dtn):
+    def __init__(self, router_id, model, routing_protocol):
         self.CLIENT_MAPPING_TIMEOUT = model.model_params["host_router_mapping_timeout"]
         self.router_id = router_id
         self.model = model
@@ -21,8 +21,7 @@ class RouterClientPayloadHandler:
         self.client_router_mapping_dict = {}  # dict of client_id->(dict of router_id->(expiration timestamp))
                                               # which represents DTN router(s) known to be associated with the specified
                                               # client.
-        self.num_bundles_delivered_to_client = 0
-        self.dtn = dtn  # the DTN object we can use to send out Bundles over the DTN network.
+        self.routing_protocol = routing_protocol  # the routing protocol object we can use to send out Bundles over the DTN network.
 
     """
     Updates that this router can connect to a particular client.
@@ -204,7 +203,7 @@ class RouterClientPayloadHandler:
                     bundle = Bundle(bundle_id, router_id, payload, self.model.schedule.time, self.model.model_params["bundle_lifespan"])
 
                     # send the Bundle.
-                    self.dtn.handle_bundle(bundle)
+                    self.routing_protocol.handle_bundle(bundle)
 
             # if we were unable to send out the payload, store it for later.
             else:

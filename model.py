@@ -8,8 +8,7 @@ from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
 from agent.client_agent import ClientAgent
-from agent.router_agent import RouterAgent
-
+from agent.router_agent import RouterAgent, RoutingProtocol
 
 def merge(source, destination):
     """
@@ -71,7 +70,16 @@ class LunarModel(mesa.Model):
 
         # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
         self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0}
+        # Mesa Datacollector stuff
+        self.avg_latency = None
+        self.payload_rate = None
+        self.avg_storage_overhead = None
+        self.datacollector = mesa.DataCollector(model_reporters={"avg_latency": "avg_latency",
+                                                                 "payload_rate": "payload_rate",
+                                                                 "avg_storage_overhead": "avg_storage_overhead"
+                                                                 })
 
+        # Initialize agents
         for agent_options in initial_state["agents"]:
 
             # Merge the node defaults with the individual node options
@@ -99,7 +107,7 @@ class LunarModel(mesa.Model):
                 a = ClientAgent(self, options)
                 self.client_agents[options["id"]] = a
 
-            print(a)
+            # print(a)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 
@@ -142,10 +150,10 @@ class LunarModel(mesa.Model):
                 "step": self.schedule.steps,
                 "agents": agent_list,
             }
-            with open("out_agents.json", "w") as outfile:
-                outfile.write(json.dumps(final_metric_entry, indent=2))
-            # Plug in the final metrics + the cumulative metrics
-            summary_statistics(final_metric_entry, self.metrics, self.model_params["correctness"])
+            stats = summary_statistics(final_metric_entry, self.metrics, self.model_params["correctness"])
+            self.avg_latency = stats[0]
+            self.payload_rate = stats[1]
+            self.avg_storage_overhead = stats[2]
 
     def __track_contacts(self):
         curr_step = self.schedule.steps
@@ -215,6 +223,8 @@ class LunarModel(mesa.Model):
                 self.data_drops.append(drop)
             elif "repeat_every" in drop:
                 # TODO: Have an option to stop repeating after a certain amount of time
+                if "until" in drop and self.schedule.steps > drop["until"]:
+                    continue
                 if (self.schedule.steps - drop["time"]) % drop["repeat_every"] == 0 and self.schedule.steps > drop["time"]:
                     self.data_drops.append(drop)
 

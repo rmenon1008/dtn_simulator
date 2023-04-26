@@ -18,7 +18,6 @@ class ClientClientPayloadHandler:
         self.already_received_payload_ids = set()  # elements are tuples of ('id', 'expiration timestamp').
 
         # vars used to record stats for measurements + evaluation
-        self.num_payloads_sent = 0
         self.num_payloads_received = 0
         self.received_payload_latencies = []
         self.received_payloads = []
@@ -117,7 +116,6 @@ class ClientClientPayloadHandler:
         # note: if false, this if statement ends the handshake early
         if len(self.payloads_to_send) > 0:
             router_handler.handshake_6(copy(self.payloads_to_send))
-            self.num_payloads_sent += len(self.payloads_to_send)
             if "debug" in self.model.model_params:
                 print("client", self.client_id, "is sending", len(self.payloads_to_send), "payload(s) to router", router_handler.router_id)
             # clear the list of payloads to send (since we've now sent them into the DTN network).

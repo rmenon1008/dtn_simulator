@@ -192,7 +192,6 @@ class ClientAgent(mesa.Agent):
             "pos": self.pos,
             "history": self.history,
             "radio": self.radio.get_state(),
-            "total_pay_sent_to_router":  self.payload_handler.num_payloads_sent,
             "total_pay_recv_from_router":  self.payload_handler.num_payloads_received,
             "pay_recv_latencies":  self.payload_handler.received_payload_latencies,
             "received_payloads": self.payload_handler.received_payloads,

@@ -1,6 +1,9 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import os
+from random import randint
 
 def agg_metric_for_agents(agents, key, agg):
     """
@@ -57,7 +60,6 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.savefig("plotted_metrics.png")
 
 def summary_statistics(final_client_metrics, metrics, verify):
-    print("============ Summary Statistics ============")
     # Sanity checking:
     if verify:
         for agent in final_client_metrics["agents"]:
@@ -73,27 +75,22 @@ def summary_statistics(final_client_metrics, metrics, verify):
     # Average payload delivery latency
     num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
     total_payload_latency = agg_metric_for_agents(final_client_metrics["agents"], "pay_recv_latencies", "sum_array")
+    avg_payload_latency = None
     if num_payloads_recv > 0:
         avg_payload_latency = total_payload_latency / num_payloads_recv
-        print("Average payload delivery latency: {} ticks".format(avg_payload_latency))
-    else:
-        print("Average payload delivery latency: N/A (no payloads were delivered)")
-
     # Metric 1
     # Payload delivery success rate
     num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
     num_payloads_picked_up = agg_metric_for_agents(final_client_metrics["agents"], "total_drops_picked_up_from_ground", "sum")
+    payload_delivery_success_rate = None
     if num_payloads_picked_up > 0:
-        payload_delivery_success_rate = num_payloads_recv / num_payloads_picked_up
-        print("Payload delivery success rate: {}%".format(payload_delivery_success_rate * 100))
-    else:
-        print("Payload delivery success rate: N/A (no payloads were picked up)")
+        payload_delivery_success_rate = (num_payloads_recv / num_payloads_picked_up) * 100
 
     # Metric 2
     # Average bundle storage overhead
     total_bundles_stored = metrics["total_bundles_stored_so_far"]
     avg_bundle_storage_overhead = total_bundles_stored / metrics["num_steps"]
-    print("Average bundle storage overhead: {}".format(avg_bundle_storage_overhead))
+    return (avg_payload_latency, payload_delivery_success_rate, avg_bundle_storage_overhead)
 
 
 if __name__ == "__main__":
