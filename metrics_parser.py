@@ -56,18 +56,18 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.legend()
     plt.savefig("plotted_metrics.png")
 
-def summary_statistics(final_client_metrics, metrics):
+def summary_statistics(final_client_metrics, metrics, verify):
     print("============ Summary Statistics ============")
     # Sanity checking:
-
-    for agent in final_client_metrics["agents"]:
-        seen_payloads = set()
-        for payload_dict in agent["received_payloads"]:
-            unique_tuple = (payload_dict["drop_id"], payload_dict["creation_timestamp"])
-            if unique_tuple in seen_payloads:
-                print("INVARIANT VIOLATION dupe payload:", unique_tuple[0], unique_tuple[1])
-            else:
-                seen_payloads.add(unique_tuple)
+    if verify:
+        for agent in final_client_metrics["agents"]:
+            seen_payloads = set()
+            for payload_dict in agent["received_payloads"]:
+                unique_tuple = (payload_dict["drop_id"], payload_dict["creation_timestamp"])
+                if unique_tuple in seen_payloads:
+                    print("INVARIANT VIOLATION dupe payload:", unique_tuple[0], unique_tuple[1])
+                else:
+                    seen_payloads.add(unique_tuple)
 
     # Metric 0 
     # Average payload delivery latency

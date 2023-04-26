@@ -145,7 +145,7 @@ class LunarModel(mesa.Model):
             with open("out_agents.json", "w") as outfile:
                 outfile.write(json.dumps(final_metric_entry, indent=2))
             # Plug in the final metrics + the cumulative metrics
-            summary_statistics(final_metric_entry, self.metrics)
+            summary_statistics(final_metric_entry, self.metrics, self.model_params["correctness"])
 
     def __track_contacts(self):
         curr_step = self.schedule.steps
@@ -311,14 +311,14 @@ class LunarModel(mesa.Model):
             if "routing_protocol" not in metrics:
                 continue # ignore clients
             # can assume agent is a router
-            # check if the router is holding any duplicate bundles
-            # TODO: hide this behind a debug/dev thing because this is really slow
-            seen_bundles = set()
-            for bundle in metrics["routing_protocol"]["curr_stored_bundles"]:
-                if str(bundle) in seen_bundles:
-                    print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
-                else:
-                    seen_bundles.add(str(bundle))
+            if self.model_params["correctness"]:
+                # check if the router is holding any duplicate bundles
+                seen_bundles = set()
+                for bundle in metrics["routing_protocol"]["curr_stored_bundles"]:
+                    if str(bundle) in seen_bundles:
+                        print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
+                    else:
+                        seen_bundles.add(str(bundle))
             # Currently tracking only 1 cumulative metric for router agents only
             self.metrics["total_bundles_stored_so_far"] += metrics["routing_protocol"]["curr_num_stored_bundles"]
 

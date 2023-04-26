@@ -94,8 +94,6 @@ class ClientClientPayloadHandler:
         for payload in payloads_for_client:
             unique_tuple = (payload.get_identifier(), payload.expiration_timestamp)
             if unique_tuple in self.already_received_payload_ids:
-                # TODO: find out why this is happening.
-                # handshake_3() should have prevented this from happening
                 print("INVARIANT VIOLATION: handshake_5 found a dupe")
             else:
                 self.already_received_payload_ids.add(unique_tuple)
