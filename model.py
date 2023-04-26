@@ -70,7 +70,16 @@ class LunarModel(mesa.Model):
 
         # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
         self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0}
+        # Mesa Datacollector stuff
+        self.avg_latency = None
+        self.payload_rate = None
+        self.avg_storage_overhead = None
+        self.datacollector = mesa.DataCollector(model_reporters={"avg_latency": "avg_latency",
+                                                                 "payload_rate": "payload_rate",
+                                                                 "avg_storage_overhead": "avg_storage_overhead"
+                                                                 })
 
+        # Initialize agents
         for agent_options in initial_state["agents"]:
 
             # Merge the node defaults with the individual node options
@@ -141,16 +150,25 @@ class LunarModel(mesa.Model):
                 "step": self.schedule.steps,
                 "agents": agent_list,
             }
-            # Plug in the final metrics + the cumulative metrics
-            title = self.model_params["title"] + "\n"
-            title += "\tRouting Protocol: {}\n".format(str(RoutingProtocol(self.model_params["routing_protocol"])))
-            title += "\tMax Steps: {} steps \n".format(self.model_params["max_steps"])
-            title += "\tRSSI Noise STDEV: {} \n".format(self.model_params["rssi_noise_stdev"])
-            title += "\tModel Speed Limit: {} m/s \n".format(self.model_params["model_speed_limit"])
-            title += "\tHost Router Timeout: {} steps \n".format(self.model_params["host_router_mapping_timeout"])
-            title += "\tPayload Lifespan: {} steps \n".format(self.model_params["payload_lifespan"])
-            title += "\tBundle Lifespan: {} steps \n".format(self.model_params["bundle_lifespan"])
-            summary_statistics(title, final_metric_entry, self.metrics, self.model_params["correctness"])
+            # # Plug in the final metrics + the cumulative metrics
+            # title = self.model_params["title"] + "\n"
+            # title += "\tRouting Protocol: {}\n".format(str(RoutingProtocol(self.model_params["routing_protocol"])))
+            # title += "\tMax Steps: {} steps \n".format(self.model_params["max_steps"])
+            # title += "\tRSSI Noise STDEV: {} \n".format(self.model_params["rssi_noise_stdev"])
+            # title += "\tModel Speed Limit: {} m/s \n".format(self.model_params["model_speed_limit"])
+            # title += "\tHost Router Timeout: {} steps \n".format(self.model_params["host_router_mapping_timeout"])
+            # title += "\tPayload Lifespan: {} steps \n".format(self.model_params["payload_lifespan"])
+            # title += "\tBundle Lifespan: {} steps \n".format(self.model_params["bundle_lifespan"])
+            m0, m1, m2 = summary_statistics(final_metric_entry, self.metrics, self.model_params["correctness"])
+            self.avg_latency = m0
+            self.payload_rate = m1
+            self.avg_storage_overhead = m2
+            # self.datacollector.collect(self)
+            # final_stuff = self.datacollector.get_model_vars_dataframe()
+            # print(final_stuff.head())
+            # print(final_stuff.head().values[0][0])
+            # print(final_stuff.head().values[0][1])
+            # print(final_stuff.head().values[0][2])
 
     def __track_contacts(self):
         curr_step = self.schedule.steps
