@@ -15,7 +15,7 @@ class RouterClientPayloadHandler:
         self.CLIENT_MAPPING_TIMEOUT = model.model_params["host_router_mapping_timeout"]
         self.router_id = router_id
         self.model = model
-        self.payloads_received_for_client = {}  # map of client_ids->[list of ClientPayloads]
+        self.payloads_received_for_client = {}  # map of client_ids->[set of ClientPayloads]
         self.outgoing_payloads_to_send = []  # stores payloads for us to attempt to send with each `refresh()`
         self.client_router_mapping_dict = {}  # dict of client_id->(dict of router_id->(expiration timestamp))
                                               # which represents DTN router(s) known to be associated with the specified
@@ -70,10 +70,10 @@ class RouterClientPayloadHandler:
             print("router", self.router_id, "got a payload for a client. Need to wait for client", payload.dest_client_id, "to pick it up...")
         # if no list exists in the dict for the client, add one.
         if payload.dest_client_id not in self.payloads_received_for_client.keys():
-            self.payloads_received_for_client[payload.dest_client_id] = []
+            self.payloads_received_for_client[payload.dest_client_id] = set()
 
         # store the payload in the dict for the client.
-        self.payloads_received_for_client[payload.dest_client_id].append(payload)
+        self.payloads_received_for_client[payload.dest_client_id].add(payload)
 
     """
     Executes "step 2" of the handshake process described in README.md.
@@ -85,10 +85,10 @@ class RouterClientPayloadHandler:
     """
     def handshake_2(self, client_handler):
         # get a list of metadata for the payloads waiting for the client.
-        payloads_for_client_metadata = []
+        payloads_for_client_metadata = set()
         if client_handler.client_id in self.payloads_received_for_client.keys():
             for payload in self.payloads_received_for_client[client_handler.client_id]:
-                payloads_for_client_metadata.append((payload.get_identifier(), payload.expiration_timestamp))
+                payloads_for_client_metadata.add((payload.get_identifier(), payload.expiration_timestamp))
 
         # send the metadata list back to the client.
         client_handler.handshake_3(self, payloads_for_client_metadata)
@@ -104,7 +104,7 @@ class RouterClientPayloadHandler:
            before this method is called.
     """
 
-    def handshake_4(self, client_handler, desired_payload_ids: list):
+    def handshake_4(self, client_handler, desired_payload_ids: set):
         # obtain the payloads the client wants.
         payloads_for_client = [payload for payload
                               in self.payloads_received_for_client[client_handler.client_id]
@@ -145,11 +145,14 @@ class RouterClientPayloadHandler:
     def refresh(self):
         # remove expired payloads from payloads_received_for_client
         for client_payload_list in self.payloads_received_for_client.values():
+            payloads_to_remove = [] # to avoid removing items from set while looping over it
             for payload in client_payload_list:
                 if payload.expiration_timestamp <= self.model.schedule.time:
                     if "debug" in self.model.model_params:
                         print(self.router_id, "dropping expired client payload", payload.drop_id)
-                    client_payload_list.remove(payload)
+                    payloads_to_remove.append(payload)
+            for payload in payloads_to_remove:
+                client_payload_list.remove(payload)
 
         # remove expired router-client mappings.
         for client_dict in self.client_router_mapping_dict.values():

@@ -63,7 +63,7 @@ def test_already_received_payload_ids_expiration():
     already_received_entry = (CLIENT_ID_0, schedule.time)
 
     # store the entry in already_received_payload_ids
-    client_handler.already_received_payload_ids.append(already_received_entry)
+    client_handler.already_received_payload_ids.add(already_received_entry)
 
     # assert that the entry has been stored.
     assert already_received_entry in client_handler.already_received_payload_ids

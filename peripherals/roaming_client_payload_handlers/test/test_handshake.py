@@ -50,8 +50,8 @@ def test_handshake():
     router_handler.handle_payload(c1_to_c0_payload_0)
     router_handler.handle_payload(c1_to_c0_payload_1)
 
-    # set up the list of payloads stored in the client_handler as already seen.
-    client_already_received_payload_ids = [(c1_to_c0_payload_0.get_identifier(), c1_to_c0_payload_0.expiration_timestamp)]
+    # set up the set of payloads stored in the client_handler as already seen.
+    client_already_received_payload_ids = set([(c1_to_c0_payload_0.get_identifier(), c1_to_c0_payload_0.expiration_timestamp)])
     client_handler.already_received_payload_ids = client_already_received_payload_ids
 
     # set up the payloads_to_send field in the client_handler.
@@ -67,13 +67,13 @@ def test_handshake():
     verify(router_handler, times=1).handshake_2(client_handler)
 
     # verify that handshake_3 was successfully called w/ the router_handler and a list of metadata as params.
-    metadata_list = [(c1_to_c0_payload_0.get_identifier(), c1_to_c0_payload_0.expiration_timestamp),
-                     (c1_to_c0_payload_1.get_identifier(), c1_to_c0_payload_1.expiration_timestamp)]
-    verify(client_handler, times=1).handshake_3(router_handler, metadata_list)
+    metadata_set = set([(c1_to_c0_payload_0.get_identifier(), c1_to_c0_payload_0.expiration_timestamp),
+                     (c1_to_c0_payload_1.get_identifier(), c1_to_c0_payload_1.expiration_timestamp)])
+    verify(client_handler, times=1).handshake_3(router_handler, metadata_set)
 
     # verify that handshake_4 was successfully called w/ the client_handler and a list of desired payload IDs as params.
     # NOTE:  The list should only contain c1_to_c0_payload_1 since c1_to_c0_payload_0 is already in client_handler.
-    verify(router_handler, times=1).handshake_4(client_handler, [c1_to_c0_payload_1.get_identifier()])
+    verify(router_handler, times=1).handshake_4(client_handler, set([c1_to_c0_payload_1.get_identifier()]))
 
     # verify that handshake_5 was successfully called w/ the router_handler and a list of payloads as params.
     # NOTE:  The list should only contain c1_to_c0_payload_1 since c1_to_c0_payload_0 is already in client_handler.

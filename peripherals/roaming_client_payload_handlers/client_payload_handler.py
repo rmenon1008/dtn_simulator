@@ -14,7 +14,8 @@ class ClientClientPayloadHandler:
         self.client_id = client_id
         self.model = model
         self.payloads_to_send = []  # elements are ClientPayloads.
-        self.already_received_payload_ids = []  # elements are tuples of ('id', 'expiration timestamp').
+        # TODO change this to set instead of list, use frozenset for tuples for efficiency
+        self.already_received_payload_ids = set()  # elements are tuples of ('id', 'expiration timestamp').
 
         # vars used to record stats for measurements + evaluation
         self.num_payloads_sent = 0
@@ -29,7 +30,7 @@ class ClientClientPayloadHandler:
 
     def store_payload(self, payload: ClientPayload):
         self.payloads_to_send.append(payload)
-        self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
+        self.already_received_payload_ids.add((payload.get_identifier(), payload.expiration_timestamp))
         self.num_drops_picked_up += 1
 
     """
@@ -50,13 +51,13 @@ class ClientClientPayloadHandler:
     In this step, the client looks at list, figures out which ClientPayloads it needs.  It then asks the router for 
     ClientPayloads it doesn't have.
     
-    'payloads_for_client_metadata' = list of (payload_id, expiration timestamp) tuples
+    'payloads_for_client_metadata' = set of (payload_id, expiration timestamp) tuples
 
     NOTE:  This method does _not_ verify that the device is in-range of the router--that needs to be done separately
            before this method is called.
     """
 
-    def handshake_3(self, router_handler, payloads_for_client_metadata: list):
+    def handshake_3(self, router_handler, payloads_for_client_metadata: set):
         # if no payloads were sent by the router, skip to step 5.
         if len(payloads_for_client_metadata) == 0:
             self.handshake_5(router_handler, [])
@@ -64,11 +65,17 @@ class ClientClientPayloadHandler:
         # otherwise, analyze the metadata received from the router.
         else:
             # extract the list of payload IDs we don't have from "payloads_for_client_metadata".
-            desired_payload_ids = [payload_id for (payload_id, expiration_timestamp)
+            # TODO: is there a bug here? clients are receiving more payloads than the # of payloads that are picked up
+            # print('available for client')
+            # for x, y in payloads_for_client_metadata:
+            #     print("\t", x,y)
+            desired_payload_ids = set([payload_id for (payload_id, expiration_timestamp)
                                    in payloads_for_client_metadata
-                                   if (payload_id, expiration_timestamp) not in self.already_received_payload_ids]
-            # TODO: track metrics for # bundles ignored by client bc they were duplicates
+                                   if (payload_id, expiration_timestamp) not in self.already_received_payload_ids])
             # ask the RouterClientPayloadHandler for the ClientPayloads associated with desired_payload_ids.
+            # print('wanted by client')
+            # for x in desired_payload_ids:
+            #     print("\t", x)
             router_handler.handshake_4(self, desired_payload_ids)
 
     """
@@ -85,8 +92,8 @@ class ClientClientPayloadHandler:
     def handshake_5(self, router_handler, payloads_for_client: list):
         # store the metadata for the payloads from the router.
         for payload in payloads_for_client:
-            self.already_received_payload_ids.append((payload.get_identifier(), payload.expiration_timestamp))
-            self.num_payloads_received += 1
+            self.already_received_payload_ids.add((payload.get_identifier(), payload.expiration_timestamp))
+            self.num_payloads_received += 1 #TODO: this is incremented  more times than expected
             latency = self.model.schedule.time - payload.creation_timestamp
             received_payload_serialized = {
                 "drop_id": payload.drop_id,
@@ -121,5 +128,5 @@ class ClientClientPayloadHandler:
     def refresh(self):
         self.payloads_to_send = [payload for payload in
                                  self.payloads_to_send if payload.expiration_timestamp > self.model.schedule.time]
-        self.already_received_payload_ids = [(payload, expiration_timestamp) for (payload, expiration_timestamp) in
-                                             self.already_received_payload_ids if expiration_timestamp > self.model.schedule.time]
+        self.already_received_payload_ids = set([(payload, expiration_timestamp) for (payload, expiration_timestamp) in
+                                             self.already_received_payload_ids if expiration_timestamp > self.model.schedule.time])
