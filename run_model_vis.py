@@ -6,6 +6,7 @@ import argparse
 import time
 import multiprocessing as mp
 import os
+from statistics import mean, stdev
 
 from peripherals.movement import *
 from agent.router_agent import RoutingProtocol
@@ -27,17 +28,13 @@ class ObjectOption(mesa.visualization.UserParam):
     def value(self, value):
         self._value = value
 
-def get_trial_results(output_q, model_params, initial_state, max_steps):
+def get_trial_results(trial_num, output_q, model_params, initial_state, max_steps):
     model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params, initial_state=initial_state)
     for i in range(max_steps):
         if i % (max_steps / 10) == 0:
-            print("\t step {} out of {}".format(i, max_steps), flush=True)
+            print("\t Trial {}: {}/{} steps, {}% done".format(trial_num, i, max_steps, 100 * i / max_steps), flush=True)
         model.step()
-    model.datacollector.collect(model)
-    final_stuff = model.datacollector.get_model_vars_dataframe()
-    output_df_row_values = final_stuff.head().values[0]
-    output_tuple = (output_df_row_values[0], output_df_row_values[1], output_df_row_values[2])
-    print(output_tuple)
+    output_tuple = (model.avg_latency, model.payload_rate, model.avg_storage_overhead)
     output_q.put(output_tuple)
 
 def print_sim_results(title, num_trials, m0, m1, m2):
@@ -54,9 +51,9 @@ def print_sim_results(title, num_trials, m0, m1, m2):
         print(str, flush=True)
     print("============ Simulation Results ({} Trials) ============".format(num_trials), flush=True)
     print(title, flush=True)
-    print("Average payload delivery latency: {} ticks".format(m0), flush=True)
-    print("Payload delivery success rate: {}%".format(m1), flush=True)
-    print("Average bundle storage overhead: {}".format(m2), flush=True)
+    print("Average payload delivery latency: {} ticks (stdev={})".format(m0[0], m0[1]), flush=True)
+    print("Payload delivery success rate: {}% (stdev={})".format(m1[0], m1[1]), flush=True)
+    print("Average bundle storage overhead: {} (stdev={})".format(m2[0], m2[1]), flush=True)
     
 def main():
     argParser = argparse.ArgumentParser()
@@ -95,7 +92,7 @@ def main():
         new_json["make_contact_plan"] = True
         model_params.value = json.dumps(new_json)
 
-    if args.log_metrics:
+    if args.log_metrics or int(args.b) > 0:
         new_json = model_params.value
         new_json["log_metrics"] = True
         model_params.value = json.dumps(new_json)
@@ -130,31 +127,23 @@ def main():
         #https://stackoverflow.com/questions/31711378/python-multiprocessing-how-to-know-to-use-pool-or-process
         output_q = mp.Queue()
         num_processes = int(args.b)
-        processes = [mp.Process(target=get_trial_results, args=(output_q, model_params.value, agent_state.value, model_params.value["max_steps"])) for x in range(num_processes)]
+        processes = [mp.Process(target=get_trial_results, args=(i, output_q, model_params.value, agent_state.value, model_params.value["max_steps"])) for i in range(num_processes)]
         for p in processes:
             p.start()
         for p in processes:
             p.join()
         # Process results
+        # list of n 3-tuples [(m0, m1, m2), (m0, m1, m2)]
         results = [output_q.get() for p in processes]
-        print(results)
-        avg_avg_latency = 0
-        avg_payload_rate = 0
-        avg_avg_storage_overhead = 0
-        for res in results:
-            if res[0] is not None:
-                avg_avg_latency += res[0]
-            else:
-                avg_avg_latency += 0
-            if res[1] is not None:
-                avg_payload_rate += res[1]
-            else:
-                avg_payload_rate += 0
-            avg_avg_storage_overhead += res[2]
-        avg_avg_latency /= num_processes
-        avg_payload_rate /= num_processes
-        avg_avg_storage_overhead /= num_processes
-        print_sim_results(title, num_processes, avg_avg_latency, avg_payload_rate, avg_avg_storage_overhead)
+        # list of 3 n-tuples [(m0, m0, m0, ...), (m1, m1, ...), (m2, m2, ...)]
+        result_unzipped = list(zip(*results))
+        avg_latencies = list(result_unzipped[0])
+        avg_payload_rates = list(result_unzipped[1])
+        avg_bundles_stored = list(result_unzipped[2])
+        print_sim_results(title, num_processes,
+                          (mean(avg_latencies), stdev(avg_latencies)),
+                          (mean(avg_payload_rates), stdev(avg_payload_rates)),
+                          (mean(avg_bundles_stored), stdev(avg_bundles_stored)))
         exit()
 
     if args.nv:
