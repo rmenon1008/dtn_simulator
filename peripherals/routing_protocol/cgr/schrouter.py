@@ -1,5 +1,5 @@
 """
-Contains the Schrouter class, which handles all contact plan-related content that HDTN puts in Router and Scheduler.
+Contains the Schrouter class, which handles all contact plan-related content for CGR.
 """
 import string
 import sys

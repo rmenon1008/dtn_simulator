@@ -1,15 +1,15 @@
 """
-Contains the Dtn class, which is a simplified implementation of HDTN.
+Contains the Cgr class, which is an implementation of a contact graph routing based DTN router.
 """
 import string
 
 from peripherals.routing_protocol.routing_protocol_common import Bundle, handle_payload
-from peripherals.routing_protocol.dtn.storage import Storage
-from peripherals.routing_protocol.dtn.schrouter import Schrouter
+from peripherals.routing_protocol.cgr.storage import Storage
+from peripherals.routing_protocol.cgr.schrouter import Schrouter
 from agent.client_agent import ClientAgent
 
 
-class Dtn:
+class Cgr:
 
     def __init__(self, node_id, model, contact_plan_json_filename: string = None):
         self.node_id = node_id
@@ -59,7 +59,7 @@ class Dtn:
             print("INVARIANT VIOLATION. this should never happen")
 
     """
-    Refreshes the state of the DTN object.  Called by the simulation at each timestamp.
+    Refreshes the state of the CGR object.  Called by the simulation at each timestamp.
     """
     def refresh(self):
         # 1. Get the destination ids for all bundles

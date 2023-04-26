@@ -10,7 +10,7 @@
 ```
 -a                          used to provide path to json file containing initial agent states
 -m                          used to provide path to json file containing model parameters
--rp                         choose routing protocol (0-dtn/cgr, 1-epidemic, 2-spray) [default=0]
+-rp                         choose routing protocol (0-cgr, 1-epidemic, 2-spray) [default=0]
 -nv                         if present, simulator runs without web server visualization
 --log-metrics               if present, logs metrics to file and prints summary statistics
 --debug                     if present, run with debug print statements

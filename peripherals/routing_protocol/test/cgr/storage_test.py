@@ -1,6 +1,6 @@
 from payload import Payload
 from peripherals.routing_protocol.routing_protocol_common import Bundle
-from peripherals.routing_protocol.dtn.storage import Storage
+from peripherals.routing_protocol.cgr.storage import Storage
 
 import mesa
 from mockito import mock
@@ -8,7 +8,7 @@ from mockito import mock
 BUNDLE_LIFESPAN = 2500
 
 def test_bundle_lifecycle():
-    # setup a dummy model object used by the DTN objects.
+    # setup a dummy model object used by the CGR objects.
     schedule = mesa.time.RandomActivation(mesa.Model())
     dummy_model = mock({"schedule": schedule})
 
@@ -36,7 +36,7 @@ def test_bundle_lifecycle():
 
 
 def test_bundle_expiration():
-    # setup a dummy model object used by the DTN objects.
+    # setup a dummy model object used by the CGR objects.
     schedule = mesa.time.RandomActivation(mesa.Model())
     dummy_model = mock({"schedule": schedule})
 

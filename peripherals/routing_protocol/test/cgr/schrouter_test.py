@@ -1,6 +1,6 @@
 import sys
 
-from peripherals.routing_protocol.dtn.schrouter import Schrouter
+from peripherals.routing_protocol.cgr.schrouter import Schrouter
 
 
 """
@@ -10,7 +10,7 @@ def test_simple_contact_plan_routing():
     # NOTE:  This test will fail to find the JSON files if not run from the root directory using the `pytest` command.
 
     # construct the Schrouter from a file.
-    schrouter = Schrouter("peripherals/routing_protocol/test/dtn/test_contact_plans/contactPlan.json")
+    schrouter = Schrouter("peripherals/routing_protocol/test/cgr/test_contact_plans/contactPlan.json")
 
     # topology loaded from file:
     #      1

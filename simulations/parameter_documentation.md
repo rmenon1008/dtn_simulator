@@ -6,7 +6,7 @@ Model parameters defines model-wide constants
 ```
 {
     "max_steps": 10000,         # Max number of steps to run the model for (can be None)
-    "routing_protocol": 0,      # Protocol used by backbone (0 -> DTN, 1 -> Epidemic, 2 -> Spray and Wait)
+    "routing_protocol": 0,      # Protocol used by backbone (0 -> CGR, 1 -> Epidemic, 2 -> Spray and Wait)
     "rssi_noise_stdev": 0,      # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model in m/s
     "host_router_mapping_timeout": 1000, # How long a client to host router mapping should be valid for
