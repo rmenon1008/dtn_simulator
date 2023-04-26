@@ -8,8 +8,7 @@ from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
 from agent.client_agent import ClientAgent
-from agent.router_agent import RouterAgent
-
+from agent.router_agent import RouterAgent, RoutingProtocol
 
 def merge(source, destination):
     """
@@ -142,10 +141,16 @@ class LunarModel(mesa.Model):
                 "step": self.schedule.steps,
                 "agents": agent_list,
             }
-            with open("out_agents.json", "w") as outfile:
-                outfile.write(json.dumps(final_metric_entry, indent=2))
             # Plug in the final metrics + the cumulative metrics
-            summary_statistics(final_metric_entry, self.metrics, self.model_params["correctness"])
+            title = self.model_params["title"] + "\n"
+            title += "\tRouting Protocol: {}\n".format(str(RoutingProtocol(self.model_params["routing_protocol"])))
+            title += "\tMax Steps: {} steps \n".format(self.model_params["max_steps"])
+            title += "\tRSSI Noise STDEV: {} \n".format(self.model_params["rssi_noise_stdev"])
+            title += "\tModel Speed Limit: {} m/s \n".format(self.model_params["model_speed_limit"])
+            title += "\tHost Router Timeout: {} steps \n".format(self.model_params["host_router_mapping_timeout"])
+            title += "\tPayload Lifespan: {} steps \n".format(self.model_params["payload_lifespan"])
+            title += "\tBundle Lifespan: {} steps \n".format(self.model_params["bundle_lifespan"])
+            summary_statistics(title, final_metric_entry, self.metrics, self.model_params["correctness"])
 
     def __track_contacts(self):
         curr_step = self.schedule.steps

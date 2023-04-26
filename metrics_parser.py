@@ -56,8 +56,9 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.legend()
     plt.savefig("plotted_metrics.png")
 
-def summary_statistics(final_client_metrics, metrics, verify):
+def summary_statistics(title, final_client_metrics, metrics, verify):
     print("============ Summary Statistics ============")
+    print(title)
     # Sanity checking:
     if verify:
         for agent in final_client_metrics["agents"]:
