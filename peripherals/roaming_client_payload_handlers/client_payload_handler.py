@@ -14,7 +14,6 @@ class ClientClientPayloadHandler:
         self.client_id = client_id
         self.model = model
         self.payloads_to_send = []  # elements are ClientPayloads.
-        # TODO change this to set instead of list, use frozenset for tuples for efficiency
         self.already_received_payload_ids = set()  # elements are tuples of ('id', 'expiration timestamp').
 
         # vars used to record stats for measurements + evaluation
@@ -64,17 +63,10 @@ class ClientClientPayloadHandler:
         # otherwise, analyze the metadata received from the router.
         else:
             # extract the list of payload IDs we don't have from "payloads_for_client_metadata".
-            # TODO: is there a bug here? clients are receiving more payloads than the # of payloads that are picked up
-            # print('available for client')
-            # for x, y in payloads_for_client_metadata:
-            #     print("\t", x,y)
             desired_payload_ids = set([payload_id for (payload_id, expiration_timestamp)
                                    in payloads_for_client_metadata
                                    if (payload_id, expiration_timestamp) not in self.already_received_payload_ids])
             # ask the RouterClientPayloadHandler for the ClientPayloads associated with desired_payload_ids.
-            # print('wanted by client')
-            # for x in desired_payload_ids:
-            #     print("\t", x)
             router_handler.handshake_4(self, desired_payload_ids)
 
     """
