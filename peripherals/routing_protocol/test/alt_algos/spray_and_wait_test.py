@@ -94,7 +94,7 @@ def test_spray_and_wait_expiration(setup):
     # feed a Bundle to s0.
     # NOTE:  The Bundle has the last RouterAgent as its destination + r0 is not connected to the last RouterAgent,
     # so the Bundle will be held by all other nodes before reaching its destination.
-    bundle_1 = Bundle(0, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time, BUNDLE_LIFESPAN)
+    bundle_1 = Bundle(1, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time, BUNDLE_LIFESPAN)
     s_dict[0].handle_bundle(bundle_1)
 
     # assert that the Bundle is in s0 and ready to be sprayed.
@@ -115,7 +115,7 @@ def test_spray_and_wait_expiration(setup):
     # feed a new second Bundle to s0.
     # NOTE:  The Bundle has the last RouterAgent as its destination.  r0 is no longer connected to any RouterAgent,
     #        so the Bundle will be held by s0 until it expires.
-    bundle_2 = Bundle(0, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time, BUNDLE_LIFESPAN)
+    bundle_2 = Bundle(2, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time, BUNDLE_LIFESPAN)
     s_dict[0].handle_bundle(bundle_2)
 
     # assert that the second Bundle is in s0 and ready to be sprayed.

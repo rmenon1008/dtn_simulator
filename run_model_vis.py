@@ -31,6 +31,7 @@ def main():
     argParser.add_argument("-m", default="simulations/demo/model_d1.json", help="path to json file with model parameters")
     argParser.add_argument("-rp", default=0, help="choose routing protocol (0-dtn/cgr, 1-epidemic, 2-spray) [default=0]")
     argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
+    argParser.add_argument("--correctness", default=False, action='store_true', help="run with expensive checks to verify invariants")
     argParser.add_argument("--debug", default=False, action='store_true', help="run with debug print statements")
     argParser.add_argument("--log-metrics", default=False, action='store_true', help="path to file to log metrics in")
     argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
@@ -68,6 +69,10 @@ def main():
     # Set routing_protocol param, default = 0
     new_json = model_params.value
     new_json["routing_protocol"] = int(args.rp)
+    model_params.value = json.dumps(new_json)
+
+    new_json = model_params.value
+    new_json["correctness"] = args.correctness
     model_params.value = json.dumps(new_json)
 
     agent_state = ObjectOption(

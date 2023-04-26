@@ -145,11 +145,14 @@
         "detection_thresh": -65
       },
       "movement": {
-        "pattern": "spiral",
+        "pattern": "circle",
         "speed": 3.5,
         "options": {
-          "center": [500,400],
-          "separation": 10
+          "radius": 25,
+          "center": [
+            500,
+            400],
+          "repeat": true
         }
       }
     },
@@ -166,7 +169,7 @@
         "options": {
             "radius": 25,
             "center": [
-              50,
+              150,
               600],
             "repeat": true
         }
