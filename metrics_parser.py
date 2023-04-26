@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 def agg_metric_for_agents(agents, key, agg):
     """
@@ -57,8 +58,18 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.savefig("plotted_metrics.png")
 
 def summary_statistics(title, final_client_metrics, metrics, verify):
-    print("============ Summary Statistics ============")
-    print(title)
+    file_name = "summary_" + time.ctime().replace(" ", "_").replace(":", "_")
+    open(file_name, "x") # create file, error if already exists
+    def log_and_print(str):
+        with open(file_name, "a") as outfile:
+            if "\n" in str:
+                outfile.write(str)
+            else:
+                outfile.write(str + "\n")
+        print(str, flush=True)
+
+    log_and_print("============ Summary Statistics ============")
+    log_and_print(title)
     # Sanity checking:
     if verify:
         for agent in final_client_metrics["agents"]:
@@ -66,7 +77,7 @@ def summary_statistics(title, final_client_metrics, metrics, verify):
             for payload_dict in agent["received_payloads"]:
                 unique_tuple = (payload_dict["drop_id"], payload_dict["creation_timestamp"])
                 if unique_tuple in seen_payloads:
-                    print("INVARIANT VIOLATION dupe payload:", unique_tuple[0], unique_tuple[1])
+                    log_and_print("INVARIANT VIOLATION dupe payload:", unique_tuple[0], unique_tuple[1])
                 else:
                     seen_payloads.add(unique_tuple)
 
@@ -76,9 +87,9 @@ def summary_statistics(title, final_client_metrics, metrics, verify):
     total_payload_latency = agg_metric_for_agents(final_client_metrics["agents"], "pay_recv_latencies", "sum_array")
     if num_payloads_recv > 0:
         avg_payload_latency = total_payload_latency / num_payloads_recv
-        print("Average payload delivery latency: {} ticks".format(avg_payload_latency))
+        log_and_print("Average payload delivery latency: {} ticks".format(avg_payload_latency))
     else:
-        print("Average payload delivery latency: N/A (no payloads were delivered)")
+        log_and_print("Average payload delivery latency: N/A (no payloads were delivered)")
 
     # Metric 1
     # Payload delivery success rate
@@ -86,15 +97,15 @@ def summary_statistics(title, final_client_metrics, metrics, verify):
     num_payloads_picked_up = agg_metric_for_agents(final_client_metrics["agents"], "total_drops_picked_up_from_ground", "sum")
     if num_payloads_picked_up > 0:
         payload_delivery_success_rate = num_payloads_recv / num_payloads_picked_up
-        print("Payload delivery success rate: {}%".format(payload_delivery_success_rate * 100))
+        log_and_print("Payload delivery success rate: {}%".format(payload_delivery_success_rate * 100))
     else:
-        print("Payload delivery success rate: N/A (no payloads were picked up)")
+        log_and_print("Payload delivery success rate: N/A (no payloads were picked up)")
 
     # Metric 2
     # Average bundle storage overhead
     total_bundles_stored = metrics["total_bundles_stored_so_far"]
     avg_bundle_storage_overhead = total_bundles_stored / metrics["num_steps"]
-    print("Average bundle storage overhead: {}".format(avg_bundle_storage_overhead))
+    log_and_print("Average bundle storage overhead: {}".format(avg_bundle_storage_overhead))
 
 
 if __name__ == "__main__":
