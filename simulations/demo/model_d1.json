@@ -1,5 +1,5 @@
 {
-    "max_steps": 10000,
+    "max_steps": 2000,
     "routing_protocol": 0,
     "rssi_noise_stdev": 0,
     "model_speed_limit": 10,
@@ -14,15 +14,8 @@
           475,
           400
         ],
-        "target_id": 10
+        "target_id": 10,
+        "repeat_every": 100
       }
-    ],
-    "make_contact_plan": true,
-    "log_metrics_to_file": true,
-    "metrics_to_plot": [
-      ["routing_protocol.total_bundle_sends", "sum"],
-      ["routing_protocol.curr_num_stored_bundles", "sum"],
-      ["curr_num_stored_payloads", "mean"],
-      ["total_pay_recv_from_router", "sum"]
     ]
   }
