@@ -74,18 +74,18 @@ def main():
         "Initial agent states",
         value=init_agent_params,
     )
-    print("Routing protocol for this simulation is: ", RoutingProtocol(model_params.value["routing_protocol"]))
+    print("Routing protocol for this simulation is: ", RoutingProtocol(model_params.value["routing_protocol"]), flush=True)
     if args.nv:
-        print("\nStarting simulation at {}\n".format(time.ctime()))
+        print("\nStarting simulation at {}\n".format(time.ctime()), flush=True)
         start_time = time.time()
         model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
         max_steps = model_params.value["max_steps"]
         for i in range(max_steps):
             if i % (max_steps / 10) == 0:
-                print("\t step {} out of {}".format(i, max_steps))
+                print("\t step {} out of {}".format(i, max_steps), flush=True)
             model.step()
         elapsed_time = time.time() - start_time
-        print("\n\nSimulation took {} s to run".format(elapsed_time))
+        print("\n\nSimulation took {} s to run".format(elapsed_time), flush=True)
         exit()
 
     # To run simulation with web server

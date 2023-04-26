@@ -27,7 +27,7 @@ def main():
     model_arg += "./simulations/scenario{0}/model_s{0}.json ".format(args.scenario_id)
 
     cmd_str += agent_arg + model_arg
-    print("executing:\n\t{}".format(cmd_str))
+    print("executing:\n\t{}".format(cmd_str), flush=True)
     os.system(cmd_str)
 
 if __name__ == "__main__":
