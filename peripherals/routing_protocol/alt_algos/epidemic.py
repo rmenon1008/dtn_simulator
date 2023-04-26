@@ -31,7 +31,6 @@ class Epidemic:
                 handle_payload(self.model, self.node_id, bundle.payload)
                 self.num_bundle_reached_destination += 1
             else: # else, store it so we can flood it to others
-                print("storing to flood to others")
                 self.curr_bundles.append(bundle)
 
     """
