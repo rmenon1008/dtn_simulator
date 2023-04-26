@@ -197,7 +197,7 @@ class RouterClientPayloadHandler:
                     # create the Bundle.
                     if "debug" in self.model.model_params:
                         print("creating bundle destined to host router:", router_id)
-                    bundle_id = "bundle(routerdst=[{}],{})".format(router_id, payload.get_identifier())
+                    bundle_id = "bundle(routerdst[{}]creationtime[{}],{})".format(router_id, self.model.schedule.time, payload.get_identifier())
                     bundle = Bundle(bundle_id, router_id, payload, self.model.schedule.time, self.model.model_params["bundle_lifespan"])
 
                     # send the Bundle.
