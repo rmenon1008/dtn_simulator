@@ -92,22 +92,28 @@ class ClientClientPayloadHandler:
     def handshake_5(self, router_handler, payloads_for_client: list):
         # store the metadata for the payloads from the router.
         for payload in payloads_for_client:
-            self.already_received_payload_ids.add((payload.get_identifier(), payload.expiration_timestamp))
-            self.num_payloads_received += 1 #TODO: this is incremented  more times than expected
-            latency = self.model.schedule.time - payload.creation_timestamp
-            received_payload_serialized = {
-                "drop_id": payload.drop_id,
-                "source_id": payload.source_client_id,
-                "dest_client_id": payload.dest_client_id,
-                "expiration_timestamp": payload.expiration_timestamp,
-                "creation_timestamp": payload.creation_timestamp,
-                "delivery_timestamp": self.model.schedule.time,
-                "delivery_latency": latency,
-            }
-            if "debug" in self.model.model_params:
-                print("client", self.client_id, "received payload", payload.drop_id)
-            self.received_payloads.append(received_payload_serialized)
-            self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
+            unique_tuple = (payload.get_identifier(), payload.expiration_timestamp)
+            if unique_tuple in self.already_received_payload_ids:
+                # TODO: find out why this is happening.
+                # handshake_3() should have prevented this from happening
+                print("found a dupe in handdshake_5")
+            else:
+                self.already_received_payload_ids.add(unique_tuple)
+                self.num_payloads_received += 1
+                latency = self.model.schedule.time - payload.creation_timestamp
+                received_payload_serialized = {
+                    "drop_id": payload.drop_id,
+                    "source_id": payload.source_client_id,
+                    "dest_client_id": payload.dest_client_id,
+                    "expiration_timestamp": payload.expiration_timestamp,
+                    "creation_timestamp": payload.creation_timestamp,
+                    "delivery_timestamp": self.model.schedule.time,
+                    "delivery_latency": latency,
+                }
+                if "debug" in self.model.model_params:
+                    print("client", self.client_id, "received payload", payload.drop_id)
+                self.received_payloads.append(received_payload_serialized)
+                self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
 
         # send the stored outgoing payloads to the router.
         # note: if false, this if statement ends the handshake early
