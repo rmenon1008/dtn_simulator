@@ -58,7 +58,7 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.savefig("plotted_metrics.png")
 
 def summary_statistics(title, final_client_metrics, metrics, verify):
-    file_name = "summary_" + time.ctime().replace(" ", "_").replace(":", "_")
+    file_name = "summary_" + time.ctime().replace(" ", "_").replace(":", "_") + ".txt"
     open(file_name, "x") # create file, error if already exists
     def log_and_print(str):
         with open(file_name, "a") as outfile:
