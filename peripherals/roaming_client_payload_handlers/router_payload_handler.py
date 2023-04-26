@@ -15,6 +15,7 @@ class RouterClientPayloadHandler:
         self.CLIENT_MAPPING_TIMEOUT = model.model_params["host_router_mapping_timeout"]
         self.router_id = router_id
         self.model = model
+        self.seen_payload_ids = set() # for deduping
         self.payloads_received_for_client = {}  # map of client_ids->[set of ClientPayloads]
         self.outgoing_payloads_to_send = []  # stores payloads for us to attempt to send with each `refresh()`
         self.client_router_mapping_dict = {}  # dict of client_id->(dict of router_id->(expiration timestamp))
@@ -73,7 +74,9 @@ class RouterClientPayloadHandler:
             self.payloads_received_for_client[payload.dest_client_id] = set()
 
         # store the payload in the dict for the client.
-        self.payloads_received_for_client[payload.dest_client_id].add(payload)
+        if payload.get_identifier() not in self.seen_payload_ids:
+            self.seen_payload_ids.add(payload.get_identifier())
+            self.payloads_received_for_client[payload.dest_client_id].add(payload)
 
     """
     Executes "step 2" of the handshake process described in README.md.

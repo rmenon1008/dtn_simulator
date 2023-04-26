@@ -9,23 +9,29 @@ class Storage:
         # initialize dictionary to store bundles.
         self.model = model
 
+        self.seen_bundle_ids = set() # for deduping
+
         # key = destination
         # value = list containing bundles which need to be sent to that destination.
         # implementation invariant: there are no empty lists. if there are no bundles, there should be no key
         self.stored_message_dict = dict()
 
+    def seen_before(self, bundle):
+        return bundle.bundle_id in self.seen_bundle_ids
+
     """
     Adds a bundle to the storage.
-    Returns true iff this bundle was already in storage and doesn't change anything
+    If this bundle was seen before, return true and don't do anything.
     """
     def store_bundle(self, dest_id, bundle):
-        if self.bundle_is_in_storage(bundle):
+        if self.seen_before(bundle):
             return True
-    
-        if dest_id not in self.stored_message_dict:
-            self.stored_message_dict[dest_id] = []
-        self.stored_message_dict[dest_id].append(bundle)
-        return False
+        else:
+            self.seen_bundle_ids.add(bundle.bundle_id)
+            if dest_id not in self.stored_message_dict:
+                self.stored_message_dict[dest_id] = []
+            self.stored_message_dict[dest_id].append(bundle)
+            return False
 
     """
     Returns list of all destination IDs for the bundles in storage
@@ -44,18 +50,6 @@ class Storage:
         for bundle_list in self.stored_message_dict.values():
             all_bundles += bundle_list
         return all_bundles
-        
-    """
-    Returns if we already have the passed Bundle in storage.
-    """
-    def bundle_is_in_storage(self, bundle):
-
-        # check if we've ever stored any bundles for the dest node.
-        if bundle.dest_id not in self.stored_message_dict:
-            return False
-
-        # check if the bundle is stored
-        return bundle in self.stored_message_dict[bundle.dest_id]
     
     """
     Returns list of bundles destined to the given dest_id
