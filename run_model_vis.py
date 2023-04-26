@@ -61,7 +61,7 @@ def main():
 
     if args.log_metrics:
         new_json = model_params.value
-        new_json["log_metrics_to_file"] = True
+        new_json["log_metrics"] = True
         model_params.value = json.dumps(new_json)
 
     # Set routing_protocol param, default = 0

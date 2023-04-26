@@ -56,15 +56,23 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.legend()
     plt.savefig("plotted_metrics.png")
 
-def summary_statistics(metrics):
+def summary_statistics(final_client_metrics, metrics):
     print("============ Summary Statistics ============")
-    # Model final metrics
-    final_entry = metrics[-1]
+    # Sanity checking:
+
+    for agent in final_client_metrics["agents"]:
+        seen_payloads = set()
+        for payload_dict in agent["received_payloads"]:
+            unique_tuple = (payload_dict["drop_id"], payload_dict["creation_timestamp"])
+            if unique_tuple in seen_payloads:
+                print("dupe payload:", unique_tuple[0], unique_tuple[1])
+            else:
+                seen_payloads.add(unique_tuple)
 
     # Metric 0 
     # Average payload delivery latency
-    num_payloads_recv = agg_metric_for_agents(final_entry["agents"], "total_pay_recv_from_router", "sum")
-    total_payload_latency = agg_metric_for_agents(final_entry["agents"], "pay_recv_latencies", "sum_array")
+    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
+    total_payload_latency = agg_metric_for_agents(final_client_metrics["agents"], "pay_recv_latencies", "sum_array")
     if num_payloads_recv > 0:
         avg_payload_latency = total_payload_latency / num_payloads_recv
         print("Average payload delivery latency: {} ticks".format(avg_payload_latency))
@@ -73,8 +81,8 @@ def summary_statistics(metrics):
 
     # Metric 1
     # Payload delivery success rate
-    num_payloads_recv = agg_metric_for_agents(final_entry["agents"], "total_pay_recv_from_router", "sum")
-    num_payloads_picked_up = agg_metric_for_agents(final_entry["agents"], "total_drops_picked_up_from_ground", "sum")
+    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
+    num_payloads_picked_up = agg_metric_for_agents(final_client_metrics["agents"], "total_drops_picked_up_from_ground", "sum")
     if num_payloads_picked_up > 0:
         payload_delivery_success_rate = num_payloads_recv / num_payloads_picked_up
         print("Payload delivery success rate: {}%".format(payload_delivery_success_rate * 100))
@@ -83,9 +91,8 @@ def summary_statistics(metrics):
 
     # Metric 2
     # Average bundle storage overhead
-    bundles_stored_at_each_step = [agg_metric_for_agents(entry["agents"], "routing_protocol.curr_num_stored_bundles", "sum") for entry in metrics]
-    # If no bundles were stored, result is 0.
-    avg_bundle_storage_overhead = sum(bundles_stored_at_each_step) / len(bundles_stored_at_each_step)
+    total_bundles_stored = metrics["total_bundles_stored_so_far"]
+    avg_bundle_storage_overhead = total_bundles_stored / metrics["num_steps"]
     print("Average bundle storage overhead: {}".format(avg_bundle_storage_overhead))
 
 
