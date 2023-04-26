@@ -116,8 +116,8 @@ class LunarModel(mesa.Model):
 
         self.schedule.step()
         
-        # TODO: only do this when asked to?
-        self.__update_metrics()
+        if "log_metrics" in self.model_params:
+            self.__update_metrics()
 
         if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
             if self.schedule.steps >= self.model_params["max_steps"]:
@@ -128,13 +128,8 @@ class LunarModel(mesa.Model):
         if "make_contact_plan" in self.model_params:
             self.__generate_contact_plan()
         
-        if "log_metrics_to_file" in self.model_params:
-            self.__log_metrics_to_file()
+        if "log_metrics" in self.model_params:
             summary_statistics(self.metrics)
-            
-
-        if "metrics_to_plot" in self.model_params:
-            parse_and_plot(self.metrics, self.model_params["metrics_to_plot"])
 
     def __track_contacts(self):
         curr_step = self.schedule.steps
@@ -204,6 +199,8 @@ class LunarModel(mesa.Model):
                 self.data_drops.append(drop)
             elif "repeat_every" in drop:
                 # TODO: Have an option to stop repeating after a certain amount of time
+                if "until" in drop and self.schedule.steps > drop["until"]:
+                    continue
                 if (self.schedule.steps - drop["time"]) % drop["repeat_every"] == 0 and self.schedule.steps > drop["time"]:
                     self.data_drops.append(drop)
 
@@ -309,12 +306,6 @@ class LunarModel(mesa.Model):
         }
 
         self.metrics.append(metric_entry)
-
-    def __log_metrics_to_file(self):
-        """Logs the metrics to a file"""
-        print("logging metrics to file...")
-        with open(self.metrics_file, "w") as outfile:
-            outfile.write(json.dumps(self.metrics, indent=2))
 
     """
     Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.

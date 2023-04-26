@@ -3,6 +3,7 @@ from lunar_vis import LunarVis
 import mesa
 import json
 import argparse
+import time
 
 from peripherals.movement import *
 from agent.router_agent import RoutingProtocol
@@ -61,7 +62,7 @@ def main():
 
     if args.log_metrics:
         new_json = model_params.value
-        new_json["log_metrics_to_file"] = True
+        new_json["log_metrics"] = True
         model_params.value = json.dumps(new_json)
 
     # Set routing_protocol param, default = 0
@@ -75,12 +76,16 @@ def main():
     )
     print("Routing protocol for this simulation is: ", RoutingProtocol(model_params.value["routing_protocol"]))
     if args.nv:
+        print("\nStarting simulation at {}\n".format(time.ctime()))
+        start_time = time.time()
         model = LunarModel(size=(SIM_WIDTH,SIM_HEIGHT), model_params=model_params.value, initial_state=agent_state.value)
         max_steps = model_params.value["max_steps"]
         for i in range(max_steps):
             if i % (max_steps / 10) == 0:
                 print("\t step {} out of {}".format(i, max_steps))
             model.step()
+        elapsed_time = time.time() - start_time
+        print("\n\nSimulation took {} s to run".format(elapsed_time))
         exit()
 
     # To run simulation with web server

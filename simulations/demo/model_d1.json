@@ -18,7 +18,7 @@
       }
     ],
     "make_contact_plan": true,
-    "log_metrics_to_file": true,
+    "log_metrics": true,
     "metrics_to_plot": [
       ["routing_protocol.total_bundle_sends", "sum"],
       ["routing_protocol.curr_num_stored_bundles", "sum"],

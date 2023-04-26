@@ -16,7 +16,7 @@ Model parameters defines model-wide constants
         # Schedule of data drops
         #   - Drops can be picked up by any client that comes within 5 units
         #   - A payload is created from the drop and stored on the client
-        #   - repeat_every is optional and can be used to repeat a drop every n ticks
+        #   - repeat_every is optional and can be used to repeat a drop every n steps
       {
         "drop_id": 0,
         "time": 5000,
@@ -26,6 +26,7 @@ Model parameters defines model-wide constants
         ],
         "target_id": 9,
         "repeat_every": 100 
+        "until": 750        # optional parameter for "repeat_every". Repeat this drop until "until" steps is reached.
       },
       {
         "drop_id": 1,
