@@ -1,6 +1,9 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import os
+from random import randint
 
 def agg_metric_for_agents(agents, key, agg):
     """
@@ -23,6 +26,9 @@ def agg_metric_for_agents(agents, key, agg):
         else:
             metric_vals.append(val)
 
+    if len(metric_vals) == 0:
+        return None
+
     if agg == "sum":
         return sum(metric_vals)
     elif agg == "ave":
@@ -31,6 +37,8 @@ def agg_metric_for_agents(agents, key, agg):
         return min(metric_vals)
     elif agg == "max":
         return max(metric_vals)
+    elif agg == "sum_array":
+        return sum(sum(x) for x in metric_vals)
     
 
 def parse_and_plot(metrics, metrics_to_plot):
@@ -51,13 +59,47 @@ def parse_and_plot(metrics, metrics_to_plot):
     plt.legend()
     plt.savefig("plotted_metrics.png")
 
-def __main__():
+def summary_statistics(final_client_metrics, metrics, verify):
+    # Sanity checking:
+    if verify:
+        for agent in final_client_metrics["agents"]:
+            seen_payloads = set()
+            for payload_dict in agent["received_payloads"]:
+                unique_tuple = (payload_dict["drop_id"], payload_dict["creation_timestamp"])
+                if unique_tuple in seen_payloads:
+                    print("INVARIANT VIOLATION dupe payload:", unique_tuple[0], unique_tuple[1])
+                else:
+                    seen_payloads.add(unique_tuple)
+
+    # Metric 0 
+    # Average payload delivery latency
+    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
+    total_payload_latency = agg_metric_for_agents(final_client_metrics["agents"], "pay_recv_latencies", "sum_array")
+    avg_payload_latency = None
+    if num_payloads_recv > 0:
+        avg_payload_latency = total_payload_latency / num_payloads_recv
+    # Metric 1
+    # Payload delivery success rate
+    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
+    num_payloads_picked_up = agg_metric_for_agents(final_client_metrics["agents"], "total_drops_picked_up_from_ground", "sum")
+    payload_delivery_success_rate = None
+    if num_payloads_picked_up > 0:
+        payload_delivery_success_rate = (num_payloads_recv / num_payloads_picked_up) * 100
+
+    # Metric 2
+    # Average bundle storage overhead
+    total_bundles_stored = metrics["total_bundles_stored_so_far"]
+    avg_bundle_storage_overhead = total_bundles_stored / metrics["num_steps"]
+    return (avg_payload_latency, payload_delivery_success_rate, avg_bundle_storage_overhead)
+
+
+if __name__ == "__main__":
     metrics = json.load(open("metrics.json", "r"))
     metrics_to_plot = [
-        ("agent.client_agent.ClientAgent.num_data_drops", "sum"),
-        ("agent.client_agent.ClientAgent.num_data_drops", "mean"),
-        ("agent.client_agent.ClientAgent.num_data_drops", "min"),
-        ("agent.client_agent.ClientAgent.num_data_drops", "max"),
+        ("routing_protocol.total_bundle_sends", "sum"),
+        ("routing_protocol.curr_num_stored_bundles", "sum"),
+        ("curr_num_stored_payloads", "mean"),
+        ("total_pay_recv_from_router", "sum")
     ]
 
     parse_and_plot(metrics, metrics_to_plot)

@@ -1,14 +1,14 @@
-from random import randint
-
 from payload import Payload
 from peripherals.routing_protocol.routing_protocol_common import Bundle
-from peripherals.routing_protocol.dtn.storage import Storage
+from peripherals.routing_protocol.cgr.storage import Storage
 
 import mesa
 from mockito import mock
 
+BUNDLE_LIFESPAN = 2500
+
 def test_bundle_lifecycle():
-    # setup a dummy model object used by the DTN objects.
+    # setup a dummy model object used by the CGR objects.
     schedule = mesa.time.RandomActivation(mesa.Model())
     dummy_model = mock({"schedule": schedule})
 
@@ -16,8 +16,8 @@ def test_bundle_lifecycle():
     storage = Storage(dummy_model)
 
     # store a bundle in the Storage.
-    dest_id = randint
-    bundle_1 = Bundle(randint, dest_id, Payload(), 0)
+    dest_id = 123
+    bundle_1 = Bundle(1, dest_id, Payload(), 0, BUNDLE_LIFESPAN)
     storage.store_bundle(dest_id, bundle_1)
 
     # successfully get the bundle from Storage + assert it looks as expected.
@@ -25,7 +25,7 @@ def test_bundle_lifecycle():
     assert bundle_1 == retrieved_bundle_1
 
     # store a second bundle in the Storage.
-    bundle_2 = Bundle(randint, dest_id, Payload(), 0)
+    bundle_2 = Bundle(2, dest_id, Payload(), 0, BUNDLE_LIFESPAN)
     storage.store_bundle(dest_id, bundle_2)
 
     # successfully get the second bundle from Storage + assert it looks as expected.
@@ -36,7 +36,7 @@ def test_bundle_lifecycle():
 
 
 def test_bundle_expiration():
-    # setup a dummy model object used by the DTN objects.
+    # setup a dummy model object used by the CGR objects.
     schedule = mesa.time.RandomActivation(mesa.Model())
     dummy_model = mock({"schedule": schedule})
 
@@ -44,8 +44,8 @@ def test_bundle_expiration():
     storage = Storage(dummy_model)
 
     # store an expired bundle in the Storage.
-    dest_id = randint
-    expired_bundle = Bundle(randint, dest_id, Payload(), schedule.time - Bundle.EXPIRATION_LIFESPAN - 1)
+    dest_id = 123
+    expired_bundle = Bundle(1, dest_id, Payload(), schedule.time - BUNDLE_LIFESPAN - 1, BUNDLE_LIFESPAN)
     storage.store_bundle(dest_id, expired_bundle)
 
     # verify that the expired_bundle is in Storage.

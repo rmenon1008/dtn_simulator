@@ -50,11 +50,12 @@ def setup():
 
 def test_spray_and_wait_propagation(setup):
     schedule, mocked_model, r_dict, s_dict = setup
+    BUNDLE_LIFESPAN = 2500
 
     # feed a Bundle to s0.
     # NOTE:  The Bundle has the last RouterAgent as its destination + r0 is not connected to the last RouterAgent,
     # so the Bundle will be held by all other nodes before reaching its destination.
-    bundle = Bundle(0, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time)
+    bundle = Bundle(0, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time, BUNDLE_LIFESPAN)
     s_dict[0].handle_bundle(bundle)
 
     # assert that the Bundle is in s0 and ready to be sprayed.
@@ -89,11 +90,11 @@ def test_spray_and_wait_propagation(setup):
 
 def test_spray_and_wait_expiration(setup):
     schedule, mocked_model, r_dict, s_dict = setup
-
+    BUNDLE_LIFESPAN = 2500
     # feed a Bundle to s0.
     # NOTE:  The Bundle has the last RouterAgent as its destination + r0 is not connected to the last RouterAgent,
     # so the Bundle will be held by all other nodes before reaching its destination.
-    bundle_1 = Bundle(0, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time)
+    bundle_1 = Bundle(1, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time, BUNDLE_LIFESPAN)
     s_dict[0].handle_bundle(bundle_1)
 
     # assert that the Bundle is in s0 and ready to be sprayed.
@@ -114,14 +115,14 @@ def test_spray_and_wait_expiration(setup):
     # feed a new second Bundle to s0.
     # NOTE:  The Bundle has the last RouterAgent as its destination.  r0 is no longer connected to any RouterAgent,
     #        so the Bundle will be held by s0 until it expires.
-    bundle_2 = Bundle(0, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time)
+    bundle_2 = Bundle(2, SprayAndWait.NUM_NODES_TO_SPRAY, Payload(), schedule.time, BUNDLE_LIFESPAN)
     s_dict[0].handle_bundle(bundle_2)
 
     # assert that the second Bundle is in s0 and ready to be sprayed.
     assert bundle_2 in s_dict[0].bundle_sprays_map.keys()
 
     # advance the clock so that the bundle_1 and bundle_2 expire.
-    for i in range(0, Bundle.EXPIRATION_LIFESPAN):
+    for i in range(0, BUNDLE_LIFESPAN):
         schedule.step()
 
     # refresh all s# objects.

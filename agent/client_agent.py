@@ -14,7 +14,7 @@ from agent.agent_common import try_getting, rssi_find_router_target
 from payload import ClientBeaconPayload
 from peripherals.movement import Movement
 from peripherals.radio import Radio
-from peripherals.roaming_client_payload_handlers.cilent_payload_handler import ClientClientPayloadHandler
+from peripherals.roaming_client_payload_handlers.client_payload_handler import ClientClientPayloadHandler
 
 """
 Used to represent the current mode of the ClientAgent.
@@ -192,7 +192,6 @@ class ClientAgent(mesa.Agent):
             "pos": self.pos,
             "history": self.history,
             "radio": self.radio.get_state(),
-            "total_pay_sent_to_router":  self.payload_handler.num_payloads_sent,
             "total_pay_recv_from_router":  self.payload_handler.num_payloads_received,
             "pay_recv_latencies":  self.payload_handler.received_payload_latencies,
             "received_payloads": self.payload_handler.received_payloads,

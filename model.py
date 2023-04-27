@@ -4,12 +4,13 @@ import mesa
 import itertools
 import json
 
-from metrics_parser import parse_and_plot
+from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
 from agent.client_agent import ClientAgent
 from agent.router_agent import RouterAgent
-
+from agent.epidemic_agent import EpidemicAgent
+from agent.spray_and_wait_agent import SprayAndWaitAgent
 
 def merge(source, destination):
     """
@@ -69,10 +70,14 @@ class LunarModel(mesa.Model):
         self.router_agents = {}
         self.client_agents = {}
 
-        # An array of objects containing model metrics
-        self.metrics_file = "metrics.json"
-        self.metrics = []
+        # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
+        self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0}
+        # Mesa Datacollector stuff
+        self.avg_latency = None
+        self.payload_rate = None
+        self.avg_storage_overhead = None
 
+        # Initialize agents
         for agent_options in initial_state["agents"]:
 
             # Merge the node defaults with the individual node options
@@ -94,13 +99,20 @@ class LunarModel(mesa.Model):
             # Place it on the space
             a = None
             if "type" not in options or options["type"] == "router":
-                a = RouterAgent(self, options, model_params["routing_protocol"])
+                a = RouterAgent(self, options, model_params["backbone_routing_protocol"])
                 self.router_agents[options["id"]] = a
             elif options["type"] == "client":
                 a = ClientAgent(self, options)
                 self.client_agents[options["id"]] = a
+            elif options["type"] == "epidemic":
+                a = EpidemicAgent(self, options)
+                self.router_agents[options["id"]] = a
+            elif options["type"] == "spray":
+                a = SprayAndWaitAgent(self, options)
+                self.router_agents[options["id"]] = a
 
-            print(a)
+            if "debug" in self.model_params:
+                print(a)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 
@@ -112,11 +124,12 @@ class LunarModel(mesa.Model):
         if "data_drop_schedule" in self.model_params:
             self.update_data_drops()
         if "make_contact_plan" in self.model_params:
-            self.__track_contacts()
+            self.__track_contacts(int(self.model_params["make_contact_plan"]))
 
         self.schedule.step()
         
-        self.__update_metrics()
+        if "log_metrics" in self.model_params:
+            self.__update_metrics()
 
         if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
             if self.schedule.steps >= self.model_params["max_steps"]:
@@ -127,29 +140,72 @@ class LunarModel(mesa.Model):
         if "make_contact_plan" in self.model_params:
             self.__generate_contact_plan()
         
-        if "log_metrics_to_file" in self.model_params:
-            self.__log_metrics_to_file()
+        if "log_metrics" in self.model_params:
+            # Log metrics for the last step
+            agent_list = []
+            for agent in self.schedule.agents:
+                metrics = agent.get_state()
+                del metrics["pos"]
+                del metrics["radio"]
+                del metrics["history"]
+                agent_list.append(metrics)
+            final_metric_entry = {
+                "step": self.schedule.steps,
+                "agents": agent_list,
+            }
+            verify = False
+            if "correctness" in self.model_params and self.model_params["correctness"]:
+                verify = True
+            stats = summary_statistics(final_metric_entry, self.metrics, verify)
+            self.avg_latency = stats[0]
+            self.payload_rate = stats[1]
+            self.avg_storage_overhead = stats[2]
 
-        if "metrics_to_plot" in self.model_params:
-            parse_and_plot(self.metrics, self.model_params["metrics_to_plot"])
+    def __track_contacts(self, mode):
+        """
+        mode=0 means track contacts between routers only
+        mode=1 means track contacts between all nodes
+        """
+        # For Epidemic Agents & Spray and Wait Agents, the mode doesn't matter
+        # All nodes are routers, so mode 0 & mode 1 are the same behavior
+        # All nodes are also in the router_agents dict
 
-    def __track_contacts(self):
-        curr_step = self.schedule.steps
-        # Loop through all routers
-        for curr_router_id in self.router_agents:
-            curr_router_agent = self.router_agents[curr_router_id]
-            neighbor_data = self.get_neighbors(curr_router_agent)
-            # Loop through all neighbors of this router
-            for neighbor in neighbor_data:
-                if neighbor["connected"] and neighbor["id"] in self.router_agents:
-                    # Found a connected pair of router agents
-                    pair = frozenset((curr_router_id, neighbor["id"]))
-                    # Add the current step number for this pair
-                    if pair not in self.contacts:
-                        self.contacts[pair] = [curr_step]
-                    elif self.contacts[pair][-1] != curr_step:
-                        # avoid adding duplicate step numbers
-                        self.contacts[pair].append(curr_step)
+        # For Roaming DTN agents, the mode matters
+        if mode == 0:
+            # Loop through only routers
+            for curr_router_id in self.router_agents:
+                curr_router_agent = self.router_agents[curr_router_id]
+                neighbor_data = self.get_neighbors(curr_router_agent)
+                # Loop through all neighbors of this router
+                for neighbor in neighbor_data:
+                    if neighbor["connected"] and neighbor["id"] in self.router_agents:
+                        # Found a connected pair of router agents
+                        pair = frozenset((curr_router_id, neighbor["id"]))
+                        # Add the current step number for this pair
+                        curr_step = self.schedule.steps
+                        if pair not in self.contacts:
+                            self.contacts[pair] = [curr_step]
+                        elif self.contacts[pair][-1] != curr_step:
+                            # avoid adding duplicate step numbers
+                            self.contacts[pair].append(curr_step)
+        elif mode == 1:
+            for curr_agent_id in self.agents:
+                curr_agent = self.agents[curr_agent_id]
+                neighbor_data = self.get_neighbors(curr_agent)
+                # Loop through all neighbors of this agent
+                for neighbor in neighbor_data:
+                    if neighbor["connected"]:
+                        # Found a connected pair of agents
+                        pair = frozenset((curr_agent_id, neighbor["id"]))
+                        # Add the current step number for this pair
+                        curr_step = self.schedule.steps
+                        if pair not in self.contacts:
+                            self.contacts[pair] = [curr_step]
+                        elif self.contacts[pair][-1] != curr_step:
+                            # avoid adding duplicate step numbers
+                            self.contacts[pair].append(curr_step)
+        else:
+            print("error contact plan")
 
     def __generate_contact_plan(self):
         def ranges(i):
@@ -200,6 +256,8 @@ class LunarModel(mesa.Model):
             if drop["time"] == self.schedule.steps:
                 self.data_drops.append(drop)
             elif "repeat_every" in drop:
+                if "until" in drop and self.schedule.steps > drop["until"]:
+                    continue
                 if (self.schedule.steps - drop["time"]) % drop["repeat_every"] == 0 and self.schedule.steps > drop["time"]:
                     self.data_drops.append(drop)
 
@@ -207,11 +265,20 @@ class LunarModel(mesa.Model):
         for drop in self.data_drops:
             for agent in self.schedule.agents:
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
-                    # Make sure the agent is a client
-                    if isinstance(agent, ClientAgent):
-                        agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps))
-                        self.data_drops.remove(drop)
-                        pass
+                    # Make sure the agent is someone who should pickup bundles
+                    if isinstance(agent, ClientAgent) or isinstance(agent, EpidemicAgent) or isinstance(agent, SprayAndWaitAgent):
+                        if isinstance(agent, EpidemicAgent) or isinstance(agent, SprayAndWaitAgent):
+                            if not agent.name.startswith('C'):
+                                # only epidemic agents w/ names starting with C can pickup drops
+                                continue
+                        # TODO: Maybe we need to add a field to drops so that only specific clients can pick up the drop
+                        #       This would help for reasoning about the simulation scenarios being made
+                        # If the drop's target is the nearby client agent, the client will ignore it
+                        # Someone else will pick it up eventually
+                        # Added this condition check bc I witnessed a client taking 2000 steps to get a bundle delivered to itself.
+                        if drop["target_id"] != agent.unique_id:
+                            agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps, self.model_params["payload_lifespan"]))
+                            self.data_drops.remove(drop)
 
     def get_rssi(self, agent, other):
         """Returns the RSSI of the agent to the other agent in dBm"""
@@ -286,25 +353,21 @@ class LunarModel(mesa.Model):
 
     def __update_metrics(self):
         """Logs the metrics for the current step"""
-        agent_list = []
         for agent in self.schedule.agents:
-            metrics = agent.get_state()
-            del metrics["pos"]
-            del metrics["radio"]
-            del metrics["history"]
-            agent_list.append(metrics)
-
-        metric_entry = {
-            "step": self.schedule.steps,
-            "agents": agent_list,
-        }
-
-        self.metrics.append(metric_entry)
-
-    def __log_metrics_to_file(self):
-        """Logs the metrics to a file"""
-        with open(self.metrics_file, "w") as outfile:
-            outfile.write(json.dumps(self.metrics, indent=2))
+            agent_state = agent.get_state()
+            if "routing_protocol" not in agent_state:
+                continue # ignore clients
+            # can assume agent is a router
+            if "correctness" in self.model_params and self.model_params["correctness"]:
+                # check if the router is holding any duplicate bundles
+                seen_bundles = set()
+                for bundle in agent_state["routing_protocol"]["curr_stored_bundles"]:
+                    if str(bundle) in seen_bundles:
+                        print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
+                    else:
+                        seen_bundles.add(str(bundle))
+            # Currently tracking only 1 cumulative metric for router agents only
+            self.metrics["total_bundles_stored_so_far"] += agent_state["routing_protocol"]["curr_num_stored_bundles"]
 
     """
     Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.

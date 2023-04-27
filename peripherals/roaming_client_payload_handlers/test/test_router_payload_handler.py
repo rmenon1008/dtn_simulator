@@ -8,7 +8,7 @@ from mockito import verify, mock, spy2, arg_that
 import mesa
 
 from payload import ClientPayload, ClientBeaconPayload, ClientMappingDictPayload
-from peripherals.routing_protocol.dtn.dtn import Dtn
+from peripherals.routing_protocol.cgr.cgr import Cgr
 from peripherals.routing_protocol.routing_protocol_common import Bundle
 from peripherals.roaming_client_payload_handlers.router_payload_handler import RouterClientPayloadHandler
 
@@ -19,6 +19,11 @@ ROUTER_ID_0 = "r0"
 ROUTER_ID_1 = "r1"
 CLIENT_ID_0 = "c0"
 CLIENT_ID_1 = "c1"
+DROP_ID_0 = 0
+DROP_ID_1 = 1
+DROP_ID_2 = 2
+
+PAYLOAD_LIFESPAN = 5000
 
 """
 Tests that payloads stored-to-be-sent-to-a-client can expire.
@@ -26,13 +31,13 @@ Tests that payloads stored-to-be-sent-to-a-client can expire.
 def test_handle_payload_refresh_payload_expires():
     # set up a dummy model object used by the RouterClientPayloadHandler object.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
+    dummy_model = mock({"schedule": schedule, "model_params": {"host_router_mapping_timeout": 2500}})
 
     # create the router_handler
-    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Dtn(0, dummy_model))
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Cgr(0, dummy_model))
 
     # create a payload object.
-    payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time)
+    payload = ClientPayload(DROP_ID_0, CLIENT_ID_1, CLIENT_ID_0, dummy_model.schedule.time, PAYLOAD_LIFESPAN)
 
     # make the router handle the payload.
     router_handler.handle_payload(payload)
@@ -41,7 +46,7 @@ def test_handle_payload_refresh_payload_expires():
     assert payload in router_handler.payloads_received_for_client.get(CLIENT_ID_0)
 
     # move the schedule forward such that the payload expires.
-    expire_timestamp = ClientPayload.EXPIRATION_LIFESPAN + 1
+    expire_timestamp = PAYLOAD_LIFESPAN + 1
     for i in range(0, expire_timestamp):
         schedule.step()
 
@@ -58,10 +63,10 @@ Tests that payloads stored-to-be-sent-to-a-client can expire.
 def test_update_client_mapping_refresh_mapping_expires():
     # set up a dummy model object used by the RouterClientPayloadHandler object.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
+    dummy_model = mock({"schedule": schedule, "model_params": {"host_router_mapping_timeout": 2500}})
 
     # create the router_handler
-    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Dtn(0, dummy_model))
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, Cgr(0, dummy_model))
 
     # create a ClientBeaconPayload object.
     beacon_payload = ClientBeaconPayload(CLIENT_ID_0)
@@ -73,7 +78,7 @@ def test_update_client_mapping_refresh_mapping_expires():
     assert ROUTER_ID_0 in router_handler.client_router_mapping_dict.get(CLIENT_ID_0).keys()
 
     # move the schedule forward such that the entry expires.
-    expire_timestamp = RouterClientPayloadHandler.CLIENT_MAPPING_TIMEOUT + 1
+    expire_timestamp = router_handler.CLIENT_MAPPING_TIMEOUT + 1
     for i in range(0, expire_timestamp):
         schedule.step()
 
@@ -86,27 +91,28 @@ def test_update_client_mapping_refresh_mapping_expires():
 
 """
 Tests that with each refresh...
-- Outgoing payloads with a known DTN route are sent out.
-- Outgoing payloads without a known DTN route are stored.
+- Outgoing payloads with a known CGR route are sent out.
+- Outgoing payloads without a known CGR route are stored.
 - Outgoing payloads which are expired are thrown out.
 """
 def test_send_stored_outgoing_payloads():
     # set up a dummy model object used by the RouterClientPayloadHandler object.
     schedule = mesa.time.RandomActivation(mesa.Model())
-    dummy_model = mock({"schedule": schedule})
-    dtn = Dtn(0, dummy_model)
-    spy2(dtn.handle_bundle)
+    dummy_model = mock({"schedule": schedule, "model_params": {"host_router_mapping_timeout": 2500, "bundle_lifespan": 2500}})
+    cgr = Cgr(0, dummy_model)
+    spy2(cgr.handle_bundle)
 
     # create the router_handler
-    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, dtn)
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, cgr)
 
     # store a dict with a route to CLIENT_ID_1 in the router_handler.
     router_handler.client_router_mapping_dict = {CLIENT_ID_1: {ROUTER_ID_1: sys.maxsize}}
 
     # create + store the three payloads in the router_handler.
-    known_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time)
-    unknown_payload = ClientPayload(CLIENT_ID_1, CLIENT_ID_0, schedule.time)
-    expired_payload = ClientPayload(CLIENT_ID_0, CLIENT_ID_1, schedule.time - ClientPayload.EXPIRATION_LIFESPAN - 1)
+    known_payload = ClientPayload(DROP_ID_0, CLIENT_ID_0, CLIENT_ID_1, schedule.time, PAYLOAD_LIFESPAN)
+    unknown_payload = ClientPayload(DROP_ID_1, CLIENT_ID_1, CLIENT_ID_0, schedule.time, PAYLOAD_LIFESPAN)
+    expired_payload = ClientPayload(DROP_ID_2, CLIENT_ID_0, CLIENT_ID_1, schedule.time - PAYLOAD_LIFESPAN - 1, PAYLOAD_LIFESPAN)
+
     router_handler.handshake_6([known_payload, unknown_payload, expired_payload])
 
     # assert that the three payloads are in the router_handler.
@@ -121,12 +127,11 @@ def test_send_stored_outgoing_payloads():
     # due to issues with mockito, we need to use a custom function here to match the Bundle fed to the DTN call.
     def bundle_match(other_bundle: Bundle):
         if other_bundle.dest_id == ROUTER_ID_1 \
-                and other_bundle.payload == known_payload \
-                and other_bundle.bundle_id == known_payload.get_identifier():
+                and other_bundle.payload == known_payload:
             return True
         else:
             return False
-    verify(dtn, times=1).handle_bundle(arg_that(lambda bundle: bundle_match(bundle)))
+    verify(cgr, times=1).handle_bundle(arg_that(lambda bundle: bundle_match(bundle)))
 
     # assert that unknown_payload was _not_ sent out.
     assert unknown_payload in router_handler.outgoing_payloads_to_send
@@ -143,7 +148,8 @@ This means two particular cases:
 """
 def test_handle_mapping_dict():
     # create the router_handler
-    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, mock(), mock())
+    dummy_model = mock({"model_params": {"host_router_mapping_timeout": 2500}})
+    router_handler = RouterClientPayloadHandler(ROUTER_ID_0, dummy_model, mock())
 
     # add two entries to the dict:
     # - c1: r0: timestamp = 1

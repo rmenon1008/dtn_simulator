@@ -28,7 +28,7 @@ def setup():
     agents = {ROUTER_ID_1: mock({"payload_handler": mocked_router_1_payload_handler}, spec=RouterAgent),
               ROUTER_ID_2: mock({"payload_handler": mocked_router_2_payload_handler}, spec=RouterAgent),
               CLIENT_ID_0: mock({"payload_handler": mocked_client_0_payload_handler}, spec=ClientAgent)}
-    mocked_model = mock({"schedule": schedule, "agents": agents, "model_params": {"model_speed_limit": 10}})
+    mocked_model = mock({"schedule": schedule, "agents": agents, "model_params": {"model_speed_limit": 10, "host_router_mapping_timeout": 2500}})
 
     # set up the RouterAgent.
     router_agent = RouterAgent(mocked_model, {"id": ROUTER_ID_0,
@@ -45,7 +45,8 @@ def setup():
                                               "radio": {
                                                   "detection_thresh": 20,
                                                   "connection_thresh": 10}
-                                              }
+                                              },
+                                              0
                                )
 
     # mock the peripherals in the ClientAgent
