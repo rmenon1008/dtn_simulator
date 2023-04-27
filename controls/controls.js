@@ -25,10 +25,17 @@ function ModelController() {
     this.render = (data) => {
         this.receivedFrames += 1;
         console.log("Received frames " + this.receivedFrames + " / " + this.tick)
-        if (this.tick - this.receivedFrames > 5) {
+        if (this.tick - this.receivedFrames > 2) {
             console.log("Too many frames behind, reducing FPS");
-            this.changeFPS(this.fps - 1);
+            this.changeFPS(Math.ceil(this.fps * 0.8));
+        } 
+        else if (fpsSlider.value - this.fps > 2) {
+            console.log("Attempting to increase FPS")
+            this.changeFPS(Math.ceil(this.fps + 1));
         }
+
+        // console.log(Number(fpsValue.innerText) - this.fps);
+
         visualizationElements.forEach((element, index) => {
             element.render(data[index]);
         });
@@ -72,7 +79,11 @@ function ModelController() {
 
     this.changeFPS = (fps) => {
         this.fps = fps;
-        fpsValue.innerText = fps;
+        if (fps < fpsSlider.value) {
+            fpsValue.innerText = fps + " (set: " + fpsSlider.value + ")";
+        } else {
+            fpsValue.innerText = fps;
+        }
         if (this.running) {
             this.stop();
             this.start();
