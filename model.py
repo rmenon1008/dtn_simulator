@@ -71,7 +71,7 @@ class LunarModel(mesa.Model):
         self.client_agents = {}
 
         # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
-        self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0}
+        self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0, "total_payloads_stored_so_far": 0}
         # Mesa Datacollector stuff
         self.avg_latency = None
         self.payload_rate = None
@@ -355,9 +355,17 @@ class LunarModel(mesa.Model):
         """Logs the metrics for the current step"""
         for agent in self.schedule.agents:
             agent_state = agent.get_state()
+                    
             if "routing_protocol" not in agent_state:
+                # Client payload count is stored here:
+                self.metrics["total_payloads_stored_so_far"] += agent_state["curr_num_stored_payloads"]
                 continue # ignore clients
+            
             # can assume agent is a router
+
+            # Router payload count stored here:
+            self.metrics["total_payloads_stored_so_far"] += agent_state["outgoing_payloads_to_send"]
+
             if "correctness" in self.model_params and self.model_params["correctness"]:
                 # check if the router is holding any duplicate bundles
                 seen_bundles = set()

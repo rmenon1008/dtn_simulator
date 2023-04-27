@@ -88,8 +88,8 @@ def summary_statistics(final_client_metrics, metrics, verify):
 
     # Metric 2
     # Average bundle storage overhead
-    total_bundles_stored = metrics["total_bundles_stored_so_far"]
-    avg_bundle_storage_overhead = total_bundles_stored / metrics["num_steps"]
+    total_data_stored = metrics["total_bundles_stored_so_far"] + metrics["total_payloads_stored_so_far"]
+    avg_bundle_storage_overhead = total_data_stored / metrics["num_steps"]
     return (avg_payload_latency, payload_delivery_success_rate, avg_bundle_storage_overhead)
 
 
