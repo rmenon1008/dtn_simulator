@@ -3,13 +3,12 @@
     "radio": {
       "detection_thresh": -60,
       "connection_thresh": -50
-    },
-    "cp_file": "simulations/scenario2/5000steps_cp_s2.json"
+    }
   },
   "agents": [
     {
       "name": "P1",
-      "type": "router",
+      "type": "spray",
       "id": 1,
       "movement": {
         "pattern": "arc",
@@ -27,7 +26,7 @@
     },
     {
       "name": "P2",
-      "type": "router",
+      "type": "spray",
       "id": 2,
       "movement": {
         "pattern": "waypoints",
@@ -44,7 +43,7 @@
     },
     {
       "name": "P3",
-      "type": "router",
+      "type": "spray",
       "id": 3,
       "movement": {
         "pattern": "circle",
@@ -60,7 +59,7 @@
     },
     {
       "name": "L1",
-      "type": "router",
+      "type": "spray",
       "id": 4,
       "movement": {
         "pattern": "fixed",
@@ -75,7 +74,7 @@
     },
     {
       "name": "L2",
-      "type": "router",
+      "type": "spray",
       "id": 5,
       "movement": {
         "pattern": "fixed",
@@ -91,7 +90,7 @@
     {
       "name": "C1",
       "comment": "loops left of map -> loops right of map -> loops bottom of map -> repeat",
-      "type": "client",
+      "type": "spray",
       "id": 6,
       "radio": {
         "detection_thresh": -65
@@ -136,7 +135,7 @@
     {
       "name": "C2",
       "comment": "loops right of map -> loops bottom of map -> loops left of map -> repeat",
-      "type": "client",
+      "type": "spray",
       "id": 7,
       "radio": {
         "detection_thresh": -65
@@ -182,7 +181,7 @@
     {
       "name": "C3",
       "comment": "loops bottom of map -> loops left of map -> loops right of map -> repeat",
-      "type": "client",
+      "type": "spray",
       "id": 8,
       "radio": {
         "detection_thresh": -65

@@ -3,13 +3,12 @@
     "radio": {
       "detection_thresh": -60,
       "connection_thresh": -50
-    },
-    "cp_file": "simulations/demo/10000steps_cp_d1.json"
+    }
   },
   "agents": [
     {
       "name": "P1",
-      "type": "router",
+      "type": "epidemic",
       "id": 1,
       "movement": {
         "pattern": "arc",
@@ -27,7 +26,7 @@
     },
     {
       "name": "P2",
-      "type": "router",
+      "type": "epidemic",
       "id": 2,
       "movement": {
         "pattern": "waypoints",
@@ -45,7 +44,7 @@
     {
       "name": "P3",
       "id": 3,
-      "type": "router",
+      "type": "epidemic",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -62,7 +61,7 @@
     {
       "name": "P4",
       "id": 4,
-      "type": "router",
+      "type": "epidemic",
       "movement": {
         "pattern": "waypoints",
         "speed": 2.5,
@@ -78,7 +77,7 @@
     },
     {
       "name": "P5",
-      "type": "router",
+      "type": "epidemic",
       "id": 5,
       "movement": {
         "pattern": "circle",
@@ -94,7 +93,7 @@
     },
     {
       "name": "L1",
-      "type": "router",
+      "type": "epidemic",
       "id": 6,
       "movement": {
         "pattern": "fixed",
@@ -109,7 +108,7 @@
     },
     {
       "name": "L2",
-      "type": "router",
+      "type": "epidemic",
       "id": 7,
       "movement": {
         "pattern": "fixed",
@@ -124,7 +123,7 @@
     },
     {
       "name": "L3",
-      "type": "router",
+      "type": "epidemic",
       "id": 8,
       "movement": {
         "pattern": "fixed",
@@ -139,39 +138,78 @@
     },
     {
       "name": "C1",
-      "type": "client",
+      "comment": "stays in top left corner",
+      "type": "epidemic",
       "id": 9,
       "radio": {
         "detection_thresh": -65
       },
       "movement": {
-        "pattern": "circle",
+        "pattern": "spline",
         "speed": 3.5,
         "options": {
-          "radius": 25,
-          "center": [
-            500,
-            400],
+          "control_points": [
+            [100,150],
+            [150,150],
+            [275,200],
+            [250,300],
+            [130,400],
+            [175,260],
+            [100,150]
+          ],
           "repeat": true
         }
       }
     },
     {
       "name": "C2",
-      "type": "client",
+      "comment": "stays in top right corner",
+      "type": "epidemic",
       "id": 10,
       "radio": {
         "detection_thresh": -65
       },
       "movement": {
-        "pattern": "circle",
+        "pattern": "spline",
         "speed": 3.5,
         "options": {
-            "radius": 25,
-            "center": [
-              150,
-              600],
-            "repeat": true
+          "control_points": [
+            [750,150],
+            [750,200],
+            [950,150],
+            [850,275],
+            [950,300],
+            [700,400],
+            [850,150],
+            [750,150]
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "name": "C3",
+      "comment": "stays in bottom middle",
+      "type": "epidemic",
+      "id": 11,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600]
+          ],
+          "repeat": true
         }
       }
     }

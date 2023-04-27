@@ -4,7 +4,7 @@
       "detection_thresh": -60,
       "connection_thresh": -50
     },
-    "cp_file": "simulations/demo/5000steps_cp_d1.json"
+    "cp_file": "simulations/scenario2/10000steps_cp_s2.json"
   },
   "agents": [
     {
@@ -13,12 +13,12 @@
       "id": 1,
       "movement": {
         "pattern": "arc",
-        "speed": 2.5,
+        "speed": 0.75,
         "options": {
             "control_points": [
-              [0, 0],
-              [0, 650],
-              [250, 325]
+              [200, 0],
+              [200, 650],
+              [400, 325]
             ],
             "repeat": true,
             "bounce": false
@@ -30,13 +30,12 @@
       "type": "router",
       "id": 2,
       "movement": {
-        "pattern": "arc",
-        "speed": 3,
+        "pattern": "waypoints",
+        "speed": 0.5,
         "options": {
-            "control_points": [
-              [200, 0],
-              [200, 650],
-              [50, 325]
+            "waypoints": [
+              [700, 649],
+              [700, 0]
             ],
             "repeat": true,
             "bounce": false
@@ -48,44 +47,8 @@
       "type": "router",
       "id": 3,
       "movement": {
-        "pattern": "arc",
-        "speed": 4,
-        "options": {
-            "control_points": [
-              [325, 0],
-              [325, 650],
-              [50, 400]
-            ],
-            "repeat": true,
-            "bounce": false
-        }
-      }
-    },
-    {
-      "name": "P4",
-      "type": "router",
-      "id": 4,
-      "movement": {
-        "pattern": "arc",
-        "speed": 4,
-        "options": {
-            "control_points": [
-              [600, 0],
-              [650, 650],
-              [40, 800]
-            ],
-            "repeat": true,
-            "bounce": false
-        }
-      }
-    },
-    {
-      "name": "P5",
-      "type": "router",
-      "id": 5,
-      "movement": {
         "pattern": "circle",
-        "speed": 6,
+        "speed": 1.0,
         "options": {
             "radius": 324,
             "center": [
@@ -98,14 +61,14 @@
     {
       "name": "L1",
       "type": "router",
-      "id": 6,
+      "id": 4,
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-           515,
-            100
+            100,
+            320
           ]
         }
       }
@@ -113,29 +76,14 @@
     {
       "name": "L2",
       "type": "router",
-      "id": 7,
+      "id": 5,
       "movement": {
         "pattern": "fixed",
         "speed": 0,
         "options": {
           "pos": [
-            70,
-            550
-          ]
-        }
-      }
-    },
-    {
-      "name": "L3",
-      "type": "router",
-      "id": 8,
-      "movement": {
-        "pattern": "fixed",
-        "speed": 0,
-        "options": {
-          "pos": [
-           825,
-            535
+            570,
+            160
           ]
         }
       }
@@ -144,7 +92,7 @@
       "name": "C1",
       "comment": "loops left of map -> loops right of map -> loops bottom of map -> repeat",
       "type": "client",
-      "id": 9,
+      "id": 6,
       "radio": {
         "detection_thresh": -65
       },
@@ -189,7 +137,7 @@
       "name": "C2",
       "comment": "loops right of map -> loops bottom of map -> loops left of map -> repeat",
       "type": "client",
-      "id": 10,
+      "id": 7,
       "radio": {
         "detection_thresh": -65
       },
@@ -235,7 +183,7 @@
       "name": "C3",
       "comment": "loops bottom of map -> loops left of map -> loops right of map -> repeat",
       "type": "client",
-      "id": 11,
+      "id": 8,
       "radio": {
         "detection_thresh": -65
       },

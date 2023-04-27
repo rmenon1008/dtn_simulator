@@ -114,10 +114,9 @@ class RouterAgent(mesa.Agent):
             "curr_num_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
             "curr_payloads_received_for_client": curr_payloads_received_for_client,
             "radio": self.radio.get_state(),
-            "type": "router"
+            "type": "router",
+            "name": self.name
         }
-        if self.name:
-            state["name"] = self.name
         return state
     
     def __get_curr_num_payloads_received_for_client(self):
