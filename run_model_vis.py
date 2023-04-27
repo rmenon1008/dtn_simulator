@@ -207,7 +207,7 @@ def main():
     title = model_params.value["scenario_name"] + "\n"
     if sim_type == 0:
         title += "\tSimulator: Roaming DTN\n"
-        title += "\tBackbone Routing Protocol: {}\n".format(str(RoutingProtocol(model_params.value["backbone_routing_protocol"])))
+        title += "\tBackbone Routing Protocol: {}\n".format(str(RoutingProtocol(model_params.value["backbone_routing_protocol"])).split('.')[1])
     elif sim_type == 1:
         title += "\tSimulator: Epidemic\n"
     elif sim_type == 2:

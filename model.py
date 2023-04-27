@@ -153,7 +153,10 @@ class LunarModel(mesa.Model):
                 "step": self.schedule.steps,
                 "agents": agent_list,
             }
-            stats = summary_statistics(final_metric_entry, self.metrics, self.model_params["correctness"])
+            verify = False
+            if "correctness" in self.model_params and self.model_params["correctness"]:
+                verify = True
+            stats = summary_statistics(final_metric_entry, self.metrics, verify)
             self.avg_latency = stats[0]
             self.payload_rate = stats[1]
             self.avg_storage_overhead = stats[2]
@@ -327,7 +330,7 @@ class LunarModel(mesa.Model):
             if "routing_protocol" not in agent_state:
                 continue # ignore clients
             # can assume agent is a router
-            if self.model_params["correctness"]:
+            if "correctness" in self.model_params and self.model_params["correctness"]:
                 # check if the router is holding any duplicate bundles
                 seen_bundles = set()
                 for bundle in agent_state["routing_protocol"]["curr_stored_bundles"]:
