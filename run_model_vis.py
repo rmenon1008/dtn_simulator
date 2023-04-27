@@ -129,9 +129,9 @@ def main():
     argParser.add_argument("--correctness", default=False, action='store_true', help="run with expensive checks to verify invariants")
     argParser.add_argument("--debug", default=False, action='store_true', help="run with debug print statements")
     argParser.add_argument("--log-metrics", default=False, action='store_true', help="path to file to log metrics in")
-    argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
+    argParser.add_argument("--make-contact-plan", help="Make contact plan for connections between... [0-routers-only, 1-all nodes]")
     args = argParser.parse_args()
-    
+
     # Get agent parameters
     init_agent_params = None
     init_model_params = None
@@ -168,7 +168,7 @@ def main():
 
     if args.make_contact_plan:
         new_json = model_params.value
-        new_json["make_contact_plan"] = True
+        new_json["make_contact_plan"] = args.make_contact_plan
         model_params.value = json.dumps(new_json)
 
     if args.log_metrics or int(args.b) > 0:

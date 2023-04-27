@@ -124,7 +124,7 @@ class LunarModel(mesa.Model):
         if "data_drop_schedule" in self.model_params:
             self.update_data_drops()
         if "make_contact_plan" in self.model_params:
-            self.__track_contacts()
+            self.__track_contacts(int(self.model_params["make_contact_plan"]))
 
         self.schedule.step()
         
@@ -161,23 +161,51 @@ class LunarModel(mesa.Model):
             self.payload_rate = stats[1]
             self.avg_storage_overhead = stats[2]
 
-    def __track_contacts(self):
-        curr_step = self.schedule.steps
-        # Loop through all routers
-        for curr_router_id in self.router_agents:
-            curr_router_agent = self.router_agents[curr_router_id]
-            neighbor_data = self.get_neighbors(curr_router_agent)
-            # Loop through all neighbors of this router
-            for neighbor in neighbor_data:
-                if neighbor["connected"] and neighbor["id"] in self.router_agents:
-                    # Found a connected pair of router agents
-                    pair = frozenset((curr_router_id, neighbor["id"]))
-                    # Add the current step number for this pair
-                    if pair not in self.contacts:
-                        self.contacts[pair] = [curr_step]
-                    elif self.contacts[pair][-1] != curr_step:
-                        # avoid adding duplicate step numbers
-                        self.contacts[pair].append(curr_step)
+    def __track_contacts(self, mode):
+        """
+        mode=0 means track contacts between routers only
+        mode=1 means track contacts between all nodes
+        """
+        # For Epidemic Agents & Spray and Wait Agents, the mode doesn't matter
+        # All nodes are routers, so mode 0 & mode 1 are the same behavior
+        # All nodes are also in the router_agents dict
+
+        # For Roaming DTN agents, the mode matters
+        if mode == 0:
+            # Loop through only routers
+            for curr_router_id in self.router_agents:
+                curr_router_agent = self.router_agents[curr_router_id]
+                neighbor_data = self.get_neighbors(curr_router_agent)
+                # Loop through all neighbors of this router
+                for neighbor in neighbor_data:
+                    if neighbor["connected"] and neighbor["id"] in self.router_agents:
+                        # Found a connected pair of router agents
+                        pair = frozenset((curr_router_id, neighbor["id"]))
+                        # Add the current step number for this pair
+                        curr_step = self.schedule.steps
+                        if pair not in self.contacts:
+                            self.contacts[pair] = [curr_step]
+                        elif self.contacts[pair][-1] != curr_step:
+                            # avoid adding duplicate step numbers
+                            self.contacts[pair].append(curr_step)
+        elif mode == 1:
+            for curr_agent_id in self.agents:
+                curr_agent = self.agents[curr_agent_id]
+                neighbor_data = self.get_neighbors(curr_agent)
+                # Loop through all neighbors of this agent
+                for neighbor in neighbor_data:
+                    if neighbor["connected"]:
+                        # Found a connected pair of agents
+                        pair = frozenset((curr_agent_id, neighbor["id"]))
+                        # Add the current step number for this pair
+                        curr_step = self.schedule.steps
+                        if pair not in self.contacts:
+                            self.contacts[pair] = [curr_step]
+                        elif self.contacts[pair][-1] != curr_step:
+                            # avoid adding duplicate step numbers
+                            self.contacts[pair].append(curr_step)
+        else:
+            print("error contact plan")
 
     def __generate_contact_plan(self):
         def ranges(i):
