@@ -1,0 +1,277 @@
+{
+  "agent_defaults": {
+    "radio": {
+      "detection_thresh": -60,
+      "connection_thresh": -50
+    }
+  },
+  "agents": [
+    {
+      "name": "P1",
+      "type": "spray",
+      "id": 1,
+      "movement": {
+        "pattern": "arc",
+        "speed": 2.5,
+        "options": {
+            "control_points": [
+              [0, 0],
+              [0, 650],
+              [200, 325]
+            ],
+            "repeat": true,
+            "bounce": false
+        }
+      }
+    },
+    {
+      "name": "P2",
+      "type": "spray",
+      "id": 2,
+      "movement": {
+        "pattern": "waypoints",
+        "speed": 2.5,
+        "options": {
+            "waypoints": [
+              [200, 649],
+              [200, 0]
+            ],
+            "repeat": true,
+            "bounce": false
+        }
+      }
+    },
+    {
+      "name": "P3",
+      "id": 3,
+      "type": "spray",
+      "movement": {
+        "pattern": "waypoints",
+        "speed": 2.5,
+        "options": {
+            "waypoints": [
+              [300, 0],
+              [300, 649]
+            ],
+            "repeat": true,
+            "bounce": false
+        }
+      }
+    },
+    {
+      "name": "P4",
+      "id": 4,
+      "type": "spray",
+      "movement": {
+        "pattern": "waypoints",
+        "speed": 2.5,
+        "options": {
+            "waypoints": [
+              [700, 649],
+              [700, 0]
+            ],
+            "repeat": true,
+            "bounce": false
+        }
+      }
+    },
+    {
+      "name": "P5",
+      "type": "spray",
+      "id": 5,
+      "movement": {
+        "pattern": "circle",
+        "speed": 3.5,
+        "options": {
+            "radius": 324,
+            "center": [
+              500,
+              325],
+            "repeat": true
+        }
+      }
+    },
+    {
+      "name": "L1",
+      "type": "spray",
+      "id": 6,
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            50,
+            550
+          ]
+        }
+      }
+    },
+    {
+      "name": "L2",
+      "type": "spray",
+      "id": 7,
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            400,
+            100
+          ]
+        }
+      }
+    },
+    {
+      "name": "L3",
+      "type": "spray",
+      "id": 8,
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            650,
+            500
+          ]
+        }
+      }
+    },
+    {
+      "name": "C1",
+      "comment": "loops left of map -> loops right of map -> loops bottom of map -> repeat",
+      "type": "spray",
+      "id": 9,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+            [100,150],
+            [150,150],
+            [275,200],
+            [250,300],
+            [130,400],
+            [175,260],
+            [100,150],
+
+            [750,150],
+            [750,200],
+            [950,150],
+            [850,275],
+            [950,300],
+            [700,400],
+            [850,150],
+            [750,150],
+
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600],
+
+            [100,150]
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "name": "C2",
+      "comment": "loops right of map -> loops bottom of map -> loops left of map -> repeat",
+      "type": "spray",
+      "id": 10,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+
+            [750,150],
+            [750,200],
+            [950,150],
+            [850,275],
+            [950,300],
+            [700,400],
+            [850,150],
+            [750,150],
+
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600],
+
+            [100,150],
+            [150,150],
+            [275,200],
+            [250,300],
+            [130,400],
+            [175,260],
+            [100,150],
+
+            [750,150]
+          ],
+          "repeat": true
+        }
+      }
+    },
+    {
+      "name": "C3",
+      "comment": "loops bottom of map -> loops left of map -> loops right of map -> repeat",
+      "type": "spray",
+      "id": 11,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "movement": {
+        "pattern": "spline",
+        "speed": 3.5,
+        "options": {
+          "control_points": [
+
+            [500,600],
+            [600,400],
+            [500,500],
+            [550,450],
+            [400,500],
+            [400,550],
+            [450,625],
+            [500,600],
+
+            [100,150],
+            [150,150],
+            [275,200],
+            [250,300],
+            [130,400],
+            [175,260],
+            [100,150],
+
+            [750,150],
+            [750,200],
+            [950,150],
+            [850,275],
+            [950,300],
+            [700,400],
+            [850,150],
+            [750,150],
+            
+            [500,600]
+          ],
+          "repeat": true
+        }
+      }
+    }
+  ]
+}

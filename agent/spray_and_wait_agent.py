@@ -4,15 +4,15 @@ from agent.agent_common import try_getting
 
 from peripherals.radio import Radio
 from peripherals.movement import Movement
-from peripherals.routing_protocol.alt_algos.epidemic import Epidemic
-from peripherals.epidemic_payload_handler import EpidemicPayloadHandler
+from peripherals.routing_protocol.alt_algos.spray_and_wait import SprayAndWait
+from peripherals.spray_and_wait_payload_handler import SprayAndWaitPayloadHandler
 
 """
 An EpidemicAgent for a simulator where all nodes are epidemic agents 
 (i.e. there is no differentiation between clients and routers)
 """
 
-class EpidemicAgent(mesa.Agent):
+class SprayAndWaitAgent(mesa.Agent):
     # Maximum length of the history to keep. Prevents the simulation from slowing down.
     MAX_HISTORY_LENGTH = 150
 
@@ -25,8 +25,8 @@ class EpidemicAgent(mesa.Agent):
         # Peripherals
         self.movement = Movement(self, model, node_options["movement"])
         self.radio = Radio(self, model, node_options["radio"])
-        self.routing_protocol = Epidemic(self.unique_id, self.model, self)
-        self.payload_handler = EpidemicPayloadHandler(self.unique_id, model, self.routing_protocol)
+        self.routing_protocol = SprayAndWait(self.unique_id, self.model, self)
+        self.payload_handler = SprayAndWaitPayloadHandler(self.unique_id, model, self.routing_protocol)
 
     def update_history(self):
         self.history.append({
@@ -58,7 +58,8 @@ class EpidemicAgent(mesa.Agent):
             "received_payloads": self.payload_handler.received_payloads,
             "total_drops_picked_up_from_ground":  self.payload_handler.num_drops_picked_up,
             "radio": self.radio.get_state(),
-            "type": "router",
-            "name": self.name
+            "type": "router"
         }
+        if self.name:
+            state["name"] = self.name
         return state

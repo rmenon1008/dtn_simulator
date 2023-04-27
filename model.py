@@ -7,9 +7,10 @@ import json
 from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
-from agent.epidemic_agent import EpidemicAgent
 from agent.client_agent import ClientAgent
 from agent.router_agent import RouterAgent
+from agent.epidemic_agent import EpidemicAgent
+from agent.spray_and_wait_agent import SprayAndWaitAgent
 
 def merge(source, destination):
     """
@@ -105,6 +106,9 @@ class LunarModel(mesa.Model):
                 self.client_agents[options["id"]] = a
             elif options["type"] == "epidemic":
                 a = EpidemicAgent(self, options)
+                self.router_agents[options["id"]] = a
+            elif options["type"] == "spray":
+                a = SprayAndWaitAgent(self, options)
                 self.router_agents[options["id"]] = a
 
             if "debug" in self.model_params:
@@ -231,9 +235,8 @@ class LunarModel(mesa.Model):
             for agent in self.schedule.agents:
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
                     # Make sure the agent is someone who should pickup bundles
-                    if isinstance(agent, ClientAgent) or isinstance(agent, EpidemicAgent):
-                        # TODO: for epidemic, add another check for agents who shouldn't pickup bundles
-                        if isinstance(agent, EpidemicAgent):
+                    if isinstance(agent, ClientAgent) or isinstance(agent, EpidemicAgent) or isinstance(agent, SprayAndWaitAgent):
+                        if isinstance(agent, EpidemicAgent) or isinstance(agent, SprayAndWaitAgent):
                             if not agent.name.startswith('C'):
                                 # only epidemic agents w/ names starting with C can pickup drops
                                 continue

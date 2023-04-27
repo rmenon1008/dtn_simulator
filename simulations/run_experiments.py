@@ -17,13 +17,9 @@ def get_paths_for_scenario(scenario_id):
     elif letter == "d":
         agent_path += "epidemic_roaming_clients_s{}.json".format(num)
     elif letter == "e":
-        print("e unavailable")
-        exit()
+        agent_path += "spray_and_wait_stable_clients_s{}.json".format(num)
     elif letter == "f":
-        print("f unavailable")
-        exit()
-    print(model_path)
-    print(agent_path)
+        agent_path += "spray_and_wait_roaming_clients_s{}.json".format(num)
     return model_path, agent_path
 
 def get_cmd_str():

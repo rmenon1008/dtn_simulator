@@ -9,13 +9,13 @@ from payload import ClientPayload
 from peripherals.routing_protocol.routing_protocol_common import Bundle
 
 
-class EpidemicPayloadHandler:
-    def __init__(self, agent_id, model, epidemic_router):
+class SprayAndWaitPayloadHandler:
+    def __init__(self, agent_id, model, spray_and_wait_router):
         self.agent_id = agent_id
         self.model = model
         self.seen_payload_ids = set() # for deduping
 
-        self.epidemic_router = epidemic_router  # the Epidemic router used to handle bundles
+        self.spray_and_wait_router = spray_and_wait_router  # the Spray and Wait router used to handle bundles
 
         self.num_payloads_received = 0 # from another router
         self.num_drops_picked_up = 0 # from the ground
@@ -23,10 +23,10 @@ class EpidemicPayloadHandler:
         self.received_payload_latencies = []
 
     """
-    This is called when an Epidemic agent encounters a payload on the ground.
+    This is called when a Spray and Wait agent encounters a payload on the ground.
     - Note, this is not called if the payload on the ground is for itself (the model prevents agents from picking it up)
     - Immediately turns the payload into N bundles, where N is the # of agents in the simulation.
-    - Hands these bundles over to the Epidemic protocol
+    - Hands these bundles over to the Spray and Wait protocol
     """
     def store_payload(self, payload: ClientPayload):
         if payload.get_identifier() in self.seen_payload_ids:
@@ -38,10 +38,10 @@ class EpidemicPayloadHandler:
         # Make a bundle targeted to the payload's target
         bundle_id = "bundle(routerdst[{}]creationtime[{}],{})".format(payload.dest_client_id, self.model.schedule.time, payload.get_identifier())
         bundle = Bundle(bundle_id, payload.dest_client_id, payload, self.model.schedule.time, self.model.model_params["bundle_lifespan"])
-        self.epidemic_router.handle_bundle(bundle) # epidemic will store-and-forward
+        self.spray_and_wait_router.handle_bundle(bundle) # spray and wait will store-and-forward
    
     """
-    This is called when an Epidemic agent unwraps a bundle received from another agent,
+    This is called when an Spray and Wait agent unwraps a bundle received from another agent,
     which was meant for itself.
     """
     def handle_payload(self, payload: ClientPayload):
@@ -65,7 +65,7 @@ class EpidemicPayloadHandler:
         self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
 
     """
-    Refreshes the state of the EpidemicPayloadHandler.
+    Refreshes the state of the SprayAndWaitPayloadHandler.
     """
     def refresh(self):
         pass
