@@ -25,13 +25,13 @@ def get_paths_for_scenario(scenario_id):
 def get_cmd_str():
     argParser = argparse.ArgumentParser()
     argParser.add_argument("s", help="")
-    argParser.add_argument("-rp", default=False, help="choose backbone routing protocol (0-cgr, 1-epidemic, 2-spray) [default=0]")
-    argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
-    argParser.add_argument("-b", default=False, help="run n batches")
-    argParser.add_argument("--correctness", default=False, action='store_true', help="run with expensive checks to verify invariants")
-    argParser.add_argument("--debug", default=False, action='store_true', help="run with debug print statements")
-    argParser.add_argument("--log-metrics", default=False, action='store_true', help="path to file to log metrics in")
-    argParser.add_argument("--make-contact-plan", default=False, action='store_true', help="simulation tracks contacts between nodes and generates a contact plan")
+    argParser.add_argument("-rp", default=False, help="see run_model_vis.py")
+    argParser.add_argument("-nv", default=False, action='store_true', help="see run_model_vis.py")
+    argParser.add_argument("-b", default=False, help="see run_model_vis.py")
+    argParser.add_argument("--correctness", default=False, action='store_true', help="see run_model_vis.py")
+    argParser.add_argument("--debug", default=False, action='store_true', help="see run_model_vis.py")
+    argParser.add_argument("--log-metrics", default=False, action='store_true', help="see run_model_vis.py")
+    argParser.add_argument("--make-contact-plan", help="see run_model_vis.py")
     argParser.add_argument("--dry-run", default=False, action='store_true', help="don't execute the command")
     args = argParser.parse_args()
     model_path, agent_path = get_paths_for_scenario(args.s)
@@ -47,7 +47,7 @@ def get_cmd_str():
     if args.log_metrics:
         cmd_str += "--log-metrics "
     if args.make_contact_plan:
-        cmd_str += "--make-contact-plan "
+        cmd_str += "--make-contact-plan {}".format(args.make_contact_plan)
     print("Executing:\n\t{}".format(cmd_str), flush=True)
     if args.dry_run:
         exit()
