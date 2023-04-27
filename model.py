@@ -7,8 +7,9 @@ import json
 from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
 from payload import ClientPayload
+from agent.epidemic_agent import EpidemicAgent
 from agent.client_agent import ClientAgent
-from agent.router_agent import RouterAgent, RoutingProtocol
+from agent.router_agent import RouterAgent
 
 def merge(source, destination):
     """
@@ -74,10 +75,6 @@ class LunarModel(mesa.Model):
         self.avg_latency = None
         self.payload_rate = None
         self.avg_storage_overhead = None
-        self.datacollector = mesa.DataCollector(model_reporters={"avg_latency": "avg_latency",
-                                                                 "payload_rate": "payload_rate",
-                                                                 "avg_storage_overhead": "avg_storage_overhead"
-                                                                 })
 
         # Initialize agents
         for agent_options in initial_state["agents"]:
@@ -101,13 +98,17 @@ class LunarModel(mesa.Model):
             # Place it on the space
             a = None
             if "type" not in options or options["type"] == "router":
-                a = RouterAgent(self, options, model_params["routing_protocol"])
+                a = RouterAgent(self, options, model_params["backbone_routing_protocol"])
                 self.router_agents[options["id"]] = a
             elif options["type"] == "client":
                 a = ClientAgent(self, options)
                 self.client_agents[options["id"]] = a
+            elif options["type"] == "epidemic":
+                a = EpidemicAgent(self, options)
+                self.router_agents[options["id"]] = a
 
-            # print(a)
+            if "debug" in self.model_params:
+                print(a)
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 
@@ -140,8 +141,6 @@ class LunarModel(mesa.Model):
             agent_list = []
             for agent in self.schedule.agents:
                 metrics = agent.get_state()
-                if metrics["type"] == "router":
-                    continue
                 del metrics["pos"]
                 del metrics["radio"]
                 del metrics["history"]
@@ -231,8 +230,13 @@ class LunarModel(mesa.Model):
         for drop in self.data_drops:
             for agent in self.schedule.agents:
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
-                    # Make sure the agent is a client
-                    if isinstance(agent, ClientAgent):
+                    # Make sure the agent is someone who should pickup bundles
+                    if isinstance(agent, ClientAgent) or isinstance(agent, EpidemicAgent):
+                        # TODO: for epidemic, add another check for agents who shouldn't pickup bundles
+                        if isinstance(agent, EpidemicAgent):
+                            if not agent.name.startswith('C'):
+                                # only epidemic agents w/ names starting with C can pickup drops
+                                continue
                         # TODO: Maybe we need to add a field to drops so that only specific clients can pick up the drop
                         #       This would help for reasoning about the simulation scenarios being made
                         # If the drop's target is the nearby client agent, the client will ignore it
@@ -316,20 +320,20 @@ class LunarModel(mesa.Model):
     def __update_metrics(self):
         """Logs the metrics for the current step"""
         for agent in self.schedule.agents:
-            metrics = agent.get_state()
-            if "routing_protocol" not in metrics:
+            agent_state = agent.get_state()
+            if "routing_protocol" not in agent_state:
                 continue # ignore clients
             # can assume agent is a router
             if self.model_params["correctness"]:
                 # check if the router is holding any duplicate bundles
                 seen_bundles = set()
-                for bundle in metrics["routing_protocol"]["curr_stored_bundles"]:
+                for bundle in agent_state["routing_protocol"]["curr_stored_bundles"]:
                     if str(bundle) in seen_bundles:
                         print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
                     else:
                         seen_bundles.add(str(bundle))
             # Currently tracking only 1 cumulative metric for router agents only
-            self.metrics["total_bundles_stored_so_far"] += metrics["routing_protocol"]["curr_num_stored_bundles"]
+            self.metrics["total_bundles_stored_so_far"] += agent_state["routing_protocol"]["curr_num_stored_bundles"]
 
     """
     Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.

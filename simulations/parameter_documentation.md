@@ -6,7 +6,6 @@ Model parameters defines model-wide constants
 ```
 {
     "max_steps": 10000,         # Max number of steps to run the model for (can be None)
-    "routing_protocol": 0,      # Protocol used by backbone (0 -> CGR, 1 -> Epidemic, 2 -> Spray and Wait)
     "rssi_noise_stdev": 0,      # Standard deviation of the noise added to RSSI values
     "model_speed_limit": 10,    # Maximum speed of any agent in the model in m/s
     "host_router_mapping_timeout": 1000, # How long a client to host router mapping should be valid for
@@ -67,7 +66,7 @@ Agent parameters defines the agents that will be created and their initial state
     # Agents is a list of agents that will be created by the model
   "agents": [
     {
-      "name": "P1",             # name used for visualization/human debugging
+      "name": "P1",             # name used for special identification
       "type": "router",         # can be a "router" or a "client".
       "id": 1,                  # unique id used for doing work within simulation
       "movement": {
