@@ -1,0 +1,14 @@
+============ Simulation Results (10 Trials) ============
+Scenario 2
+	Simulator: Epidemic
+	Model File: ./simulations/scenario2/model_s2.json
+	Agent File: ./simulations/scenario2/epidemic_stable_clients_s2.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 959.1779071958227 ticks (stdev=63.40677336099095)
+Payload delivery success rate: 91.47058823529412% (stdev=0.3427479895980882)
+Average bundle storage overhead: 445.13405 (stdev=4.836757501386873)

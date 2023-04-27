@@ -1,0 +1,14 @@
+============ Simulation Results (10 Trials) ============
+Scenario 3
+	Simulator: Spray-and-Wait
+	Model File: ./simulations/scenario3/model_s3.json
+	Agent File: ./simulations/scenario3/spray_and_wait_roaming_clients_s3.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 367.09313238122155 ticks (stdev=7.838789441446123)
+Payload delivery success rate: 96.0% (stdev=0.37203266590216244)
+Average bundle storage overhead: 44.653639999999996 (stdev=1.3618865340238722)

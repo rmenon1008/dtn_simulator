@@ -1,0 +1,227 @@
+====================================================================================================================================================================================
+$ python simulations/run_single_experiment.py 1c --make-contact-plan 0 -nv
+Executing:
+        python run_model_vis.py -m ./simulations/scenario1/model_s1.json -a ./simulations/scenario1/epidemic_stable_clients_s1.json -nv --make-contact-plan 0
+Scenario 1c
+        Simulator: Epidemic
+        Model File: ./simulations/scenario1/model_s1.json
+        Agent File: ./simulations/scenario1/epidemic_stable_clients_s1.json
+        RSSI Noise St. Deviation: 2
+        Model Speed Limit: 10 m/s
+        Max Steps: 10000 steps
+        Host Router Timeout: 2000 steps
+        Payload Lifespan: 5000 steps
+        Bundle Lifespan: 5000 steps
+---------------------------------------------------------------------------------------------
+Contact Plan File:  data_analysis/1c_m0_n2_a.json
+        Total Contact Time: 45194
+        Total Num Contacts: 10508
+        Average Contact Time: 4.300913589645984
+        Num Unique Partners: 27
+        
+Contact Plan File:  data_analysis/1c_m0_n2_b.json
+        Total Contact Time: 45284
+        Total Num Contacts: 10386
+        Average Contact Time: 4.360100134796842
+        Num Unique Partners: 28
+        
+Contact Plan File:  data_analysis/1c_m0_n2_c.json
+        Total Contact Time: 45068
+        Total Num Contacts: 10464
+        Average Contact Time: 4.306957186544342
+        Num Unique Partners: 29
+---------------------------------------------------------------------------------------------
+
+Metric                  Mean            STDEV
+Total Contact Time:     45182           108.4988479
+Total Num Contacts:     10452.66667     61.78457197
+Average Contact Time:   4.32265697      0.0325672257
+Num Unique Partners:    28              1
+
+=================================================================================================================
+$ python simulations/run_single_experiment.py 1d --make-contact-plan 0 -nv
+Executing:
+        python run_model_vis.py -m ./simulations/scenario1/model_s1.json -a ./simulations/scenario1/epidemic_roaming_clients_s1.json -nv --make-contact-plan 0
+Scenario 1d
+        Simulator: Epidemic
+        Model File: ./simulations/scenario1/model_s1.json
+        Agent File: ./simulations/scenario1/epidemic_roaming_clients_s1.json
+        RSSI Noise St. Deviation: 2
+        Model Speed Limit: 10 m/s
+        Max Steps: 10000 steps
+        Host Router Timeout: 2000 steps
+        Payload Lifespan: 5000 steps
+        Bundle Lifespan: 5000 steps
+---------------------------------------------------------------------------------------------
+Contact Plan File:  data_analysis/1d_m0_n2_a.json
+        Total Contact Time: 41566
+        Total Num Contacts: 9552
+        Average Contact Time: 4.351549413735343
+        Num Unique Partners: 35
+
+Contact Plan File:  data_analysis/1d_m0_n2_b.json
+        Total Contact Time: 41492
+        Total Num Contacts: 9676
+        Average Contact Time: 4.288135593220339
+        Num Unique Partners: 35
+
+Contact Plan File:  data_analysis/1d_m0_n2_c.json
+        Total Contact Time: 41286
+        Total Num Contacts: 9776
+        Average Contact Time: 4.223199672667758
+        Num Unique Partners: 37
+
+---------------------------------------------------------------------------------------------
+
+Metric                  Mean            STDEV
+Total Contact Time:     41448           145.0930736
+Total Num Contacts:     9668            112.2140811
+Average Contact Time:   4.287628227     0.06417637473
+Num Unique Partners:    35.66666667     1.154700538
+
+====================================================================================================================================================================================
+$ python simulations/run_single_experiment.py 2c --make-contact-plan 0 -nv
+Executing:
+        python run_model_vis.py -m ./simulations/scenario2/model_s2.json -a ./simulations/scenario2/epidemic_stable_clients_s2.json -nv --make-contact-plan 0
+Scenario 2c
+        Simulator: Epidemic
+        Model File: ./simulations/scenario2/model_s2.json
+        Agent File: ./simulations/scenario2/epidemic_stable_clients_s2.json
+        RSSI Noise St. Deviation: 2
+        Model Speed Limit: 10 m/s
+        Max Steps: 10000 steps
+        Host Router Timeout: 2000 steps
+        Payload Lifespan: 5000 steps
+        Bundle Lifespan: 5000 steps
+---------------------------------------------------------------------------------------------
+Contact Plan File:  data_analysis/2c_m0_n2_a.json
+        Total Contact Time: 21968
+        Total Num Contacts: 4590
+        Average Contact Time: 4.7860566448801745
+        Num Unique Partners: 17
+        
+Contact Plan File:  data_analysis/2c_m0_n2_b.json
+        Total Contact Time: 22060
+        Total Num Contacts: 4546
+        Average Contact Time: 4.852617685877695
+        Num Unique Partners: 17
+        
+Contact Plan File:  data_analysis/2c_m0_n2_c.json
+        Total Contact Time: 22194
+        Total Num Contacts: 4538
+        Average Contact Time: 4.890700749228735
+        Num Unique Partners: 18
+
+---------------------------------------------------------------------------------------------
+
+TODO: Calculate mean & stdev
+
+=================================================================================================================
+$ python simulations/run_single_experiment.py 2d --make-contact-plan 0 -nv
+Executing:
+        python run_model_vis.py -m ./simulations/scenario2/model_s2.json -a ./simulations/scenario2/epidemic_roaming_clients_s2.json -nv --make-contact-plan 0
+Scenario 2d
+        Simulator: Epidemic
+        Model File: ./simulations/scenario2/model_s2.json
+        Agent File: ./simulations/scenario2/epidemic_roaming_clients_s2.json
+        RSSI Noise St. Deviation: 2
+        Model Speed Limit: 10 m/s
+        Max Steps: 10000 steps
+        Host Router Timeout: 2000 steps
+        Payload Lifespan: 5000 steps
+        Bundle Lifespan: 5000 steps
+---------------------------------------------------------------------------------------------
+Contact Plan File:  data_analysis/2d_m0_n2_a.json
+        Total Contact Time: 20138
+        Total Num Contacts: 4978
+        Average Contact Time: 4.045399758939333
+        Num Unique Partners: 23
+        
+Contact Plan File:  data_analysis/2d_m0_n2_b.json
+        Total Contact Time: 20222
+        Total Num Contacts: 4884
+        Average Contact Time: 4.1404586404586405
+        Num Unique Partners: 23
+        
+Contact Plan File:  data_analysis/2d_m0_n2_c.json
+        Total Contact Time: 20430
+        Total Num Contacts: 4848
+        Average Contact Time: 4.214108910891089
+        Num Unique Partners: 22
+---------------------------------------------------------------------------------------------
+
+TODO: Calculate mean & stdev
+
+====================================================================================================================================================================================
+$ python simulations/run_single_experiment.py 3c --make-contact-plan 0 -nv
+Executing:
+        python run_model_vis.py -m ./simulations/scenario3/model_s3.json -a ./simulations/scenario3/epidemic_stable_clients_s3.json -nv --make-contact-plan 0
+Scenario 3c
+        Simulator: Epidemic
+        Model File: ./simulations/scenario3/model_s3.json
+        Agent File: ./simulations/scenario3/epidemic_stable_clients_s3.json
+        RSSI Noise St. Deviation: 2
+        Model Speed Limit: 10 m/s
+        Max Steps: 10000 steps
+        Host Router Timeout: 2000 steps
+        Payload Lifespan: 5000 steps
+        Bundle Lifespan: 5000 steps
+---------------------------------------------------------------------------------------------
+Contact Plan File:  data_analysis/3c_m0_n2_a.json
+        Total Contact Time: 34162
+        Total Num Contacts: 7466
+        Average Contact Time: 4.575676399678542
+        Num Unique Partners: 27
+
+Contact Plan File:  data_analysis/3c_m0_n2_b.json
+        Total Contact Time: 34130
+        Total Num Contacts: 7156
+        Average Contact Time: 4.769424259362773
+        Num Unique Partners: 28
+
+Contact Plan File:  data_analysis/3c_m0_n2_c.json
+        Total Contact Time: 34084
+        Total Num Contacts: 7292
+        Average Contact Time: 4.674163466812946
+        Num Unique Partners: 27
+---------------------------------------------------------------------------------------------
+
+TODO: Calculate mean & stdev
+
+=================================================================================================================
+$ python simulations/run_single_experiment.py 3d --make-contact-plan 0 -nv
+Executing:
+        python run_model_vis.py -m ./simulations/scenario3/model_s3.json -a ./simulations/scenario3/epidemic_roaming_clients_s3.json -nv --make-contact-plan 0
+Scenario 3d
+        Simulator: Epidemic
+        Model File: ./simulations/scenario3/model_s3.json
+        Agent File: ./simulations/scenario3/epidemic_roaming_clients_s3.json
+        RSSI Noise St. Deviation: 2
+        Model Speed Limit: 10 m/s
+        Max Steps: 10000 steps
+        Host Router Timeout: 2000 steps
+        Payload Lifespan: 5000 steps
+        Bundle Lifespan: 5000 steps
+---------------------------------------------------------------------------------------------
+Contact Plan File:  data_analysis/3d_m0_n2_a.json
+        Total Contact Time: 33756
+        Total Num Contacts: 7086
+        Average Contact Time: 4.763759525825572
+        Num Unique Partners: 36
+
+Contact Plan File:  data_analysis/3d_m0_n2_b.json
+        Total Contact Time: 33510
+        Total Num Contacts: 7296
+        Average Contact Time: 4.592927631578948
+        Num Unique Partners: 38
+
+Contact Plan File:  data_analysis/3d_m0_n2_c.json
+        Total Contact Time: 33670
+        Total Num Contacts: 7294
+        Average Contact Time: 4.616122840690979
+        Num Unique Partners: 36
+---------------------------------------------------------------------------------------------
+
+TODO: Calculate mean & stdev
+
+====================================================================================================================================================================================
