@@ -46,9 +46,7 @@ def run_batches(num_trials, model_params, agent_state):
     avg_latencies = list(result_unzipped[0])
     avg_payload_rates = list(result_unzipped[1])
     avg_bundles_stored = list(result_unzipped[2])
-    routing_protocol = str(RoutingProtocol(model_params.value["backbone_routing_protocol"])).split('.')[1]
-    print_sim_results(model_params.value["title"], model_params.value["scenario_name"], routing_protocol,
-                      num_processes,
+    print_sim_results(model_params.value["title"], model_params.value["scenario_name"], num_processes,
                       (mean(avg_latencies), stdev(avg_latencies)),
                       (mean(avg_payload_rates), stdev(avg_payload_rates)),
                       (mean(avg_bundles_stored), stdev(avg_bundles_stored)))
@@ -59,14 +57,14 @@ def get_trial_results(trial_num, output_q, model_params, initial_state, max_step
         if i % (max_steps / 10) == 0:
             print("\t Trial {}: {}/{} steps, {}% done".format(trial_num, i, max_steps, 100 * i / max_steps), flush=True)
         model.step()
-    output_tuple = (model.avg_latency, model.payload_rate, model.avg_storage_overhead)
+    output_tuple = (model.avg_latency, model.payload_rate, model.avg_disk_burden)
     output_q.put(output_tuple)
 
-def print_sim_results(title, scenario_name, routing_protocol, num_trials, m0, m1, m2):
+def print_sim_results(title, scenario_name, num_trials, m0, m1, m2):
     if not os.path.exists("out"):
         # Create a new directory because it does not exist
         os.makedirs("out")
-    file_name = "out/" + scenario_name.replace(" ", "_") + "_" + routing_protocol + "_" + time.ctime().replace(" ", "_").replace(":", "_") + ".txt"
+    file_name = "out/" + scenario_name.replace(" ", "_") + "_" + time.ctime().replace(" ", "_").replace(":", "_") + ".txt"
     def log_and_print(str):
         with open(file_name, "a") as outfile:
             if "\n" in str:
@@ -78,7 +76,7 @@ def print_sim_results(title, scenario_name, routing_protocol, num_trials, m0, m1
     log_and_print(title)
     log_and_print("Average payload delivery latency: {} ticks (stdev={})".format(m0[0], m0[1]))
     log_and_print("Payload delivery success rate: {}% (stdev={})".format(m1[0], m1[1]))
-    log_and_print("Average bundle storage overhead: {} (stdev={})".format(m2[0], m2[1]))
+    log_and_print("Average disk burden: {} (stdev={})".format(m2[0], m2[1]))
 
 # No Web Server, CLI only
 def run_cli_only(model_params, agent_state):
@@ -93,14 +91,14 @@ def run_cli_only(model_params, agent_state):
     elapsed_time = time.time() - start_time
     print("\n\nSimulation took {} s to run".format(elapsed_time), flush=True)
     if "log_metrics" in model_params.value:
-        print_stats_for_one_trial(model_params.value["title"], model.avg_latency, model.payload_rate, model.avg_storage_overhead)
+        print_stats_for_one_trial(model_params.value["title"], model.avg_latency, model.payload_rate, model.avg_disk_burden)
 
 def print_stats_for_one_trial(title, m0, m1, m2):
     print("============ Simulation Results ============", flush=True)
     print(title, flush=True)
     print("Average payload delivery latency: {} ticks".format(m0), flush=True)
     print("Payload delivery success rate: {}%".format(m1), flush=True)
-    print("Average bundle storage overhead: {}".format(m2), flush=True)
+    print("Average disk burden: {}".format(m2), flush=True)
 
 # Web Server
 def run_web_server(model_params, agent_state):

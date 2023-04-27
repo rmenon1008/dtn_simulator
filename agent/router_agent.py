@@ -101,16 +101,22 @@ class RouterAgent(mesa.Agent):
             return SprayAndWait(self.unique_id, self.model, self)
 
     def get_state(self):
+        curr_outgoing_payloads_to_send = []
+        for payload in self.payload_handler.outgoing_payloads_to_send:
+            curr_outgoing_payloads_to_send.append(payload.serialize())
+
         curr_payloads_received_for_client = []
         for client_id in self.payload_handler.payloads_received_for_client:
             for payload in self.payload_handler.payloads_received_for_client[client_id]:
                 curr_payloads_received_for_client.append(payload.serialize())
+
         state = {
             "id": self.unique_id,
             "pos": self.pos,
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
-            "outgoing_payloads_to_send": len(self.payload_handler.outgoing_payloads_to_send),
+            "curr_num_outgoing_payloads_to_send": len(self.payload_handler.outgoing_payloads_to_send),
+            "curr_outgoing_payloads_to_send": curr_outgoing_payloads_to_send,
             "curr_num_payloads_received_for_client": self.__get_curr_num_payloads_received_for_client(),
             "curr_payloads_received_for_client": curr_payloads_received_for_client,
             "radio": self.radio.get_state(),

@@ -64,6 +64,8 @@ def summary_statistics(final_client_metrics, metrics, verify):
     if verify:
         for agent in final_client_metrics["agents"]:
             seen_payloads = set()
+            if "received_payloads" not in agent:
+                continue
             for payload_dict in agent["received_payloads"]:
                 unique_tuple = (payload_dict["drop_id"], payload_dict["creation_timestamp"])
                 if unique_tuple in seen_payloads:
@@ -87,10 +89,10 @@ def summary_statistics(final_client_metrics, metrics, verify):
         payload_delivery_success_rate = (num_payloads_recv / num_payloads_picked_up) * 100
 
     # Metric 2
-    # Average bundle storage overhead
+    # Average disk burden
     total_data_stored = metrics["total_bundles_stored_so_far"] + metrics["total_payloads_stored_so_far"]
-    avg_bundle_storage_overhead = total_data_stored / metrics["num_steps"]
-    return (avg_payload_latency, payload_delivery_success_rate, avg_bundle_storage_overhead)
+    avg_disk_burden = total_data_stored / metrics["num_steps"]
+    return (avg_payload_latency, payload_delivery_success_rate, avg_disk_burden)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import argparse
 import json
 
 def read_contact_plan_from_json(filename):
@@ -30,16 +31,21 @@ def get_num_unique_contact_partners(cp):
 def get_cp_name(exp_num):
     return "simulations/scenario{0}/5000steps_cp_s{0}.json".format(exp_num)
 
-experiment_nums = [1, 2, 3]
-for i in experiment_nums:
-    cp = read_contact_plan_from_json(get_cp_name(i))
+def main():
+    argParser = argparse.ArgumentParser()
+    argParser.add_argument("file",  help="path to json file with contact plan")
+    args = argParser.parse_args()
+    cp = read_contact_plan_from_json(args.file)
     total_contact_time = get_total_contact_time(cp)
     total_num_contacts = get_total_num_contacts(cp)
     avg_contact_time = get_avg_contact_time(cp)
     num_unique_partners = get_num_unique_contact_partners(cp)
 
-    print("Scenario", i)
+    print("Contact Plan File: ", args.file)
     print("\tTotal Contact Time:", total_contact_time)
     print("\tTotal Num Contacts:", total_num_contacts)
     print("\tAverage Contact Time:", avg_contact_time)
     print("\tNum Unique Partners:", num_unique_partners)
+
+if __name__ == "__main__":
+    main()

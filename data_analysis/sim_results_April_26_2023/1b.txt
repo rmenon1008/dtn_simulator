@@ -1,0 +1,15 @@
+============ Simulation Results (10 Trials) ============
+Scenario 1
+	Simulator: Roaming DTN
+	Backbone Routing Protocol: CGR
+	Model File: ./simulations/scenario1/model_s1.json
+	Agent File: ./simulations/scenario1/roamdtn_roaming_clients_s1.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 601.2080537632955 ticks (stdev=48.53555319840771)
+Payload delivery success rate: 67.96296296296296% (stdev=4.236385169573701)
+Average bundle storage overhead: 22.84955 (stdev=2.824532160376298)
