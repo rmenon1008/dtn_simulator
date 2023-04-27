@@ -1,0 +1,70 @@
+TODO:
+1. A major weakness of current IMPLEMENTATION of RDTN compared to SAW is that 
+clients dont share with each other if they are in mutual connection range.
+
+(Although in the stable configuration this shouldn't matter 
+b/c clients will never be in mutual connection range)
+
+Could be improved w/ one simple change:
+- If 2 client agents are in connection range with each other,
+  check if they have any payloads meant for each other. If so,
+  move the payloads accordingly and update their metrics accordingly.
+
+2. Another flaw of the current implementation of RDTN is that clients
+ignore routers if they are in connection range, because
+the reconnection interval is strictly followed
+- This could be relaxed by handshaking whenever in mutual connection with a router
+- This would avoid situations where a client is in connection range w/
+a router that has bundles for it, but ignores the router and loses the opportunity
+to receive its bundles.
+===================================================================================================
+
+Success:
+1. epidemic
+
+    Epidemic spreads bundles as much as it can, so a destination should be found
+    more often than the more conservattive propagation methods.
+    
+    Additionally, in Epidemic, all nodes are able to help propagate bundles,
+    including clients.
+
+2. Roaming DTN
+
+    Roaming DTN is similar to spray-and-wait because it waits for host router mappings
+    and generates K number of bundles for each of the available hosts.
+
+    However, RDTN's bundles will propagate throughout the network, while SAW's
+    bundles will only propagate at most 1 hops.
+
+    A fundamental downside of RDTN compared to Epidemic/SAW
+    is that only routers will help propagate bundles.
+    Clients do not help propagate/forward bundles.
+
+    A con of RDTN is that the CGR being performed is only an approximation, 
+    and can be inaccurate.
+    
+3. Spray-and-Wait
+
+    Spray-and-wait generates maximum K bundles per payload, and then propagates
+    those bundles only 1 hop. 
+
+    A pro of SAW is that everyone is able to help out, including clients.
+    Pro/con: bundles stay in one place until they get picked up, 
+        like a lost child being told to stay in one place instead of moving everywhere.
+
+Overhead:
+1. roaming dtn
+
+    Roaming DTN 
+
+2. spray-and-wait
+
+    
+    
+3. epidemic
+
+
+Latency:
+1. epidemic
+2. roaming dtn?
+3. spray-and-wait?
