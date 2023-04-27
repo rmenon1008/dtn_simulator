@@ -27,9 +27,13 @@ class ClientClientPayloadHandler:
     """
 
     def store_payload(self, payload: ClientPayload):
-        self.payloads_to_send.append(payload)
-        self.already_received_payload_ids.add((payload.get_identifier(), payload.expiration_timestamp))
-        self.num_drops_picked_up += 1
+        unique_tuple = (payload.get_identifier(), payload.expiration_timestamp)
+        if unique_tuple in self.already_received_payload_ids:
+            print("INVARIANT VIOLATION: client had store_payload() called with a payload it already saw")
+        else:
+            self.payloads_to_send.append(payload)
+            self.already_received_payload_ids.add(unique_tuple)
+            self.num_drops_picked_up += 1
 
     """
     Executes "step 1" of the handshake process described in README.md.

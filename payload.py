@@ -42,6 +42,7 @@ class ClientPayload(Payload):
     
     def serialize(self):
         return {
+                "payload_id": self.get_identifier(),
                 "drop_id": self.drop_id,
                 "source_id": self.source_client_id,
                 "dest_client_id": self.dest_client_id,

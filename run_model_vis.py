@@ -57,7 +57,7 @@ def get_trial_results(trial_num, output_q, model_params, initial_state, max_step
         if i % (max_steps / 10) == 0:
             print("\t Trial {}: {}/{} steps, {}% done".format(trial_num, i, max_steps, 100 * i / max_steps), flush=True)
         model.step()
-    output_tuple = (model.avg_latency, model.payload_rate, model.avg_storage_overhead)
+    output_tuple = (model.avg_latency, model.payload_rate, model.avg_disk_burden)
     output_q.put(output_tuple)
 
 def print_sim_results(title, scenario_name, num_trials, m0, m1, m2):
@@ -76,7 +76,7 @@ def print_sim_results(title, scenario_name, num_trials, m0, m1, m2):
     log_and_print(title)
     log_and_print("Average payload delivery latency: {} ticks (stdev={})".format(m0[0], m0[1]))
     log_and_print("Payload delivery success rate: {}% (stdev={})".format(m1[0], m1[1]))
-    log_and_print("Average bundle storage overhead: {} (stdev={})".format(m2[0], m2[1]))
+    log_and_print("Average disk burden: {} (stdev={})".format(m2[0], m2[1]))
 
 # No Web Server, CLI only
 def run_cli_only(model_params, agent_state):
@@ -91,14 +91,14 @@ def run_cli_only(model_params, agent_state):
     elapsed_time = time.time() - start_time
     print("\n\nSimulation took {} s to run".format(elapsed_time), flush=True)
     if "log_metrics" in model_params.value:
-        print_stats_for_one_trial(model_params.value["title"], model.avg_latency, model.payload_rate, model.avg_storage_overhead)
+        print_stats_for_one_trial(model_params.value["title"], model.avg_latency, model.payload_rate, model.avg_disk_burden)
 
 def print_stats_for_one_trial(title, m0, m1, m2):
     print("============ Simulation Results ============", flush=True)
     print(title, flush=True)
     print("Average payload delivery latency: {} ticks".format(m0), flush=True)
     print("Payload delivery success rate: {}%".format(m1), flush=True)
-    print("Average bundle storage overhead: {}".format(m2), flush=True)
+    print("Average disk burden: {}".format(m2), flush=True)
 
 # Web Server
 def run_web_server(model_params, agent_state):

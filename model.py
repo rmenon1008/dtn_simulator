@@ -72,10 +72,11 @@ class LunarModel(mesa.Model):
 
         # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
         self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0, "total_payloads_stored_so_far": 0}
-        # Mesa Datacollector stuff
+        # These model attributes can be accessed by instantiators of the model,
+        # after max steps is reached, to get final statistics
         self.avg_latency = None
         self.payload_rate = None
-        self.avg_storage_overhead = None
+        self.avg_disk_burden = None
 
         # Initialize agents
         for agent_options in initial_state["agents"]:
@@ -159,7 +160,7 @@ class LunarModel(mesa.Model):
             stats = summary_statistics(final_metric_entry, self.metrics, verify)
             self.avg_latency = stats[0]
             self.payload_rate = stats[1]
-            self.avg_storage_overhead = stats[2]
+            self.avg_disk_burden = stats[2]
 
     def __track_contacts(self, mode):
         """
@@ -262,6 +263,7 @@ class LunarModel(mesa.Model):
                     self.data_drops.append(drop)
 
         # Check if any agents are in range of a data drop
+        already_picked_up = set()
         for agent in self.schedule.agents:
             for drop in self.data_drops:
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
@@ -276,7 +278,8 @@ class LunarModel(mesa.Model):
                         # If the drop's target is the nearby client agent, the client will ignore it
                         # Someone else will pick it up eventually
                         # Added this condition check bc I witnessed a client taking 2000 steps to get a bundle delivered to itself.
-                        if drop["target_id"] != agent.unique_id:
+                        if drop["target_id"] != agent.unique_id and drop["drop_id"] not in already_picked_up:
+                            already_picked_up.add(drop["drop_id"])
                             agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps, self.model_params["payload_lifespan"]))
                             self.data_drops.remove(drop)
 
@@ -356,26 +359,53 @@ class LunarModel(mesa.Model):
         for agent in self.schedule.agents:
             agent_state = agent.get_state()
                     
-            if "routing_protocol" not in agent_state:
+            if isinstance(agent, ClientAgent):
+                if "correctness" in self.model_params and self.model_params["correctness"]:
+                    # check if the client is holding any duplicate bundles or payloads
+                    seen_payloads = set()
+                    for payload in agent_state["curr_stored_payloads"]:
+                        payload_id = payload["payload_id"]
+                        if payload_id in seen_payloads:
+                            print("INVARIANT VIOLATION: model found a dupe payload {}".format(payload_id))
+                        else:
+                            seen_payloads.add(payload_id)
                 # Client payload count is stored here:
                 self.metrics["total_payloads_stored_so_far"] += agent_state["curr_num_stored_payloads"]
-                continue # ignore clients
-            
-            # can assume agent is a router
-
-            # Router payload count stored here:
-            self.metrics["total_payloads_stored_so_far"] += agent_state["outgoing_payloads_to_send"]
-
+                continue # finished counting metrics for this client, iterate to next agent
+            # Can assume agent is RouterAgent, EpidemicAgent, or SprayAndWaitAgent
+            # Collect their metrics in the following lines of code
             if "correctness" in self.model_params and self.model_params["correctness"]:
-                # check if the router is holding any duplicate bundles
+                # check if the router is holding any duplicate bundles or payloads
+                seen_payloads = set()
                 seen_bundles = set()
                 for bundle in agent_state["routing_protocol"]["curr_stored_bundles"]:
                     if str(bundle) in seen_bundles:
                         print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
                     else:
                         seen_bundles.add(str(bundle))
-            # Currently tracking only 1 cumulative metric for router agents only
+                for payload in agent_state["curr_outgoing_payloads_to_send"]:
+                    payload_id = payload["payload_id"]
+                    if payload_id in seen_payloads:
+                        print("INVARIANT VIOLATION: model found a dupe payload {}".format(payload_id))
+                    else:
+                        seen_payloads.add(payload_id)
+                for payload in agent_state["curr_payloads_received_for_client"]:
+                    payload_id = payload["payload_id"]
+                    if payload_id in seen_payloads:
+                        print("INVARIANT VIOLATION: model found a dupe payload {}".format(payload_id))
+                    else:
+                        seen_payloads.add(payload_id)
+            # Currently tracking 2 cumulative metrics for router agents
+            #   1. # of bundles currently stored
+            #   2. # of payloads currently stored in network
             self.metrics["total_bundles_stored_so_far"] += agent_state["routing_protocol"]["curr_num_stored_bundles"]
+            # Router payload count stored in 2 places:
+            #       this is the # of payloads the router is delivering to a client
+            #       EpidemicAgent & SprayAndWaitAgent will have 0 for this
+            self.metrics["total_payloads_stored_so_far"] += agent_state["curr_num_payloads_received_for_client"]
+            #       this is the # of payloads the router just got from a client
+            #       EpidemicAgent & SprayAndWaitAgent will have 0 for this
+            self.metrics["total_payloads_stored_so_far"] += agent_state["curr_num_outgoing_payloads_to_send"]
 
     """
     Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.

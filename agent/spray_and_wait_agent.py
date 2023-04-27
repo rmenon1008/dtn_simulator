@@ -53,6 +53,10 @@ class SprayAndWaitAgent(mesa.Agent):
             "pos": self.pos,
             "history": self.history,
             "routing_protocol": self.routing_protocol.get_state(),
+            "curr_num_outgoing_payloads_to_send": 0, # spray-and-wait only stores bundles, not payloads. must be 0 for metrics
+            "curr_outgoing_payloads_to_send": [],
+            "curr_num_payloads_received_for_client": 0, # spray-and-wait only stores bundles, not payloads. must be 0 for metrics
+            "curr_payloads_received_for_client": [],
             "total_pay_recv_from_router":  self.payload_handler.num_payloads_received,
             "pay_recv_latencies":  self.payload_handler.received_payload_latencies,
             "received_payloads": self.payload_handler.received_payloads,
