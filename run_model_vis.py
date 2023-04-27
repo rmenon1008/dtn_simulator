@@ -46,9 +46,7 @@ def run_batches(num_trials, model_params, agent_state):
     avg_latencies = list(result_unzipped[0])
     avg_payload_rates = list(result_unzipped[1])
     avg_bundles_stored = list(result_unzipped[2])
-    routing_protocol = str(RoutingProtocol(model_params.value["backbone_routing_protocol"])).split('.')[1]
-    print_sim_results(model_params.value["title"], model_params.value["scenario_name"], routing_protocol,
-                      num_processes,
+    print_sim_results(model_params.value["title"], model_params.value["scenario_name"], num_processes,
                       (mean(avg_latencies), stdev(avg_latencies)),
                       (mean(avg_payload_rates), stdev(avg_payload_rates)),
                       (mean(avg_bundles_stored), stdev(avg_bundles_stored)))
@@ -62,11 +60,11 @@ def get_trial_results(trial_num, output_q, model_params, initial_state, max_step
     output_tuple = (model.avg_latency, model.payload_rate, model.avg_storage_overhead)
     output_q.put(output_tuple)
 
-def print_sim_results(title, scenario_name, routing_protocol, num_trials, m0, m1, m2):
+def print_sim_results(title, scenario_name, num_trials, m0, m1, m2):
     if not os.path.exists("out"):
         # Create a new directory because it does not exist
         os.makedirs("out")
-    file_name = "out/" + scenario_name.replace(" ", "_") + "_" + routing_protocol + "_" + time.ctime().replace(" ", "_").replace(":", "_") + ".txt"
+    file_name = "out/" + scenario_name.replace(" ", "_") + "_" + time.ctime().replace(" ", "_").replace(":", "_") + ".txt"
     def log_and_print(str):
         with open(file_name, "a") as outfile:
             if "\n" in str:

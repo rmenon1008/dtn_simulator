@@ -262,8 +262,8 @@ class LunarModel(mesa.Model):
                     self.data_drops.append(drop)
 
         # Check if any agents are in range of a data drop
-        for drop in self.data_drops:
-            for agent in self.schedule.agents:
+        for agent in self.schedule.agents:
+            for drop in self.data_drops:
                 if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
                     # Make sure the agent is someone who should pickup bundles
                     if isinstance(agent, ClientAgent) or isinstance(agent, EpidemicAgent) or isinstance(agent, SprayAndWaitAgent):
