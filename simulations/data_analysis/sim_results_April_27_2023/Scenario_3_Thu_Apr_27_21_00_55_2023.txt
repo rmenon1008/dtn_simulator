@@ -1,0 +1,14 @@
+============ Simulation Results (10 Trials) ============
+Scenario 3
+	Simulator: Epidemic
+	Model File: ./simulations/scenario3/model_s3.json
+	Agent File: ./simulations/scenario3/epidemic_roaming_clients_s3.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 270.4583333333333 ticks (stdev=7.15518541257812)
+Payload delivery success rate: 100.0% (stdev=0.0)
+Average disk burden: 515.6894500000001 (stdev=0.6458338851610548)

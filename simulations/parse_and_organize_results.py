@@ -1,5 +1,43 @@
 import os
 import csv, operator
+import argparse
+
+
+""" REFERENCE OUTPUT
+============ Simulation Results (10 Trials) ============
+Scenario 1
+	Simulator: Roaming DTN
+	Backbone Routing Protocol: CGR # THIS IS AN EXTRA LINE THAT EXISTS ONLY FOR ROAMING DTN
+	Model File: ./simulations/scenario1/model_s1.json
+	Agent File: ./simulations/scenario1/roamdtn_roaming_clients_s1.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 601.2080537632955 ticks (stdev=48.53555319840771)
+Payload delivery success rate: 67.96296296296296% (stdev=4.236385169573701)
+Average bundle storage overhead: 22.84955 (stdev=2.824532160376298)
+"""
+
+""" REFERENCE OUTPUT
+============ Simulation Results (10 Trials) ============
+Scenario 1
+	Simulator: Spray-and-Wait
+	Model File: ./simulations/scenario1/model_s1.json
+	Agent File: ./simulations/scenario1/spray_and_wait_roaming_clients_s1.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 358.31182795698925 ticks (stdev=15.167878619715834)
+Payload delivery success rate: 100.0% (stdev=0.0)
+Average bundle storage overhead: 25.15813 (stdev=0.8880545817184385)
+"""
+
 
 def get_scenario_id(file_path):
     """
@@ -83,9 +121,10 @@ def parse_data(file_path):
     return success_rate, disk_burden, latency
 
 def main():
-    dir_name = "out/"
-    
-    
+    argParser = argparse.ArgumentParser()
+    argParser.add_argument("dir", help="")
+    args = argParser.parse_args()
+    dir_name = args.dir
     # field names 
     fields = ['scenario_id',
               'success_rate_mean', 'success_rate_stdev',
@@ -107,47 +146,11 @@ def main():
     
     # Write to CSV
     csv_out_file = "test2.csv"
-    with open(csv_out_file, 'w') as csvfile:
+    with open(csv_out_file, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(fields)
         for data in data_list:
             csvwriter.writerow(data)
-   
-
-"""
-============ Simulation Results (10 Trials) ============
-Scenario 1
-	Simulator: Spray-and-Wait
-	Model File: ./simulations/scenario1/model_s1.json
-	Agent File: ./simulations/scenario1/spray_and_wait_roaming_clients_s1.json
-	RSSI Noise St. Deviation: 2 
-	Model Speed Limit: 10 m/s 
-	Max Steps: 10000 steps 
-	Host Router Timeout: 2000 steps 
-	Payload Lifespan: 5000 steps 
-	Bundle Lifespan: 5000 steps 
-Average payload delivery latency: 358.31182795698925 ticks (stdev=15.167878619715834)
-Payload delivery success rate: 100.0% (stdev=0.0)
-Average bundle storage overhead: 25.15813 (stdev=0.8880545817184385)
-"""
-
-"""
-============ Simulation Results (10 Trials) ============
-Scenario 1
-	Simulator: Roaming DTN
-	Backbone Routing Protocol: CGR # THIS IS AN EXTRA LINE THAT EXISTS ONLY FOR ROAMING DTN
-	Model File: ./simulations/scenario1/model_s1.json
-	Agent File: ./simulations/scenario1/roamdtn_roaming_clients_s1.json
-	RSSI Noise St. Deviation: 2 
-	Model Speed Limit: 10 m/s 
-	Max Steps: 10000 steps 
-	Host Router Timeout: 2000 steps 
-	Payload Lifespan: 5000 steps 
-	Bundle Lifespan: 5000 steps 
-Average payload delivery latency: 601.2080537632955 ticks (stdev=48.53555319840771)
-Payload delivery success rate: 67.96296296296296% (stdev=4.236385169573701)
-Average bundle storage overhead: 22.84955 (stdev=2.824532160376298)
-"""
 
 if __name__ == "__main__":
     main()

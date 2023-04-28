@@ -1,0 +1,145 @@
+{
+    const stable_success = vl.data(sim_data)
+    .transform(
+      vl.filter('datum.scenario_id == "2a" || datum.scenario_id == "2c" || datum.scenario_id == "2e" || datum.scenario_id == "2g" || datum.scenario_id == "2i"')
+    ).layer(
+      vl.markPoint().encode(
+        vl.y()
+          .fieldN('scenario_id').axis({labelExpr: '{"2a": "RDTN (CGR)", "2c": "Epidemic", "2e": "Spray and Wait", "2g": "RDTN (Epidemic)", "2i": "RDTN (Spray and Wait)"}[datum.label]',
+            labelFontWeight: "bold",
+            labelFontSize: "13",
+            labelAngle: 0})
+          .sort(["2c", "2e", "2a", "2g", "2i"])
+          .title("Simulation"),
+        vl.x().fieldQ('success_rate_mean')
+      ),
+      vl.markErrorbar({"ticks": true}).encode(
+        vl.y().fieldN('scenario_id').sort(["2c", "2e", "2a", "2g", "2i"]).title("Simulation"),
+        vl.x().fieldQ('success_rate_mean')
+          .scale({"zero": false}),
+        vl.xError().fieldQ('success_rate_stdev')
+      )
+    )
+    .title({text: "Success Rate for Scenario 1 - Stable"})
+  
+    const stable_disk_burden = vl.data(sim_data)
+    .transform(
+      vl.filter('datum.scenario_id == "2a" || datum.scenario_id == "2c" || datum.scenario_id == "2e" || datum.scenario_id == "2g" || datum.scenario_id == "2i"')
+    ).layer(
+      vl.markPoint().encode(
+        vl.y()
+          .fieldN('scenario_id').axis({labelExpr: '{"2a": "RDTN (CGR)", "2c": "Epidemic", "2e": "Spray and Wait", "2g": "RDTN (Epidemic)", "2i": "RDTN (Spray and Wait)"}[datum.label]',
+            labelFontWeight: "bold",
+            labelFontSize: "13",
+            labelAngle: 0})
+          .sort(["2c", "2e", "2a", "2g", "2i"])
+          .title("Simulation"),
+        vl.x().fieldQ('disk_burden_mean')
+      ),
+      vl.markErrorbar({"ticks": true}).encode(
+        vl.y().fieldN('scenario_id').sort(["2c", "2e", "2a", "2g", "2i"]).title("Simulation"),
+        vl.x().fieldQ('disk_burden_mean')
+          .scale({"zero": false}),
+        vl.xError().fieldQ('disk_burden_stdev')
+      )
+    )
+    .title({text: "Disk Burden for Scenario 1 - Stable"})
+    
+    const stable_latency = vl.data(sim_data)
+    .transform(
+      vl.filter('datum.scenario_id == "2a" || datum.scenario_id == "2c" || datum.scenario_id == "2e" || datum.scenario_id == "2g" || datum.scenario_id == "2i"')
+    ).layer(
+      vl.markPoint().encode(
+        vl.y()
+          .fieldN('scenario_id').axis({labelExpr: '{"2a": "RDTN (CGR)", "2c": "Epidemic", "2e": "Spray and Wait", "2g": "RDTN (Epidemic)", "2i": "RDTN (Spray and Wait)"}[datum.label]',
+            labelFontWeight: "bold",
+            labelFontSize: "13",
+            labelAngle: 0})
+          .sort(["2c", "2e", "2a", "2g", "2i"])
+          .title("Simulation"),
+        vl.x().fieldQ('latency_mean')
+      ),
+      vl.markErrorbar({"ticks": true}).encode(
+        vl.y().fieldN('scenario_id').sort(["2c", "2e", "2a", "2g", "2i"]).title("Simulation"),
+        vl.x().fieldQ('latency_mean')
+          .scale({"zero": false}),
+        vl.xError().fieldQ('latency_stdev')
+      )
+    )
+    .title({text: "Latency for Scenario 1 - Stable"})
+  
+    const stable_vert = vl.vconcat(stable_success, stable_disk_burden, stable_latency)
+  
+    const unstable_success = vl.data(sim_data)
+    .transform(
+      vl.filter('datum.scenario_id == "2b" || datum.scenario_id == "2d" || datum.scenario_id == "2f" || datum.scenario_id == "2h" || datum.scenario_id == "2j"')
+    ).layer(
+      vl.markPoint().encode(
+        vl.y()
+          .fieldN('scenario_id').axis({labelExpr: '{"2b": "RDTN (CGR)", "2d": "Epidemic", "2f": "Spray and Wait", "2h": "RDTN (Epidemic)", "2j": "RDTN (Spray and Wait)"}[datum.label]',
+            labelFontWeight: "bold",
+            labelFontSize: "13",
+            labelAngle: 0})
+          .sort(["2d", "2f", "2b", "2h", "2j"])
+          .title("Simulation"),
+        vl.x().fieldQ('success_rate_mean')
+      ),
+      vl.markErrorbar({"ticks": true}).encode(
+        vl.y().fieldN('scenario_id').sort(["2d", "2f", "2b", "2h", "2j"]).title("Simulation"),
+        vl.x().fieldQ('success_rate_mean')
+          .scale({"zero": false}),
+        vl.xError().fieldQ('success_rate_stdev')
+      )
+    )
+    .title({text: "Success Rate for Scenario 1 - Unstable"})
+  
+    const unstable_disk_burden = vl.data(sim_data)
+    .transform(
+      vl.filter('datum.scenario_id == "2b" || datum.scenario_id == "2d" || datum.scenario_id == "2f" || datum.scenario_id == "2h" || datum.scenario_id == "2j"')
+    ).layer(
+      vl.markPoint().encode(
+        vl.y()
+          .fieldN('scenario_id').axis({labelExpr: '{"2b": "RDTN (CGR)", "2d": "Epidemic", "2f": "Spray and Wait", "2h": "RDTN (Epidemic)", "2j": "RDTN (Spray and Wait)"}[datum.label]',
+            labelFontWeight: "bold",
+            labelFontSize: "13",
+            labelAngle: 0})
+          .sort(["2d", "2f", "2b", "2h", "2j"])
+          .title("Simulation"),
+        vl.x().fieldQ('disk_burden_mean')
+      ),
+      vl.markErrorbar({"ticks": true}).encode(
+        vl.y().fieldN('scenario_id').sort(["2d", "2f", "2b", "2h", "2j"]).title("Simulation"),
+        vl.x().fieldQ('disk_burden_mean')
+          .scale({"zero": false}),
+        vl.xError().fieldQ('disk_burden_stdev')
+      )
+    )
+    .title({text: "Disk Burden for Scenario 1 - Unstable"})
+    
+    const unstable_latency = vl.data(sim_data)
+    .transform(
+      vl.filter('datum.scenario_id == "2b" || datum.scenario_id == "2d" || datum.scenario_id == "2f" || datum.scenario_id == "2h" || datum.scenario_id == "2j"')
+    ).layer(
+      vl.markPoint().encode(
+        vl.y()
+          .fieldN('scenario_id').axis({labelExpr: '{"2b": "RDTN (CGR)", "2d": "Epidemic", "2f": "Spray and Wait", "2h": "RDTN (Epidemic)", "2j": "RDTN (Spray and Wait)"}[datum.label]',
+            labelFontWeight: "bold",
+            labelFontSize: "13",
+            labelAngle: 0})
+          .sort(["2d", "2f", "2b", "2h", "2j"])
+          .title("Simulation"),
+        vl.x().fieldQ('latency_mean')
+      ),
+      vl.markErrorbar({"ticks": true}).encode(
+        vl.y().fieldN('scenario_id').sort(["2d", "2f", "2b", "2h", "2j"]).title("Simulation"),
+        vl.x().fieldQ('latency_mean')
+          .scale({"zero": false}),
+        vl.xError().fieldQ('latency_stdev')
+      )
+    )
+    .title({text: "Latency for Scenario 1 - Unstable"})
+  
+    const unstable_vert = vl.vconcat(unstable_success, unstable_disk_burden, unstable_latency)
+  
+    return vl.hconcat(stable_vert, unstable_vert).render()
+  }
