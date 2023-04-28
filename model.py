@@ -305,8 +305,6 @@ class LunarModel(mesa.Model):
         Returns a list of all agents within the detection range of the agent
         Each entry includes the agent's unique id, RSSI, and whether or not
         the agent is connected.
-        If the agent is connected, the entry also includes a function that
-        can be called to send a bundle to the agent.
         """
 
         det_thresh = agent.radio.detection_thresh

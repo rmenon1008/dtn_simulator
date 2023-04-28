@@ -37,7 +37,6 @@ class ClientAgent(mesa.Agent):
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.name = try_getting(node_options, "name", default=None)
-        self.state = ClientAgentMode.WORKING
         self.history = []
         self.mode = ClientAgentMode.WORKING
         self.working_steps_remaining = self.RECONNECTION_INTERVAL
@@ -75,8 +74,10 @@ class ClientAgent(mesa.Agent):
             # if we don't already have a RouterAgent target to move towards, attempt to get one.
             if self.special_behavior == None:
                 self.__find_nearby_router()
-
-            self.__attempt_router_connection_and_payload_transfer()
+        # We'll opportunistically/passively look for any routers that are nearby
+        # We won't change our movement to do this though
+        # Upon successful connection with a router, the RECONNECTION_INTERVAL will be reset on the next step
+        self.__attempt_router_connection_and_payload_transfer()
 
         # refresh movement.
         self.__step_movement()
@@ -121,6 +122,7 @@ class ClientAgent(mesa.Agent):
             # if we've reached this point, the neighbor is a connected RouterAgent.
 
             # set state to CONNECTED.
+            print("connecting to neighbor:", neighbor_agent.unique_id)
             self.mode = ClientAgentMode.CONNECTED
 
             # do the ClientPayload exchange handshake with the RouterAgent's RouterClientPayloadHandler.
@@ -135,6 +137,7 @@ class ClientAgent(mesa.Agent):
         # if we were connected to the router in the last step, set the state to "WORKING" and reset the "working steps"
         # counter to RECONNECTION_INTERVAL.
         if self.mode == ClientAgentMode.CONNECTED:
+            print("Was connected, going back to work now")
             self.mode = ClientAgentMode.WORKING
             self.working_steps_remaining = self.RECONNECTION_INTERVAL
             self.special_behavior = None  # reset special_behavior since we no longer are pursuing a router.
@@ -173,7 +176,7 @@ class ClientAgent(mesa.Agent):
             if isinstance(neighbor_agent, ClientAgent):
                 continue
 
-            # if we've reached this point, the neighbor is a connected RouterAgent.  store it in special_behavior and
+            # if we've reached this point, the neighbor is a discovered RouterAgent.  store it in special_behavior and
             # stop searching.
             self.special_behavior = {
                 "type": "find_node_rssi",
