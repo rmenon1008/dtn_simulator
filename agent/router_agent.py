@@ -85,12 +85,7 @@ class RouterAgent(mesa.Agent):
                 .handle_mapping_dict(ClientMappingDictPayload(self.payload_handler.client_router_mapping_dict))
 
     def __step_movement(self):
-        if self.special_behavior is not None:
-            if self.special_behavior["type"] == "find_node_rssi":
-                rssi_find_router_target(self)
-            # TODO:  Add other cases for `special_behavior` here.
-        else:
-            self.movement.step()
+        self.movement.step()
 
     def __get_routing_protocol_object(self):
         if self.routing_protocol_type == RoutingProtocol.CGR:
