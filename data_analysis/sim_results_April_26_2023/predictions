@@ -1,24 +1,3 @@
-TODO:
-1. A major weakness of current IMPLEMENTATION of RDTN compared to SAW is that 
-clients dont share with each other if they are in mutual connection range.
-
-(Although in the stable configuration this shouldn't matter 
-b/c clients will never be in mutual connection range)
-
-Could be improved w/ one simple change:
-- If 2 client agents are in connection range with each other,
-  check if they have any payloads meant for each other. If so,
-  move the payloads accordingly and update their metrics accordingly.
-
-2. Another flaw of the current implementation of RDTN is that clients
-ignore routers if they are in connection range, because
-the reconnection interval is strictly followed
-- This could be relaxed by handshaking whenever in mutual connection with a router
-- This would avoid situations where a client is in connection range w/
-a router that has bundles for it, but ignores the router and loses the opportunity
-to receive its bundles.
-===================================================================================================
-
 Success:
 1. epidemic
 
