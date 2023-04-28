@@ -149,6 +149,25 @@ def test_step_payload_lifecycle(setup):
     verify(mocked_client_0_payload_handler, times=1).handshake_1(mocked_router_1_payload_handler)
     verify(mocked_client_0_payload_handler, times=0).handshake_1(mocked_client_1_payload_handler)
 
+    # set up the mocked model to return...
+    # - Router 0 ID as nearby, but not connected.
+    # - Router 1 ID as nearby, but connected.
+    # - Client 1 ID as nearby, but not connected.
+    neighbor_data = [
+        {
+            "id": ROUTER_ID_0,
+            "connected": False
+        },
+        {
+            "id": ROUTER_ID_1,
+            "connected": False
+        },
+        {
+            "id": CLIENT_ID_1,
+            "connected": False
+        }
+    ]
+    when(mocked_model).get_neighbors(client_agent).thenReturn(neighbor_data)
     # transition from CONNECTED -> WORKING
     client_agent.step()
     assert client_agent.mode == ClientAgentMode.WORKING
