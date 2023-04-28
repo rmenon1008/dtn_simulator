@@ -78,6 +78,9 @@ class ClientAgent(mesa.Agent):
         # We won't change our movement to do this though
         # Upon successful connection with a router, the RECONNECTION_INTERVAL will be reset on the next step
         self.__attempt_router_connection_and_payload_transfer()
+        # We'll opportunistically/passively look for any clients that are nearby
+        # Send payloads meant for them if possible
+        self.__send_payloads_to_connected_clients()
 
         # refresh movement.
         self.__step_movement()
@@ -101,6 +104,19 @@ class ClientAgent(mesa.Agent):
             neighbor_agent.payload_handler.update_client_mapping(ClientBeaconPayload(self.unique_id))
 
     """
+    Attempts to send payloads to other clients that are in connection range.
+
+    Will only send payloads if they're the actual destination.
+    Won't ask the client to forward unrelated payloads for them.
+    """
+    def __send_payloads_to_connected_clients(self):
+        for neighbor_data in self.model.get_neighbors(self):
+            other_client_agent = self.model.agents[neighbor_data["id"]]
+            if not isinstance(other_client_agent, ClientAgent):
+                continue
+            self.payload_handler.send_payloads_to_neighbor_client(other_client_agent)
+
+    """
     Attempts to connect to any RouterAgent neighbors (if any are nearby) and exchange payloads.
     
     NOTE:  This exchanges with ALL connected RouterAgents in one step.  If multiple RouterAgents are connected, data
@@ -122,7 +138,6 @@ class ClientAgent(mesa.Agent):
             # if we've reached this point, the neighbor is a connected RouterAgent.
 
             # set state to CONNECTED.
-            print("connecting to neighbor:", neighbor_agent.unique_id)
             self.mode = ClientAgentMode.CONNECTED
 
             # do the ClientPayload exchange handshake with the RouterAgent's RouterClientPayloadHandler.
@@ -137,7 +152,6 @@ class ClientAgent(mesa.Agent):
         # if we were connected to the router in the last step, set the state to "WORKING" and reset the "working steps"
         # counter to RECONNECTION_INTERVAL.
         if self.mode == ClientAgentMode.CONNECTED:
-            print("Was connected, going back to work now")
             self.mode = ClientAgentMode.WORKING
             self.working_steps_remaining = self.RECONNECTION_INTERVAL
             self.special_behavior = None  # reset special_behavior since we no longer are pursuing a router.
@@ -195,7 +209,7 @@ class ClientAgent(mesa.Agent):
             "pos": self.pos,
             "history": self.history,
             "radio": self.radio.get_state(),
-            "total_pay_recv_from_router":  self.payload_handler.num_payloads_received,
+            "total_pay_recv":  self.payload_handler.num_payloads_received,
             "pay_recv_latencies":  self.payload_handler.received_payload_latencies,
             "received_payloads": self.payload_handler.received_payloads,
             "total_drops_picked_up_from_ground":  self.payload_handler.num_drops_picked_up,

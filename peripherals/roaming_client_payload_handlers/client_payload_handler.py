@@ -117,6 +117,35 @@ class ClientClientPayloadHandler:
             # clear the list of payloads to send (since we've now sent them into the DTN network).
             self.payloads_to_send.clear()
 
+    def receive_payload_from_neighbor_client(self, payload):
+        unique_tuple = (payload.get_identifier(), payload.expiration_timestamp)
+        if unique_tuple in self.already_received_payload_ids:
+            print("INVARIANT VIOLATION: receive_payload_from_neighbor_client() found a dupe")
+        else:
+            self.already_received_payload_ids.add(unique_tuple)
+            self.num_payloads_received += 1
+            latency = self.model.schedule.time - payload.creation_timestamp
+            received_payload_serialized = {
+                "drop_id": payload.drop_id,
+                "source_id": payload.source_client_id,
+                "dest_client_id": payload.dest_client_id,
+                "expiration_timestamp": payload.expiration_timestamp,
+                "creation_timestamp": payload.creation_timestamp,
+                "delivery_timestamp": self.model.schedule.time,
+                "delivery_latency": latency,
+            }
+            if "debug" in self.model.model_params:
+                print("client", self.client_id, "received payload", payload.drop_id, "from another client")
+            self.received_payloads.append(received_payload_serialized)
+            self.received_payload_latencies.append(self.model.schedule.time - payload.creation_timestamp)
+
+    def send_payloads_to_neighbor_client(self, other_client_agent):
+        other_client_id = other_client_agent.unique_id
+        for payload in self.payloads_to_send:
+            if payload.dest_client_id == other_client_id:
+                other_client_agent.payload_handler.receive_payload_from_neighbor_client(payload)
+                self.payloads_to_send.remove(payload)
+
     """
     Refreshes the state of the ClientClientPayloadHandler.
     
