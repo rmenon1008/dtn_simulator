@@ -114,7 +114,8 @@ class ClientAgent(mesa.Agent):
             other_client_agent = self.model.agents[neighbor_data["id"]]
             if not isinstance(other_client_agent, ClientAgent):
                 continue
-            self.payload_handler.send_payloads_to_neighbor_client(other_client_agent)
+            if neighbor_data["connected"]:
+                self.payload_handler.send_payloads_to_neighbor_client(other_client_agent)
 
     """
     Attempts to connect to any RouterAgent neighbors (if any are nearby) and exchange payloads.
