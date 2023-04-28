@@ -20,6 +20,18 @@ def get_paths_for_scenario(scenario_id):
         agent_path += "spray_and_wait_stable_clients_s{}.json".format(num)
     elif letter == "f":
         agent_path += "spray_and_wait_roaming_clients_s{}.json".format(num)
+    elif letter == "g":
+        agent_path += "roamdtn_stable_clients_s{}.json".format(num)
+        agent_path += " -rp 1 " # for Epidemic Backbone
+    elif letter == "h":
+        agent_path += "roamdtn_roaming_clients_s{}.json".format(num)
+        agent_path += " -rp 1 " # for Epidemic Backbone
+    elif letter == "i":
+        agent_path += "roamdtn_stable_clients_s{}.json".format(num)
+        agent_path += " -rp 2 " # for Spray and Wait Backbone
+    elif letter == "j":
+        agent_path += "roamdtn_roaming_clients_s{}.json".format(num)
+        agent_path += " -rp 2 " # for Spray and Wait Backbone
     return model_path, agent_path
 
 def get_cmd_str():
@@ -64,6 +76,10 @@ $ python simulations/run_experiments.py [2-letter scenario id]
         \t1d) Epidemic w/ roaming clients
         \t1e) Spray-and-Wait w/ stable clients
         \t1f) Spray-and-Wait w/ roaming clients
+        \t1g) Roaming DTN w/ stable clients (Epidemic Backbone)
+        \t1h) Roaming DTN w/ roaming clients (Epidemic Backbone)
+        \t1i) Roaming DTN w/ stable clients (Spray and Wait Backbone)
+        \t1j) Roaming DTN w/ roaming clients (Spray and Wait Backbone)
 
         Scenario 2:
         \t2a) Roaming DTN w/ stable clients
@@ -72,14 +88,22 @@ $ python simulations/run_experiments.py [2-letter scenario id]
         \t2d) Epidemic w/ roaming clients
         \t2e) Spray-and-Wait w/ stable clients
         \t2f) Spray-and-Wait w/ roaming clients
+        \t2g) Roaming DTN w/ stable clients (Epidemic Backbone)
+        \t2h) Roaming DTN w/ roaming clients (Epidemic Backbone)
+        \t2i) Roaming DTN w/ stable clients (Spray and Wait Backbone)
+        \t2j) Roaming DTN w/ roaming clients (Spray and Wait Backbone)
 
-        Scenario 2:
+        Scenario 3:
         \t3a) Roaming DTN w/ stable clients
         \t3b) Roaming DTN w/ roaming clients
         \t3c) Epidemic w/ stable clients
         \t3d) Epidemic w/ roaming clients
         \t3e) Spray-and-Wait w/ stable clients
         \t3f) Spray-and-Wait w/ roaming clients
+        \t3g) Roaming DTN w/ stable clients (Epidemic Backbone)
+        \t3h) Roaming DTN w/ roaming clients (Epidemic Backbone)
+        \t3i) Roaming DTN w/ stable clients (Spray and Wait Backbone)
+        \t3j) Roaming DTN w/ roaming clients (Spray and Wait Backbone)
         """
     if len(sys.argv)==1:
         print(options_str)
