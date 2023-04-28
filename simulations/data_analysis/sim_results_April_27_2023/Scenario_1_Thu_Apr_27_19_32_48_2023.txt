@@ -1,0 +1,14 @@
+============ Simulation Results (10 Trials) ============
+Scenario 1
+	Simulator: Spray-and-Wait
+	Model File: ./simulations/scenario1/model_s1.json
+	Agent File: ./simulations/scenario1/spray_and_wait_roaming_clients_s1.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 374.08796296296293 ticks (stdev=18.982592183703545)
+Payload delivery success rate: 100.0% (stdev=0.0)
+Average disk burden: 30.608150000000002 (stdev=1.4736665318932305)

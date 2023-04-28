@@ -1,0 +1,15 @@
+============ Simulation Results (10 Trials) ============
+Scenario 2
+	Simulator: Roaming DTN
+	Backbone Routing Protocol: SPRAY_AND_WAIT
+	Model File: ./simulations/scenario2/model_s2.json
+	Agent File: ./simulations/scenario2/roamdtn_stable_clients_s2.json
+	RSSI Noise St. Deviation: 2 
+	Model Speed Limit: 10 m/s 
+	Max Steps: 10000 steps 
+	Host Router Timeout: 2000 steps 
+	Payload Lifespan: 5000 steps 
+	Bundle Lifespan: 5000 steps 
+Average payload delivery latency: 375.763348914783 ticks (stdev=54.06366070617097)
+Payload delivery success rate: 96.48148148148148% (stdev=1.3664162729122644)
+Average disk burden: 164.77757 (stdev=18.66260872332995)

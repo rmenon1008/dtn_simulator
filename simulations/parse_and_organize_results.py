@@ -83,7 +83,7 @@ def parse_data(file_path):
     return success_rate, disk_burden, latency
 
 def main():
-    dir_name = "data_analysis/sim_results_April_26_2023/"
+    dir_name = "out/"
     
     
     # field names 
