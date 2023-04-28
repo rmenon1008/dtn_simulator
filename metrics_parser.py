@@ -75,14 +75,14 @@ def summary_statistics(final_client_metrics, metrics, verify):
 
     # Metric 0 
     # Average payload delivery latency
-    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
+    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv", "sum")
     total_payload_latency = agg_metric_for_agents(final_client_metrics["agents"], "pay_recv_latencies", "sum_array")
     avg_payload_latency = None
     if num_payloads_recv > 0:
         avg_payload_latency = total_payload_latency / num_payloads_recv
     # Metric 1
     # Payload delivery success rate
-    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv_from_router", "sum")
+    num_payloads_recv = agg_metric_for_agents(final_client_metrics["agents"], "total_pay_recv", "sum")
     num_payloads_picked_up = agg_metric_for_agents(final_client_metrics["agents"], "total_drops_picked_up_from_ground", "sum")
     payload_delivery_success_rate = None
     if num_payloads_picked_up > 0:
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         ("routing_protocol.total_bundle_sends", "sum"),
         ("routing_protocol.curr_num_stored_bundles", "sum"),
         ("curr_num_stored_payloads", "mean"),
-        ("total_pay_recv_from_router", "sum")
+        ("total_pay_recv", "sum")
     ]
 
     parse_and_plot(metrics, metrics_to_plot)

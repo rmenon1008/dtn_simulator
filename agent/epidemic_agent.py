@@ -57,7 +57,7 @@ class EpidemicAgent(mesa.Agent):
             "curr_outgoing_payloads_to_send": [],
             "curr_num_payloads_received_for_client": 0, # epidemic only stores bundles, not payloads. must be 0 for metrics
             "curr_payloads_received_for_client": [],
-            "total_pay_recv_from_router":  self.payload_handler.num_payloads_received,
+            "total_pay_recv":  self.payload_handler.num_payloads_received,
             "pay_recv_latencies":  self.payload_handler.received_payload_latencies,
             "received_payloads": self.payload_handler.received_payloads,
             "total_drops_picked_up_from_ground":  self.payload_handler.num_drops_picked_up,
