@@ -1,7 +1,8 @@
 let PIXEL_MULTIPLIER = 3;
 let SCALE = 0.8;
 
-let showRanges = true;
+let showDetectionRanges = true;
+let showConnectionRanges = true;
 let historyFade = false;
 let showDetectionLines = false;
 let showTargetLocations = true;
@@ -163,11 +164,21 @@ const LunarVis = function (maxSimX, maxSimY) {
 
   // Adds visualization options to the DOM
   visOptions.append(
-    addBooleanInput("node_ranges", {
-      name: "Show node ranges",
-      value: showRanges
+    addBooleanInput("detection_ranges", {
+      name: "Show detection ranges",
+      value: showDetectionRanges
     }, (key, value) => {
-      showRanges = value;
+      showDetectionRanges = value;
+      this.rerender();
+    })
+  )
+
+  visOptions.append(
+    addBooleanInput("connection_ranges", {
+      name: "Show connection ranges",
+      value: showConnectionRanges
+    }, (key, value) => {
+      showConnectionRanges = value;
       this.rerender();
     })
   )
@@ -243,12 +254,14 @@ const LunarVis = function (maxSimX, maxSimY) {
     });
 
     // Draw the detection and connection ranges as transparent circles
-    if (showRanges) {
+    if (showDetectionRanges) {
       nodes.forEach(node => {
         if (node.radio.estimated_detection_range) {
           drawShape(node.pos[0], node.pos[1], node.radio.estimated_detection_range, "rgba(0, 0, 255, 0.07)", "circle", false, "rgba(0, 0, 255, 0.0)");
         }
       });
+    }
+    if (showConnectionRanges) {
       nodes.forEach(node => {
         if (node.radio.estimated_connection_range) {
           drawShape(node.pos[0], node.pos[1], node.radio.estimated_connection_range, "rgba(0, 255, 0, 0.15)", "circle", false, "rgba(0, 255, 0, 0.0)");
