@@ -1,6 +1,7 @@
 import os
 import csv, operator
 import argparse
+import math
 
 
 """ REFERENCE OUTPUT
@@ -38,6 +39,7 @@ Payload delivery success rate: 100.0% (stdev=0.0)
 Average bundle storage overhead: 25.15813 (stdev=0.8880545817184385)
 """
 
+NUM_TRIALS = 10
 
 def get_scenario_id(file_path):
     """
@@ -98,7 +100,7 @@ def get_scenario_id(file_path):
     return scenario_id
 
 # Returns (success rate, disk_burden, latency)
-# Each of those are tuples of (mean, stdev)
+# Each of those are tuples of (mean, stderr)
 def parse_data(file_path):
     outfile = open(file_path, "r")
     data = outfile.readlines()
@@ -106,17 +108,20 @@ def parse_data(file_path):
     latency_line = data[-3].split(' ')
     latency_mean = float(latency_line[-3])
     latency_stdev = float(latency_line[-1].split('=')[1].split(')')[0])
-    latency = (latency_mean, latency_stdev)
+    latency_stderr = latency_stdev / math.sqrt(NUM_TRIALS)
+    latency = (latency_mean, latency_stderr)
     # Get success rate
     success_rate_line = data[-2].split(' ')
     success_rate_mean = float(success_rate_line[-2].split('%')[0])
     success_rate_stdev = float(success_rate_line[-1].split('=')[1].split(')')[0])
-    success_rate = (success_rate_mean, success_rate_stdev)
+    success_rate_stderr = success_rate_stdev / math.sqrt(NUM_TRIALS)
+    success_rate = (success_rate_mean, success_rate_stderr)
     # Get disk burden
     disk_burden_line = data[-1].split(' ')
     disk_burden_mean = float(disk_burden_line[-2])
     disk_burden_stdev = float(disk_burden_line[-1].split('=')[1].split(')')[0])
-    disk_burden = (disk_burden_mean, disk_burden_stdev)
+    disk_burden_stderr = disk_burden_stdev / math.sqrt(NUM_TRIALS)
+    disk_burden = (disk_burden_mean, disk_burden_stderr)
     
     return success_rate, disk_burden, latency
 
@@ -127,15 +132,15 @@ def main():
     dir_name = args.dir
     # field names 
     fields = ['scenario_id',
-              'success_rate_mean', 'success_rate_stdev',
-              'disk_burden_mean', 'disk_burden_stdev',
-              'latency_mean', 'latency_stdev'] 
+              'success_rate_mean', 'success_rate_stderr',
+              'disk_burden_mean', 'disk_burden_stderr',
+              'latency_mean', 'latency_stderr'] 
         
     # Get data
     data_list = []
     for filename in os.listdir(dir_name):
         f = os.path.join(dir_name, filename)
-        if os.path.isfile(f):
+        if os.path.isfile(f) and f.endswith('.txt'):
             scenario_id = get_scenario_id(f)
             m0, m1, m2 = parse_data(f)
             data = [scenario_id, m0[0], m0[1], m1[0], m1[1], m2[0], m2[1]]
@@ -145,7 +150,7 @@ def main():
     data_list = sorted(data_list, key=operator.itemgetter(0))    
     
     # Write to CSV
-    csv_out_file = "test2.csv"
+    csv_out_file = "sim_analysis.csv"
     with open(csv_out_file, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(fields)
