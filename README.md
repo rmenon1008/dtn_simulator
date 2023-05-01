@@ -1,4 +1,4 @@
-# DCGR Simulation
+# DTN Simulator
 
 ## Running the simulation
 1. Make sure the required Python modules are installed: `pip3 install numpy scipy mesa pytest`
