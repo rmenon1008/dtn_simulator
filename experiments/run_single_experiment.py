@@ -5,7 +5,7 @@ import sys
 def get_paths_for_scenario(scenario_id):
     num = scenario_id[0]
     letter = scenario_id[1]
-    scenario_folder_path = "./simulations/scenario{0}/".format(num)
+    scenario_folder_path = "./experiments/scenario{0}/".format(num)
     model_path = scenario_folder_path + "model_s{0}.json".format(num)
     agent_path = scenario_folder_path
     if letter == "a":
@@ -68,7 +68,7 @@ def get_cmd_str():
 def main():
     options_str = \
         """Must run with scenario id:
-$ python simulations/run_experiments.py [2-letter scenario id]
+$ python experiments/run_experiments.py [2-letter scenario id]
         Scenario 1:
         \t1a) Roaming DTN w/ stable clients
         \t1b) Roaming DTN w/ roaming clients

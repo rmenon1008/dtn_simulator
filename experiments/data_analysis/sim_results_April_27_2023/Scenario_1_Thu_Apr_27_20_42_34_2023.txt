@@ -1,8 +1,8 @@
 ============ Simulation Results (10 Trials) ============
 Scenario 1
 	Simulator: Spray-and-Wait
-	Model File: ./simulations/scenario1/model_s1.json
-	Agent File: ./simulations/scenario1/spray_and_wait_stable_clients_s1.json
+	Model File: ./experiments/scenario1/model_s1.json
+	Agent File: ./experiments/scenario1/spray_and_wait_stable_clients_s1.json
 	RSSI Noise St. Deviation: 2 
 	Model Speed Limit: 10 m/s 
 	Max Steps: 10000 steps 

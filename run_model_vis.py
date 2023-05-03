@@ -119,8 +119,8 @@ def run_web_server(model_params, agent_state):
 # Main
 def main():
     argParser = argparse.ArgumentParser()
-    argParser.add_argument("-a", default="simulations/demo/agents_d1.json", help="path to json file with agent parameters")
-    argParser.add_argument("-m", default="simulations/demo/model_d1.json", help="path to json file with model parameters")
+    argParser.add_argument("-a", default="experiments/demo/agents_d1.json", help="path to json file with agent parameters")
+    argParser.add_argument("-m", default="experiments/demo/model_d1.json", help="path to json file with model parameters")
     argParser.add_argument("-rp", default=0, help="choose backbone routing protocol for Roaming DTN (0-cgr, 1-epidemic, 2-spray) [default=0]")
     argParser.add_argument("-nv", default=False, action='store_true', help="run without web server that provides visualization")
     argParser.add_argument("-b", default=0, help="run n batches")

@@ -61,7 +61,7 @@ Agent parameters defines the agents that will be created and their initial state
       "detection_thresh": -60,  # RSSI threshold for detecting another agent
       "connection_thresh": -50  # RSSI threshold for connecting to another agent
     },
-    "cp_file": "simulations/demo/5000steps_cp_d1.json"  # Contact plan file that routers should use for CGR
+    "cp_file": "experiments/demo/5000steps_cp_d1.json"  # Contact plan file that routers should use for CGR
   },
     # Agents is a list of agents that will be created by the model
   "agents": [

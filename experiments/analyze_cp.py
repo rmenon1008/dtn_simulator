@@ -29,7 +29,7 @@ def get_num_unique_contact_partners(cp):
     return len(partners)
 
 def get_cp_name(exp_num):
-    return "simulations/scenario{0}/5000steps_cp_s{0}.json".format(exp_num)
+    return "experiments/scenario{0}/5000steps_cp_s{0}.json".format(exp_num)
 
 def main():
     argParser = argparse.ArgumentParser()

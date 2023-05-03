@@ -7,7 +7,7 @@ def main():
                         '3a', '3b', '3c', '3d', '3e', '3f', '3g', '3h', '3i', '3j']
     
     for id in all_scenario_ids:
-        cmd_str = "python simulations/run_single_experiment.py {} -nv --correctness --log-metrics".format(id)
+        cmd_str = "python experiments/run_single_experiment.py {} -nv --correctness --log-metrics".format(id)
         print("Time is:\n\t{}".format(time.ctime()), flush=True)
         print("Executing:\n\t{}".format(cmd_str), flush=True)
         os.system(cmd_str)

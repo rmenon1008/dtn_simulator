@@ -4,7 +4,7 @@
       "detection_thresh": -60,
       "connection_thresh": -50
     },
-    "cp_file": "simulations/scenario2/10000steps_cp_s2.json"
+    "cp_file": "experiments/scenario2/10000steps_cp_s2.json"
   },
   "agents": [
     {

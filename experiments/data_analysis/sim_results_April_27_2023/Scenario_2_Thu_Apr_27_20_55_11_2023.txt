@@ -2,8 +2,8 @@
 Scenario 2
 	Simulator: Roaming DTN
 	Backbone Routing Protocol: SPRAY_AND_WAIT
-	Model File: ./simulations/scenario2/model_s2.json
-	Agent File: ./simulations/scenario2/roamdtn_stable_clients_s2.json
+	Model File: ./experiments/scenario2/model_s2.json
+	Agent File: ./experiments/scenario2/roamdtn_stable_clients_s2.json
 	RSSI Noise St. Deviation: 2 
 	Model Speed Limit: 10 m/s 
 	Max Steps: 10000 steps 

@@ -2,8 +2,8 @@
 Scenario 3
 	Simulator: Roaming DTN
 	Backbone Routing Protocol: CGR
-	Model File: ./simulations/scenario3/model_s3.json
-	Agent File: ./simulations/scenario3/roamdtn_stable_clients_s3.json
+	Model File: ./experiments/scenario3/model_s3.json
+	Agent File: ./experiments/scenario3/roamdtn_stable_clients_s3.json
 	RSSI Noise St. Deviation: 2 
 	Model Speed Limit: 10 m/s 
 	Max Steps: 10000 steps 

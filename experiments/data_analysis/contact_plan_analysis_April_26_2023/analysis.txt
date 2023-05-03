@@ -1,11 +1,11 @@
 ====================================================================================================================================================================================
-$ python simulations/run_single_experiment.py 1c --make-contact-plan 0 -nv
+$ python experiments/run_single_experiment.py 1c --make-contact-plan 0 -nv
 Executing:
-        python run_model_vis.py -m ./simulations/scenario1/model_s1.json -a ./simulations/scenario1/epidemic_stable_clients_s1.json -nv --make-contact-plan 0
+        python run_model_vis.py -m ./experiments/scenario1/model_s1.json -a ./experiments/scenario1/epidemic_stable_clients_s1.json -nv --make-contact-plan 0
 Scenario 1c
         Simulator: Epidemic
-        Model File: ./simulations/scenario1/model_s1.json
-        Agent File: ./simulations/scenario1/epidemic_stable_clients_s1.json
+        Model File: ./experiments/scenario1/model_s1.json
+        Agent File: ./experiments/scenario1/epidemic_stable_clients_s1.json
         RSSI Noise St. Deviation: 2
         Model Speed Limit: 10 m/s
         Max Steps: 10000 steps
@@ -39,13 +39,13 @@ Average Contact Time:   4.32265697      0.0325672257
 Num Unique Partners:    28              1
 
 =================================================================================================================
-$ python simulations/run_single_experiment.py 1d --make-contact-plan 0 -nv
+$ python experiments/run_single_experiment.py 1d --make-contact-plan 0 -nv
 Executing:
-        python run_model_vis.py -m ./simulations/scenario1/model_s1.json -a ./simulations/scenario1/epidemic_roaming_clients_s1.json -nv --make-contact-plan 0
+        python run_model_vis.py -m ./experiments/scenario1/model_s1.json -a ./experiments/scenario1/epidemic_roaming_clients_s1.json -nv --make-contact-plan 0
 Scenario 1d
         Simulator: Epidemic
-        Model File: ./simulations/scenario1/model_s1.json
-        Agent File: ./simulations/scenario1/epidemic_roaming_clients_s1.json
+        Model File: ./experiments/scenario1/model_s1.json
+        Agent File: ./experiments/scenario1/epidemic_roaming_clients_s1.json
         RSSI Noise St. Deviation: 2
         Model Speed Limit: 10 m/s
         Max Steps: 10000 steps
@@ -80,13 +80,13 @@ Average Contact Time:   4.287628227     0.06417637473
 Num Unique Partners:    35.66666667     1.154700538
 
 ====================================================================================================================================================================================
-$ python simulations/run_single_experiment.py 2c --make-contact-plan 0 -nv
+$ python experiments/run_single_experiment.py 2c --make-contact-plan 0 -nv
 Executing:
-        python run_model_vis.py -m ./simulations/scenario2/model_s2.json -a ./simulations/scenario2/epidemic_stable_clients_s2.json -nv --make-contact-plan 0
+        python run_model_vis.py -m ./experiments/scenario2/model_s2.json -a ./experiments/scenario2/epidemic_stable_clients_s2.json -nv --make-contact-plan 0
 Scenario 2c
         Simulator: Epidemic
-        Model File: ./simulations/scenario2/model_s2.json
-        Agent File: ./simulations/scenario2/epidemic_stable_clients_s2.json
+        Model File: ./experiments/scenario2/model_s2.json
+        Agent File: ./experiments/scenario2/epidemic_stable_clients_s2.json
         RSSI Noise St. Deviation: 2
         Model Speed Limit: 10 m/s
         Max Steps: 10000 steps
@@ -117,13 +117,13 @@ Contact Plan File:  data_analysis/2c_m0_n2_c.json
 TODO: Calculate mean & stdev
 
 =================================================================================================================
-$ python simulations/run_single_experiment.py 2d --make-contact-plan 0 -nv
+$ python experiments/run_single_experiment.py 2d --make-contact-plan 0 -nv
 Executing:
-        python run_model_vis.py -m ./simulations/scenario2/model_s2.json -a ./simulations/scenario2/epidemic_roaming_clients_s2.json -nv --make-contact-plan 0
+        python run_model_vis.py -m ./experiments/scenario2/model_s2.json -a ./experiments/scenario2/epidemic_roaming_clients_s2.json -nv --make-contact-plan 0
 Scenario 2d
         Simulator: Epidemic
-        Model File: ./simulations/scenario2/model_s2.json
-        Agent File: ./simulations/scenario2/epidemic_roaming_clients_s2.json
+        Model File: ./experiments/scenario2/model_s2.json
+        Agent File: ./experiments/scenario2/epidemic_roaming_clients_s2.json
         RSSI Noise St. Deviation: 2
         Model Speed Limit: 10 m/s
         Max Steps: 10000 steps
@@ -153,13 +153,13 @@ Contact Plan File:  data_analysis/2d_m0_n2_c.json
 TODO: Calculate mean & stdev
 
 ====================================================================================================================================================================================
-$ python simulations/run_single_experiment.py 3c --make-contact-plan 0 -nv
+$ python experiments/run_single_experiment.py 3c --make-contact-plan 0 -nv
 Executing:
-        python run_model_vis.py -m ./simulations/scenario3/model_s3.json -a ./simulations/scenario3/epidemic_stable_clients_s3.json -nv --make-contact-plan 0
+        python run_model_vis.py -m ./experiments/scenario3/model_s3.json -a ./experiments/scenario3/epidemic_stable_clients_s3.json -nv --make-contact-plan 0
 Scenario 3c
         Simulator: Epidemic
-        Model File: ./simulations/scenario3/model_s3.json
-        Agent File: ./simulations/scenario3/epidemic_stable_clients_s3.json
+        Model File: ./experiments/scenario3/model_s3.json
+        Agent File: ./experiments/scenario3/epidemic_stable_clients_s3.json
         RSSI Noise St. Deviation: 2
         Model Speed Limit: 10 m/s
         Max Steps: 10000 steps
@@ -189,13 +189,13 @@ Contact Plan File:  data_analysis/3c_m0_n2_c.json
 TODO: Calculate mean & stdev
 
 =================================================================================================================
-$ python simulations/run_single_experiment.py 3d --make-contact-plan 0 -nv
+$ python experiments/run_single_experiment.py 3d --make-contact-plan 0 -nv
 Executing:
-        python run_model_vis.py -m ./simulations/scenario3/model_s3.json -a ./simulations/scenario3/epidemic_roaming_clients_s3.json -nv --make-contact-plan 0
+        python run_model_vis.py -m ./experiments/scenario3/model_s3.json -a ./experiments/scenario3/epidemic_roaming_clients_s3.json -nv --make-contact-plan 0
 Scenario 3d
         Simulator: Epidemic
-        Model File: ./simulations/scenario3/model_s3.json
-        Agent File: ./simulations/scenario3/epidemic_roaming_clients_s3.json
+        Model File: ./experiments/scenario3/model_s3.json
+        Agent File: ./experiments/scenario3/epidemic_roaming_clients_s3.json
         RSSI Noise St. Deviation: 2
         Model Speed Limit: 10 m/s
         Max Steps: 10000 steps

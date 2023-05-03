@@ -9,8 +9,8 @@ import math
 Scenario 1
 	Simulator: Roaming DTN
 	Backbone Routing Protocol: CGR # THIS IS AN EXTRA LINE THAT EXISTS ONLY FOR ROAMING DTN
-	Model File: ./simulations/scenario1/model_s1.json
-	Agent File: ./simulations/scenario1/roamdtn_roaming_clients_s1.json
+	Model File: ./experiments/scenario1/model_s1.json
+	Agent File: ./experiments/scenario1/roamdtn_roaming_clients_s1.json
 	RSSI Noise St. Deviation: 2 
 	Model Speed Limit: 10 m/s 
 	Max Steps: 10000 steps 
@@ -26,8 +26,8 @@ Average bundle storage overhead: 22.84955 (stdev=2.824532160376298)
 ============ Simulation Results (10 Trials) ============
 Scenario 1
 	Simulator: Spray-and-Wait
-	Model File: ./simulations/scenario1/model_s1.json
-	Agent File: ./simulations/scenario1/spray_and_wait_roaming_clients_s1.json
+	Model File: ./experiments/scenario1/model_s1.json
+	Agent File: ./experiments/scenario1/spray_and_wait_roaming_clients_s1.json
 	RSSI Noise St. Deviation: 2 
 	Model Speed Limit: 10 m/s 
 	Max Steps: 10000 steps 

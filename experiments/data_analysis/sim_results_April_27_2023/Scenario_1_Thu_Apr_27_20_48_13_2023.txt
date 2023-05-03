@@ -2,8 +2,8 @@
 Scenario 1
 	Simulator: Roaming DTN
 	Backbone Routing Protocol: EPIDEMIC
-	Model File: ./simulations/scenario1/model_s1.json
-	Agent File: ./simulations/scenario1/roamdtn_roaming_clients_s1.json
+	Model File: ./experiments/scenario1/model_s1.json
+	Agent File: ./experiments/scenario1/roamdtn_roaming_clients_s1.json
 	RSSI Noise St. Deviation: 2 
 	Model Speed Limit: 10 m/s 
 	Max Steps: 10000 steps 
