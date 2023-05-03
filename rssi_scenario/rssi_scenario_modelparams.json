@@ -1,0 +1,10 @@
+{
+    "max_steps": 146,
+    "routing_protocol": 0,
+    "rssi_noise_stdev": 0,
+    "model_speed_limit": 40,
+    "data_drop_schedule": [
+
+    ],
+    "make_contact_plan": false
+  }

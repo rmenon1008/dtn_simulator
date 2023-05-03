@@ -1,0 +1,59 @@
+{
+  "agent_defaults": {
+    "radio": {
+
+
+      "detection_thresh": -65,
+      "connection_thresh": -37
+    }
+  },
+   "agents": [
+    {
+      "name": "L2",
+      "type": "router",
+      "id": 1,
+      "cp_file": "simulations/rssi_scenario/rssi_scenario_contactplan_5000steps.json",
+      "radio": {
+        "detection_thresh": -40
+      },
+      "movement": {
+        "pattern": "fixed",
+        "speed": 0,
+        "options": {
+          "pos": [
+            31,
+            57
+          ]
+        }
+
+      }
+
+    },
+
+    
+    {
+      "name": "C1",
+      "type": "client",
+      "id": 2,
+      "radio": {
+        "detection_thresh": -65
+      },
+      "special_behavior": {
+        "type": "find_node_rssi",
+        "options": {
+            "target_id": "all"
+        }
+      },
+
+      "movement": {
+        "pattern": "spiral",
+        "speed": 1.5,
+        "options": {
+          "center": [85,57],
+          "separation": 10
+        }
+      }
+
+    }
+  ]
+}

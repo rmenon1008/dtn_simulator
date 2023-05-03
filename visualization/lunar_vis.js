@@ -1,11 +1,11 @@
-let PIXEL_MULTIPLIER = 3;
-let SCALE = 0.8;
+let PIXEL_MULTIPLIER = 1;
+let SCALE = 0.15;
 
-let showDetectionRanges = true;
-let showConnectionRanges = true;
+let showDetectionRanges = false;
+let showConnectionRanges = false;
 let historyFade = false;
 let showDetectionLines = false;
-let showTargetLocations = true;
+let showTargetLocations = false;
 
 const LunarVis = function (maxSimX, maxSimY) {
   const elements = document.getElementById("elements");
@@ -93,8 +93,8 @@ const LunarVis = function (maxSimX, maxSimY) {
     context.beginPath();
     context.moveTo(scale(x1), scale(y1));
     context.lineTo(scale(x2), scale(y2));
-    context.strokeStyle = color;
-    context.stroke();
+    // context.strokeStyle = color;
+    // context.stroke();
   };
 
   // Determines the color for an RSSI value

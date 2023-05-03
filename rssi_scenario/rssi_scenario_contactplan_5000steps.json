@@ -1,0 +1,14 @@
+{
+    "contacts": [
+        {
+            "contact": 0,
+            "source": 2,
+            "dest": 1,
+            "startTime": 1,
+            "endTime": 1000,
+            "rate": 1000,
+            "owlt": 0,
+            "confidence": 1.0
+        }
+    ]
+}

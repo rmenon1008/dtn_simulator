@@ -19,3 +19,16 @@
 --make-contact-plan         used to generate a contact plan between RouterAgents within the simulator
                                 (must have a max_step number in model params)
 ```
+## Running the simulation using real rssi data
+
+The original get_rssi function has been commented out as to switch between simulated vs experimental values easily
+
+```
+python3 run_model_vis.py -i 'simulations/rssi_scenario/rssi_scenario.json' -m 'simulations/rssi_scenario/rssi_scenario_modelparams.json'
+
+```
+
+### Experimental RSSI Interpolation used for simulation 
+
+Under the rssi directory, the rssi data is interpolated in a jupyter notebook
+

@@ -3,6 +3,7 @@ import logging
 import mesa
 import itertools
 import json
+import numpy as np
 
 from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
@@ -11,6 +12,10 @@ from agent.client_agent import ClientAgent
 from agent.router_agent import RouterAgent
 from agent.epidemic_agent import EpidemicAgent
 from agent.spray_and_wait_agent import SprayAndWaitAgent
+
+"define constants for rssivalues"
+RSSI_REAL= False
+rssi_array = np.load('rssi/rssi_experiment.npy')
 
 def merge(source, destination):
     """
@@ -70,6 +75,12 @@ class LunarModel(mesa.Model):
         self.router_agents = {}
         self.client_agents = {}
 
+
+        # For plotting
+        self.rssi_history = []
+        self.distance_history = []
+        
+        
         # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
         self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0, "total_payloads_stored_so_far": 0}
         # These model attributes can be accessed by instantiators of the model,
@@ -77,6 +88,8 @@ class LunarModel(mesa.Model):
         self.avg_latency = None
         self.payload_rate = None
         self.avg_disk_burden = None
+        
+        
 
         # Initialize agents
         for agent_options in initial_state["agents"]:
@@ -140,6 +153,9 @@ class LunarModel(mesa.Model):
         self.running = False
         if "make_contact_plan" in self.model_params:
             self.__generate_contact_plan()
+        
+        #save for plotting
+        #np.save('rssi/rssi_history1',self.rssi_history)
         
         if "log_metrics" in self.model_params:
             # Log metrics for the last step
@@ -284,13 +300,25 @@ class LunarModel(mesa.Model):
                             self.data_drops.remove(drop)
 
     def get_rssi(self, agent, other):
-        """Returns the RSSI of the agent to the other agent in dBm"""
-        distance = self.space.get_distance(agent.pos, other.pos)
-        if distance == 0:
-            return 0
-        clean_rssi = 10 * 2.5 * math.log10(1/distance)
-        noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
-        return clean_rssi + noise
+        
+        
+        if RSSI_REAL == False:
+            """Returns the RSSI of the agent to the other agent in dBm"""
+            distance = self.space.get_distance(agent.pos, other.pos)
+            if distance == 0:
+                return 0
+            clean_rssi = 10 * 2.5 * math.log10(1/distance)
+            noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
+            return clean_rssi + noise
+        else:
+        
+            """Returns the RSSI in dBm of the agent and other agent in reference in the rssi data"""
+
+            max= -199
+            try:
+                return int(rssi_array[round(agent.pos[0]),round(agent.pos[1])])
+            except IndexError: 
+                return max
 
     def get_distance(self, rssi):
         """
