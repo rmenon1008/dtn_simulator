@@ -24,7 +24,7 @@
 The original get_rssi function has been commented out as to switch between simulated vs experimental values easily
 
 ```
-python3 run_model_vis.py -i 'simulations/rssi_scenario/rssi_scenario.json' -m 'simulations/rssi_scenario/rssi_scenario_modelparams.json'
+python3 run_model_vis.py -i 'experiments/rssi_scenario/rssi_scenario.json' -m 'experiments/rssi_scenario/rssi_scenario_modelparams.json'
 
 ```
 
