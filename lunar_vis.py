@@ -23,6 +23,7 @@ class LunarVis(VisualizationElement):
             nodes.append(agent.get_state())
         return {
             # @Isaac, @Andrew, @Lyla: A good spot for any other model-level
-            # state to live like physical objects and radio data
+            # state to go like physical objects and radio data. This gets
+            # sent to the front-end to be visualized.
             "nodes": nodes,
         }

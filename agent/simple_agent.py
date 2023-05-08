@@ -43,10 +43,10 @@ class SimpleAgent(mesa.Agent):
         if self.special_behavior is not None:
             sb_type = try_getting(self.special_behavior, "type", default=None)
 
-            # @Alex: "special behavior" is an agent parameter that gets run instead
-            #        of the normal movement pattern. Right now, the only implemented
-            #        special behavior is least squares convergence, but we can add
-            #        different convergence algorithms as well.
+            # @Alex @Andrew: "special behavior" is an agent parameter that gets run instead
+            #                of the normal movement pattern. Right now, the only implemented
+            #                special behavior is least squares convergence, but we can add
+            #                different convergence algorithms as well.
 
             if sb_type == "least_squares_convergence":
                 # Move towards a target based on RSSI

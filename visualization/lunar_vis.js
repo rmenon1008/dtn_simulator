@@ -234,8 +234,10 @@ const LunarVis = function (maxSimX, maxSimY) {
     console.log(modelState);
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    // @Isaac @Andrew @Lyla: This is where you could draw object and rssi maps
+    //                       I believe you've already done this Isaac
+
     const nodes = modelState.nodes;
-    // const data_drops = modelState.data_drops;
 
     const getNode = (id) => {
       return nodes.find(node => node.id === id);

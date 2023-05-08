@@ -15,6 +15,10 @@ def try_getting(obj, *keys, default=None):
     return obj
 
 def least_squares_convergence(agent: mesa.Agent):
+    # @Alex @Andrew: This is how we converge on another agents right now.
+    #                It uses the agent's historical RSSI to another agent
+    #                to find the best fit for where the target might be.
+
     # If no target is specified, set it to "all"
     target = try_getting(agent.special_behavior, "target", default="all")
 
