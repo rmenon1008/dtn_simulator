@@ -22,6 +22,7 @@ class LunarVis(VisualizationElement):
         for agent in model.schedule.agents:
             nodes.append(agent.get_state())
         return {
-            "data_drops": model.data_drops,
+            # @Isaac, @Andrew, @Lyla: A good spot for any other model-level
+            # state to live like physical objects and radio data
             "nodes": nodes,
         }

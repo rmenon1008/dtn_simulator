@@ -1,21 +1,21 @@
-# DTN Simulator
+# DTN Simulator · rss_dev branch
+This branch is a greatly simplified version of the main branch. It has far fewer features, hopefully making it easier to quickly develop a better simulated radio environment, physical objects, and incorporate real RSSI data.
+
+There are places in the code where I left comments about where those different pieces might fit, but feel free to modify the simulation however works best.
+
 
 ## Running the simulation
 1. Make sure the required Python modules are installed: `pip3 install numpy scipy mesa pytest`
 2. Run the visualization server: `python3 run_model_vis.py`
 3. If it does not open automatically in a browser, go to `localhost:8521`
 
-## CLI Options
 
+## Simulation Parameters
+Use the `experiments` folder to create new configurations for the simulation and specify them when running the model using the CLI options. There is additional information on configuring the simulation in `experiments/README.md`
+
+
+## CLI Options
 ```
--a [path]                   used to provide path to json file containing initial agent states
--m [path]                   used to provide path to json file containing model parameters
--rp [0, 1, or 2]            choose routing protocol (0-cgr, 1-epidemic, 2-spray) [default=0]
--b [n > 0]                  run batch of n trials and report statistics
--nv                         if present, simulator runs without web server visualization
---log-metrics               if present, logs metrics to file and prints summary statistics
---debug                     if present, run with debug print statements
---correctness               if present, run with expensive checks that verify some invariants
---make-contact-plan         used to generate a contact plan between RouterAgents within the simulator
-                                (must have a max_step number in model params)
+-a [path]        path to json file containing initial agent states
+-m [path]        path to json file containing model parameters
 ```

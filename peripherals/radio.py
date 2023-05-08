@@ -43,8 +43,8 @@ class Radio():
     def get_state(self):
         return {
             "detection_thresh": self.detection_thresh,
-            "estimated_detection_range": self.model.get_distance(self.detection_thresh),
+            "estimated_detection_range": self.model.estimate_distance_from_rssi(self.detection_thresh),
             "connection_thresh": self.connection_thresh,
-            "estimated_connection_range": self.model.get_distance(self.connection_thresh),
+            "estimated_connection_range": self.model.estimate_distance_from_rssi(self.connection_thresh),
             "neighborhood": makeSerializeable(self.neighborhood)
         }

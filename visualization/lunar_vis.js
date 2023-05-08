@@ -40,7 +40,7 @@ const LunarVis = function (maxSimX, maxSimY) {
 
 
   // Scales simulation coordinates to canvas coordinates
-  const scale = (mag) => { return Math.floor(mag * scaleFactor) };
+  const scale = (mag) => { return Math.floor(mag * scaleFactor); };
 
 
   // Draws a circle or square at the given coordinates
@@ -152,9 +152,15 @@ const LunarVis = function (maxSimX, maxSimY) {
       maxArrayItems: 100,
       exposePath: false
     });
-    let type = node.type;
-    type = type.charAt(0).toUpperCase() + type.slice(1);
-    tooltip.innerHTML = `<h3>${type} · ID: ${node.id}</h3>`;
+
+    let name;
+    if (node.name) {
+      console.log(node.name);
+      name = node.name.charAt(0).toUpperCase() + node.name.slice(1);
+    } else {
+      name = "Node · ID: " + node.id;
+    }
+    tooltip.innerHTML = `<h3>${name}</h3>`;
     tooltip.appendChild(formatter.render());
 
     // Add the tooltip to the DOM
@@ -171,7 +177,7 @@ const LunarVis = function (maxSimX, maxSimY) {
       showDetectionRanges = value;
       this.rerender();
     })
-  )
+  );
 
   visOptions.append(
     addBooleanInput("connection_ranges", {
@@ -181,7 +187,7 @@ const LunarVis = function (maxSimX, maxSimY) {
       showConnectionRanges = value;
       this.rerender();
     })
-  )
+  );
 
   visOptions.append(
     addBooleanInput("node_history", {
@@ -191,7 +197,7 @@ const LunarVis = function (maxSimX, maxSimY) {
       historyFade = value;
       this.rerender();
     })
-  )
+  );
 
   visOptions.append(
     addBooleanInput("radio_lines", {
@@ -201,7 +207,7 @@ const LunarVis = function (maxSimX, maxSimY) {
       showDetectionLines = value;
       this.rerender();
     })
-  )
+  );
 
   visOptions.append(
     addBooleanInput("show_target_locations", {
@@ -211,13 +217,13 @@ const LunarVis = function (maxSimX, maxSimY) {
       showTargetLocations = value;
       this.rerender();
     })
-  )
+  );
 
 
   // Clears the canvas
   this.reset = function () {
     context.clearRect(0, 0, canvas.width, canvas.height);
-  }
+  };
 
 
   // Renders the current simulation state
@@ -229,7 +235,7 @@ const LunarVis = function (maxSimX, maxSimY) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     const nodes = modelState.nodes;
-    const data_drops = modelState.data_drops;
+    // const data_drops = modelState.data_drops;
 
     const getNode = (id) => {
       return nodes.find(node => node.id === id);
@@ -298,27 +304,13 @@ const LunarVis = function (maxSimX, maxSimY) {
       drawShape(x=node.pos[0], y=node.pos[1], size=8 * SCALE, color=sigcolor, shape, centerDot=hasData, gradientEdgeColor=null, outline=hasDataToDeliverToClientDirectly);
       addTooltip(node);
     });
-
-    // Draw data drops
-    data_drops.forEach(drop => {
-      drawShape(drop.pos[0], drop.pos[1], 5 * SCALE, "rgba(255, 0, 0, 0.5)", "square", false);
-    });
-
-    // // Draw nodes target locations
-    // if (showTargetLocations) {
-    //   nodes.forEach(node => {
-    //     if (node.target_location) {
-    //       drawShape(node.target_location[0], node.target_location[1], 5 * SCALE, "rgba(0, 0, 255, 0.5)", "X");
-    //     }
-    //   });
-    // }
-  }
+  };
 
   this.rerender = function () {
     if (this.lastModelState) {
       console.log("rerendering");
       this.render(this.lastModelState);
     }
-  }
+  };
 
 };

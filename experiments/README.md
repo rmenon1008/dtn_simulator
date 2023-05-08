@@ -1,29 +1,23 @@
 
-## Scenario Overview
-
-Scenario 1 has highest interconnectivity
-  - 8 routers
-Scenario 2 has lowest interconnectivity
-  - 5 routers
-  - However contact durations are longer than other scenarios because the routers are moving very slowly
-Scenario 3 has medium interconnectivity
-  - 8 routers
-  - Similar to scenario 1, slightly different placement/paths/timing
-
-```
-Scenario 1
-        Total Contact Time: 10154
-        Total Num Contacts: 224
-        Average Contact Time: 45.330357142857146
-        Num Unique Partners: 10
-Scenario 2
-        Total Contact Time: 3032
-        Total Num Contacts: 16
-        Average Contact Time: 189.5
-        Num Unique Partners: 4
-Scenario 3
-        Total Contact Time: 7048
-        Total Num Contacts: 190
-        Average Contact Time: 37.09473684210526
-        Num Unique Partners: 8
-```
+# Simulation Parameters
+- `model`: top-level parameters used by the model
+    - `max_steps`: number of steps before the model terminates
+    - `rssi_noise_stdev`: amount of noise added to modeled RSSI values
+    - `model_speed_limit`: maximum speed of any agent in the model
+- `agents`: the starting state of all agents in the model
+    - `agent_defaults`: these options are applied to every agent defined in the agents list, if not overridden.
+    - `agents`: a list of every agent to create in the model
+        - `[0]`: each agent is an object with parameters
+            - `name`: name displayed in viz
+            - `id`: unique ID int
+            - `radio`:
+                - `detection_thresh`: minimum RSSI to detect other agents
+                - `connection_thresh`: minimum RSSI to communicate with other agents
+            - `movement`:
+                - `pattern`: the type of movement pattern to use (fixed, spiral, circle, waypoint or arc)
+                - `options`: options specific to that pattern (see example configs for examples)
+            - `special_behavior`: other behavior that overrides normal movement
+                - `type`: only `least_squares_convergence` implemented currently
+                - `options`: options specific to that type
+        - `[1]`: ...
+        - `[2]`: ...

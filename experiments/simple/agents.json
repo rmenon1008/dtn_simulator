@@ -1,0 +1,40 @@
+{
+  "agent_defaults": {
+    "type": "simple",
+    "radio": {
+      "detection_thresh": -80,
+      "connection_thresh": -10
+    },
+    "movement": {
+      "speed": 4
+    }
+  },
+  "agents": [
+    {
+      "name": "Fixed agent",
+      "id": 1,
+      "movement": {
+        "pattern": "fixed",
+        "options": {
+          "pos": [200, 325]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "special_behavior": {
+        "type": "least_squares_convergence",
+        "options": {
+          "target_id": 1
+        }
+      },
+      "movement": {
+        "pattern": "spiral",
+        "options": {
+          "center": [800, 325],
+          "separation": 20
+        }
+      }
+    }
+  ]
+}

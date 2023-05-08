@@ -1,0 +1,6 @@
+{
+    "scenario_name": "Simple demo scenario",
+    "max_steps": null,
+    "rssi_noise_stdev": 2.0,
+    "model_speed_limit": 10
+  }

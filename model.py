@@ -1,16 +1,9 @@
 import math
 import logging
 import mesa
-import itertools
-import json
 
-from metrics_parser import summary_statistics
 from peripherals.movement import generate_pattern
-from payload import ClientPayload
-from agent.client_agent import ClientAgent
-from agent.router_agent import RouterAgent
-from agent.epidemic_agent import EpidemicAgent
-from agent.spray_and_wait_agent import SprayAndWaitAgent
+from agent.simple_agent import SimpleAgent
 
 def merge(source, destination):
     """
@@ -36,47 +29,10 @@ class LunarModel(mesa.Model):
         super().__init__()
         self.model_params = model_params
 
-        # To track contact plan generation
-        if "make_contact_plan" in model_params:
-            self.contacts = dict()
-            """
-            self.contacts is a dictionary that contains mappings of pairs to timestamps in which a contact exists
-                - The dict keys are stored as python frozensets for efficiency reasons.
-                    For example (2,1) and (1,2) will map to equivalent frozensets
-                    This are the same because we always have bidirectional contacts in our simulation
-                - The dict values are lists of step numbers
-            Example:
-                [(1,2)] -> [step1,step2,step3,step4,step92,step93,step94] # node 1 & 2 are in contact at steps...
-                [(1,3)] -> [step1,step2,step3,step4,step92,step93,step94] # node 1 & 3 are in contact at steps...
-                [(2,3)] -> [step1,step2,step3,step4,step92,step93,step94] # node 2 & 3 are in contact at steps...
-            How it is used:
-            - self.__track_contacts() updates this dictionary on every step to add new contacts
-            - self.__generate_contact_plan() is called when the simulation is over to convert this data into a contact plan json file
-            """
-
-        # Set up an array of data drops
-        self.data_drops = []
-
         # Set up the space and schedule
-        self.space = mesa.space.ContinuousSpace(
-            size[0], size[1], False)
+        self.space = mesa.space.ContinuousSpace(size[0], size[1], False)
         self.schedule = mesa.time.BaseScheduler(self)
-
-        # Used by mesa to know when the simulation is over
         self.running = True
-
-        # Stores references to the agents as mappings of "id"->agent
-        self.agents = {}
-        self.router_agents = {}
-        self.client_agents = {}
-
-        # A dictionary of metrics useful for tracking data that is cumulative throughout a simulation
-        self.metrics = {"num_steps": self.model_params["max_steps"], "total_bundles_stored_so_far": 0, "total_payloads_stored_so_far": 0}
-        # These model attributes can be accessed by instantiators of the model,
-        # after max steps is reached, to get final statistics
-        self.avg_latency = None
-        self.payload_rate = None
-        self.avg_disk_burden = None
 
         # Initialize agents
         for agent_options in initial_state["agents"]:
@@ -99,192 +55,36 @@ class LunarModel(mesa.Model):
             # Add it to the schedule to get stepped each model tick
             # Place it on the space
             a = None
-            if "type" not in options or options["type"] == "router":
-                a = RouterAgent(self, options, model_params["backbone_routing_protocol"])
-                self.router_agents[options["id"]] = a
-            elif options["type"] == "client":
-                a = ClientAgent(self, options)
-                self.client_agents[options["id"]] = a
-            elif options["type"] == "epidemic":
-                a = EpidemicAgent(self, options)
-                self.router_agents[options["id"]] = a
-            elif options["type"] == "spray":
-                a = SprayAndWaitAgent(self, options)
-                self.router_agents[options["id"]] = a
-
-            if "debug" in self.model_params:
-                print(a)
+            if options["type"] == "simple":
+                a = SimpleAgent(self, options)
+            else:
+                logging.error("Unknown agent type: " + options["type"])
+                logging.error("Only simple agents are supported. Use movement to modify how they move")
+                exit(1)
+            
+            # Add the agent to the model schedule and space
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 
-            # Stash the agent in a map for easy lookup later.
-            self.agents[options["id"]] = a
-
     def step(self):
-        # Check if there are any data drops
-        if "data_drop_schedule" in self.model_params:
-            self.update_data_drops()
-        if "make_contact_plan" in self.model_params:
-            self.__track_contacts(int(self.model_params["make_contact_plan"]))
-
+        # This calls step() on all the agents
         self.schedule.step()
-        
-        if "log_metrics" in self.model_params:
-            self.__update_metrics()
 
+        # Check if we should stop the simulation
         if "max_steps" in self.model_params and self.model_params["max_steps"] is not None:
             if self.schedule.steps >= self.model_params["max_steps"]:
                 self.__finish_simulation()
 
     def __finish_simulation(self):
+        print("Simulation finished at step " + str(self.schedule.steps))
         self.running = False
-        if "make_contact_plan" in self.model_params:
-            self.__generate_contact_plan()
-        
-        if "log_metrics" in self.model_params:
-            # Log metrics for the last step
-            agent_list = []
-            for agent in self.schedule.agents:
-                metrics = agent.get_state()
-                del metrics["pos"]
-                del metrics["radio"]
-                del metrics["history"]
-                agent_list.append(metrics)
-            final_metric_entry = {
-                "step": self.schedule.steps,
-                "agents": agent_list,
-            }
-            verify = False
-            if "correctness" in self.model_params and self.model_params["correctness"]:
-                verify = True
-            stats = summary_statistics(final_metric_entry, self.metrics, verify)
-            self.avg_latency = stats[0]
-            self.payload_rate = stats[1]
-            self.avg_disk_burden = stats[2]
-
-    def __track_contacts(self, mode):
-        """
-        mode=0 means track contacts between routers only
-        mode=1 means track contacts between all nodes
-        """
-        # For Epidemic Agents & Spray and Wait Agents, the mode doesn't matter
-        # All nodes are routers, so mode 0 & mode 1 are the same behavior
-        # All nodes are also in the router_agents dict
-
-        # For Roaming DTN agents, the mode matters
-        if mode == 0:
-            # Loop through only routers
-            for curr_router_id in self.router_agents:
-                curr_router_agent = self.router_agents[curr_router_id]
-                neighbor_data = self.get_neighbors(curr_router_agent)
-                # Loop through all neighbors of this router
-                for neighbor in neighbor_data:
-                    if neighbor["connected"] and neighbor["id"] in self.router_agents:
-                        # Found a connected pair of router agents
-                        pair = frozenset((curr_router_id, neighbor["id"]))
-                        # Add the current step number for this pair
-                        curr_step = self.schedule.steps
-                        if pair not in self.contacts:
-                            self.contacts[pair] = [curr_step]
-                        elif self.contacts[pair][-1] != curr_step:
-                            # avoid adding duplicate step numbers
-                            self.contacts[pair].append(curr_step)
-        elif mode == 1:
-            for curr_agent_id in self.agents:
-                curr_agent = self.agents[curr_agent_id]
-                neighbor_data = self.get_neighbors(curr_agent)
-                # Loop through all neighbors of this agent
-                for neighbor in neighbor_data:
-                    if neighbor["connected"]:
-                        # Found a connected pair of agents
-                        pair = frozenset((curr_agent_id, neighbor["id"]))
-                        # Add the current step number for this pair
-                        curr_step = self.schedule.steps
-                        if pair not in self.contacts:
-                            self.contacts[pair] = [curr_step]
-                        elif self.contacts[pair][-1] != curr_step:
-                            # avoid adding duplicate step numbers
-                            self.contacts[pair].append(curr_step)
-        else:
-            print("error contact plan")
-
-    def __generate_contact_plan(self):
-        def ranges(i):
-            # helper function from: https://stackoverflow.com/a/43091576
-            # condenses [0,1,2,3,4,5,6,9,10,11,12] into [(0,6),(9,12)]
-            for a, b in itertools.groupby(enumerate(i), lambda pair: pair[1] - pair[0]):
-                b = list(b)
-                yield b[0][1], b[-1][1]
-        contact_list = []
-        curr_contact_id = 0
-        for pair in self.contacts:
-            node1, node2 = pair
-            contact_times = list(ranges(self.contacts[pair]))
-            for time_range in contact_times:
-                start, end = time_range
-                contact_list.append({
-                    "contact": curr_contact_id,
-                    "source": node1,
-                    "dest": node2,
-                    "startTime": start,
-                    "endTime": end,
-                    "rate": 1000,
-                    "owlt": 0,
-                    "confidence": 1.,
-                    })
-                curr_contact_id += 1
-                contact_list.append({
-                    "contact": curr_contact_id,
-                    "source": node2, # switch the source & dest
-                    "dest": node1,
-                    "startTime": start,
-                    "endTime": end,
-                    "rate": 1000,
-                    "owlt": 0,
-                    "confidence": 1.,
-                    })
-                curr_contact_id += 1
-    
-        final_cp = {"contacts": contact_list}
-        with open("./cp.json", "w") as outfile:
-            outfile.write(json.dumps(final_cp, indent=4))
-    
-    def update_data_drops(self):
-        DROP_PICKUP_RANGE = 5
-        
-        # Check if there are any new data drops
-        for drop in self.model_params["data_drop_schedule"]:
-            if drop["time"] == self.schedule.steps:
-                self.data_drops.append(drop)
-            elif "repeat_every" in drop:
-                if "until" in drop and self.schedule.steps > drop["until"]:
-                    continue
-                if (self.schedule.steps - drop["time"]) % drop["repeat_every"] == 0 and self.schedule.steps > drop["time"]:
-                    self.data_drops.append(drop)
-
-        # Check if any agents are in range of a data drop
-        already_picked_up = set()
-        for agent in self.schedule.agents:
-            for drop in self.data_drops:
-                if self.space.get_distance(agent.pos, drop["pos"]) < DROP_PICKUP_RANGE:
-                    # Make sure the agent is someone who should pickup bundles
-                    if isinstance(agent, ClientAgent) or isinstance(agent, EpidemicAgent) or isinstance(agent, SprayAndWaitAgent):
-                        if isinstance(agent, EpidemicAgent) or isinstance(agent, SprayAndWaitAgent):
-                            if not agent.name.startswith('C'):
-                                # only epidemic agents w/ names starting with C can pickup drops
-                                continue
-                        # TODO: Maybe we need to add a field to drops so that only specific clients can pick up the drop
-                        #       This would help for reasoning about the simulation scenarios being made
-                        # If the drop's target is the nearby client agent, the client will ignore it
-                        # Someone else will pick it up eventually
-                        # Added this condition check bc I witnessed a client taking 2000 steps to get a bundle delivered to itself.
-                        if drop["target_id"] != agent.unique_id and drop["drop_id"] not in already_picked_up:
-                            already_picked_up.add(drop["drop_id"])
-                            agent.payload_handler.store_payload(ClientPayload(drop["drop_id"], agent.unique_id, drop["target_id"], self.schedule.steps, self.model_params["payload_lifespan"]))
-                            self.data_drops.remove(drop)
 
     def get_rssi(self, agent, other):
         """Returns the RSSI of the agent to the other agent in dBm"""
+
+        # @Lyla, @Andrew: This function is what you could replace to bring in 
+        #                 interpolated RSSI values.
+
         distance = self.space.get_distance(agent.pos, other.pos)
         if distance == 0:
             return 0
@@ -292,10 +92,10 @@ class LunarModel(mesa.Model):
         noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
         return clean_rssi + noise
 
-    def get_distance(self, rssi):
+    def estimate_distance_from_rssi(self, rssi):
         """
         Returns the distance of the agent using an RSSI in dbm.
-        Right now, only used to draw the 'fuzzy' range around agents.
+        Right now, used to draw the 'fuzzy' range around agents.
         """
         distance = math.exp(-0.0921034 * rssi)
         return distance
@@ -304,7 +104,8 @@ class LunarModel(mesa.Model):
         """
         Returns a list of all agents within the detection range of the agent
         Each entry includes the agent's unique id, RSSI, and whether or not
-        the agent is connected.
+        the agent is connected. It's supposed to be analogous to a WiFi scan
+        of nearby networks and their signal strengths.
         """
 
         det_thresh = agent.radio.detection_thresh
@@ -323,97 +124,46 @@ class LunarModel(mesa.Model):
                     })
 
         return neighbors
+    
+    def pos_invalid(self, pos):
+        """Returns whether or not the given position is a valid location in the model"""
+
+        # @Isaac: Not sure how you check if an agent is running into
+        #         walls in your version, but this is probably a good
+        #         place to put it.
+
+        return self.space.out_of_bounds(pos)
 
     def move_agent(self, agent, dx, dy):
         """Moves the agent by the given delta x and delta y"""
+        # Find out how fast the agent is trying to move
         mag = (dx**2 + dy**2)**0.5
 
-        # Give it a little bit of leeway to avoid floating point errors
+        # Don't allow the agent to move faster than the model speed limit
+        # Give a little wiggle room for floating point errors
         if mag > self.model_params["model_speed_limit"] + 0.0005:
             logging.warning(
                 "Agent {} tried to move faster than model speed limit".format(agent.unique_id))
             return
-
         new_pos = (agent.pos[0] + dx, agent.pos[1] + dy)
 
-        if self.space.out_of_bounds(new_pos):
+        # Check if the agent is trying to move to an invalid position
+        if self.pos_invalid(new_pos):
             logging.warning(
-                "Agent {} tried to move out of bounds".format(agent.unique_id))
+                "Agent {} tried to move to an invalid position".format(agent.unique_id))
             return
 
         self.space.move_agent(agent, (agent.pos[0] + dx, agent.pos[1] + dy))
 
     def teleport_agent(self, agent, pos):
-        """Teleports the agent to the given position"""
-        if self.space.out_of_bounds(pos):
+        """Teleports the agent to the given position. Should be used to model satellites, not ground rovers"""
+
+        # Warn in case it's not obvious that this is happening
+        logging.warning("Agent {} teleported to {}".format(agent.unique_id, pos))
+        
+        if self.pos_invalid(pos):
             logging.warning(
-                "Agent {} tried to teleport out of bounds".format(agent.unique_id))
+                "Agent {} tried to teleport to an invalid position".format(agent.unique_id))
             return
 
         self.space.move_agent(agent, pos)
-
-    def __update_metrics(self):
-        """Logs the metrics for the current step"""
-        for agent in self.schedule.agents:
-            agent_state = agent.get_state()
-                    
-            if isinstance(agent, ClientAgent):
-                if "correctness" in self.model_params and self.model_params["correctness"]:
-                    # check if the client is holding any duplicate bundles or payloads
-                    seen_payloads = set()
-                    for payload in agent_state["curr_stored_payloads"]:
-                        payload_id = payload["payload_id"]
-                        if payload_id in seen_payloads:
-                            print("INVARIANT VIOLATION: model found a dupe payload {}".format(payload_id))
-                        else:
-                            seen_payloads.add(payload_id)
-                # Client payload count is stored here:
-                self.metrics["total_payloads_stored_so_far"] += agent_state["curr_num_stored_payloads"]
-                continue # finished counting metrics for this client, iterate to next agent
-            # Can assume agent is RouterAgent, EpidemicAgent, or SprayAndWaitAgent
-            # Collect their metrics in the following lines of code
-            if "correctness" in self.model_params and self.model_params["correctness"]:
-                # check if the router is holding any duplicate bundles or payloads
-                seen_payloads = set()
-                seen_bundles = set()
-                for bundle in agent_state["routing_protocol"]["curr_stored_bundles"]:
-                    if str(bundle) in seen_bundles:
-                        print("INVARIANT VIOLATION: model found a dupe bundle {}".format(str(bundle)))
-                    else:
-                        seen_bundles.add(str(bundle))
-                for payload in agent_state["curr_outgoing_payloads_to_send"]:
-                    payload_id = payload["payload_id"]
-                    if payload_id in seen_payloads:
-                        print("INVARIANT VIOLATION: model found a dupe payload {}".format(payload_id))
-                    else:
-                        seen_payloads.add(payload_id)
-                for payload in agent_state["curr_payloads_received_for_client"]:
-                    payload_id = payload["payload_id"]
-                    if payload_id in seen_payloads:
-                        print("INVARIANT VIOLATION: model found a dupe payload {}".format(payload_id))
-                    else:
-                        seen_payloads.add(payload_id)
-            # Currently tracking 2 cumulative metrics for router agents
-            #   1. # of bundles currently stored
-            #   2. # of payloads currently stored in network
-            self.metrics["total_bundles_stored_so_far"] += agent_state["routing_protocol"]["curr_num_stored_bundles"]
-            # Router payload count stored in 2 places:
-            #       this is the # of payloads the router is delivering to a client
-            #       EpidemicAgent & SprayAndWaitAgent will have 0 for this
-            self.metrics["total_payloads_stored_so_far"] += agent_state["curr_num_payloads_received_for_client"]
-            #       this is the # of payloads the router just got from a client
-            #       EpidemicAgent & SprayAndWaitAgent will have 0 for this
-            self.metrics["total_payloads_stored_so_far"] += agent_state["curr_num_outgoing_payloads_to_send"]
-
-    """
-    Used to easily obtain references to routing_protocol objects belonging to RouterAgents on the network.
-    """
-    def get_routing_protocol_object(self, node_id):
-        return self.router_agents[node_id].routing_protocol
-
-    """
-    Used to easily obtain references to RouterClientPayloadHandler and ClientPayloadHandler objects 
-    from RouterAgents and ClientAgents.
-    """
-    def get_client_payload_handler_object(self, node_id):
-        return self.agents[node_id].payload_handler

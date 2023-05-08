@@ -14,13 +14,14 @@ def try_getting(obj, *keys, default=None):
             return default
     return obj
 
-
-def rssi_find_router_target(agent: mesa.Agent):
-    target = agent.special_behavior["options"]["target_id"]
+def least_squares_convergence(agent: mesa.Agent):
+    # If no target is specified, set it to "all"
+    target = try_getting(agent.special_behavior, "target", default="all")
 
     # Check if connected to target
     if agent.radio.is_connected(target):
         agent.special_behavior["type"] = None
+        agent.movement.stop()
 
     # 1. Create a matrix with previous data
     positions = []
@@ -28,11 +29,6 @@ def rssi_find_router_target(agent: mesa.Agent):
     for h in agent.history:
         if "neighborhood" in h["radio"]:
             for n in h["radio"]["neighborhood"]:
-                # if desired_target_agent_type is not None + n is not of desired_target_agent_type,
-                # skip n.
-                if n["id"] not in agent.model.router_agents.keys():
-                    continue
-
                 if n["id"] == target or target == "all":
                     positions.append(h["pos"])
                     rssis.append(n["rssi"])

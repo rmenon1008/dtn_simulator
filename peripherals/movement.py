@@ -14,6 +14,7 @@ class Movement():
         self.pattern = generate_pattern(movement_options)
         self.max_speed = movement_options["speed"]
 
+        self.stopped = False
         self.target_pos = self.pattern.starting_pos
 
     def refresh(self):
@@ -22,12 +23,18 @@ class Movement():
         pass
 
     def move(self, dx, dy):
+        if self.stopped:
+            return
+        
         mag = (dx**2 + dy**2)**0.5
         if mag > self.max_speed:
             dx = dx / mag * self.max_speed
             dy = dy / mag * self.max_speed
 
         self.model.move_agent(self.agent, dx, dy)
+
+    def stop(self):
+        self.stopped = True
 
     def move_towards(self, target_pos):
         dx = target_pos[0] - self.agent.pos[0]
