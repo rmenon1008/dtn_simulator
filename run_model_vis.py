@@ -3,8 +3,14 @@ from lunar_vis import LunarVis
 import mesa
 import json
 
-SIM_WIDTH = 1000
-SIM_HEIGHT = 550
+# SIM_WIDTH = 880
+# SIM_HEIGHT = 390
+# SIM_WIDTH = 1000
+# SIM_HEIGHT = 550
+# SIM_WIDTH = 6980
+# SIM_HEIGHT = 3090
+SIM_WIDTH = 3490
+SIM_HEIGHT = 1550
 
 DEFAULT_MODEL_PARAMS = {
     # "size": (SIM_WIDTH, SIM_HEIGHT),

@@ -291,7 +291,6 @@ const LunarVis = function (maxSimX, maxSimY) {
     Object.entries(modelState).forEach(([key, value]) => {
       // Check if the current value is an array
       if (key === "obs_grid") {
-    
         // Iterate over each element in the 2D array
         for (let i = 0; i < value.length; i++) {
           for (let j = 0; j < value[i].length; j++) {
@@ -299,7 +298,7 @@ const LunarVis = function (maxSimX, maxSimY) {
             // Perform some action on the current element
             if (value[i][j] == 1) {
               // TODO: not hard-code these pixel drawing parameters
-              drawShape((j * 10) + 5, (i * 10) + 5, 10, "rgba(130, 130, 130, 1.0)", "square", false);
+              drawShape(j + 0.5, i + 0.5, 1, "rgba(130, 130, 130, 1.0)", "square", false);
             }
           }
         }

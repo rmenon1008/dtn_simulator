@@ -2,7 +2,7 @@ import mesa
 import logging
 import numpy as np
 from scipy.optimize import leastsq
-
+import math
 from peripherals.dtn.dtn import Dtn
 
 # The old HDTN class. Remove when replaced with Dtn

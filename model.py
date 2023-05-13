@@ -5,6 +5,8 @@ import os
 import json
 import mesa
 import numpy as np
+import cv2
+from copy import deepcopy
 from agent import RoverAgent
 import random
 
@@ -111,7 +113,7 @@ class ObsGrid():
                         self.grid[i][j] = 1
         
 
-    def get_grid(self):
+    def get_grid(self) -> list:
         """
         Returns grid for this ObsGrid object.
         """
@@ -137,8 +139,8 @@ class ObsGrid():
             raise FileExistsError
 
         with open(filepath + ".layer", "w") as f:
-            for i in range(int(self.y / self.grid_step)):
-                for j in range(int(self.x / self.grid_step)):
+            for i in range(int(np.shape(self.grid)[0])):
+                for j in range(int(np.shape(self.grid)[1])):
                     f.write(str(self.grid[i][j]))
                 f.write('\n')
         
@@ -160,9 +162,44 @@ class ObsGrid():
                 temp_grid.append(int_line)
                 idx += 1
         
-        self.grid = temp_grid
+        self.grid = deepcopy(temp_grid)
         self.y = len(self.grid) * self.grid_step
         self.x = len(self.grid[0]) * self.grid_step
+
+
+    def convert_plan(self, floor_plan_path:str, dilatation_size:int=3, downsmpl:int=4) -> None:
+        """
+        Converts an image of a building floor-plan into a scaled occupancy grid,
+        with 1's representing walls and 0's representing free-space.
+        :param floor_plan_path: The path to the floor-plan image to be loaded in.
+        """
+
+        # Load the image
+        image = cv2.imread(floor_plan_path)
+
+        dilation_shape = cv2.MORPH_RECT
+        element = cv2.getStructuringElement(dilation_shape, (2 * dilatation_size + 1, 2 * dilatation_size + 1),
+                                        (dilatation_size, dilatation_size))
+        dil_im = cv2.dilate(image, element)
+
+        gray = cv2.cvtColor(dil_im, cv2.COLOR_BGR2GRAY)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        
+        # Down sample the image to make grid more workable.
+        for i in range(downsmpl):
+            binary = cv2.pyrDown(binary)
+
+        print("Rows: " + str(np.shape(binary)[0]) + "\tCols: " + str(np.shape(binary)[1]))
+        
+        new_grid = [[0] * np.shape(binary)[0]] * np.shape(binary)[0]
+
+        _, binary = cv2.threshold(binary, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+
+        new_grid = [[int(binary[i][j] / 255) for j in range(np.shape(binary)[1])] for i in range(np.shape(binary)[0])]
+
+        self.grid = deepcopy(np.array(new_grid))
+        print(np.array(new_grid))
+        cv2.imwrite("./boop.png", binary)
 
 
 class LunarModel(mesa.Model):
@@ -192,8 +229,10 @@ class LunarModel(mesa.Model):
         
         self.grid_layer = ObsGrid(size, grid_step=GRID_STEP)
         self.grid_layer.place_obstacles()
+        self.grid_layer.load_grid("./grid_layers/basement6.layer")
         self.grid_step = GRID_STEP
         self.grid = self.grid_layer.get_grid()
+        # self.grid_layer.save_grid("./grid_layers/urmum")
         # print(np.array(self.grid_layer.get_grid()))
 
         for agent_options in initial_state["agents"]:
