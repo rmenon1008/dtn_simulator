@@ -8,8 +8,10 @@ import multiprocessing as mp
 import os
 from statistics import mean, stdev
 
-SIM_WIDTH = 1000  # 1 km
-SIM_HEIGHT = 650  # 650 m
+# SIM_WIDTH = 1000  # 1 km
+# SIM_HEIGHT = 650  # 650 m
+SIM_WIDTH = 3490
+SIM_HEIGHT = 1550
 
 class ObjectOption(mesa.visualization.UserParam):
     def __init__(self, name="", value=None, choices=None, description=None):

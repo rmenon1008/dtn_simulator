@@ -237,11 +237,41 @@ const LunarVis = function (maxSimX, maxSimY) {
     // @Isaac @Andrew @Lyla: This is where you could draw object and rssi maps
     //                       I believe you've already done this Isaac
 
+    const grid = modelState.obs_grid
+    const rssi_layer = modelState.rssi_layer
     const nodes = modelState.nodes;
+
+    // Define the range of input values
+    var minValue = -140;
+    var maxValue = -40;
+
+    // Define the color scale
+    var colorScale = d3.scaleSequential()
+    .interpolator(d3.interpolateInferno)
+    .domain([minValue, maxValue]);
+    
+    for (let i = 0; i < rssi_layer.length; i++) {
+      for (let j = 0; j < rssi_layer[i].length; j++) {
+        drawShape((j * 10) + 5, (i * 10) + 5, 10, colorScale(rssi_layer[i][j]), "square", false);
+      }
+    }
+
+    // Draw the obstacle grid
+    for (let i = 0; i < grid.length; i++) {
+      for (let j = 0; j < grid[i].length; j++) {
+        // Perform some action on the current element
+        if (grid[i][j] == 1) {
+          // TODO: not hard-code these pixel drawing parameters
+          // 10 is the grid-step size specified in the LunarModel class, 5 is center of the square for each pixel.
+          drawShape((j * 10) + 5, (i * 10) + 5, 10, "rgba(130, 130, 130, 1.0)", "square", false);
+        }
+      }
+    }
 
     const getNode = (id) => {
       return nodes.find(node => node.id === id);
     };
+
 
     // Draw the historical RSSI values
     nodes.forEach(node => {

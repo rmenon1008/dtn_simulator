@@ -26,4 +26,6 @@ class LunarVis(VisualizationElement):
             # state to go like physical objects and radio data. This gets
             # sent to the front-end to be visualized.
             "nodes": nodes,
+            "obs_grid": model.grid,
+            "rssi_layer": model.rssi_layer
         }

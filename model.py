@@ -1,7 +1,11 @@
 import math
 import logging
 import mesa
-
+import os
+import cv2
+import numpy as np
+import re
+from copy import deepcopy
 from peripherals.movement import generate_pattern
 from agent.simple_agent import SimpleAgent
 
@@ -19,6 +23,116 @@ def merge(source, destination):
     return destination
 
 
+class LoadLayers():
+    def __init__(self, floorplan_path:str) -> None:
+        if not os.path.exists(floorplan_path):
+            logging.error("The specified saved floorplan file does not exist")
+            raise FileNotFoundError
+
+        # if not os.path.exists(rssi_data_path):
+        #     logging.error("The specified saved floorplan file does not exist")
+        #     raise FileNotFoundError
+        
+        self.floorplan_path = floorplan_path
+        # self.rssi_data_path = rssi_data_path
+    
+
+    def convert_plan(self, dilatation_size:int=3, downsmpl:int=4) -> list:
+        """
+		Converts an image of a building floor-plan into a scaled occupancy grid,
+		with 1's representing walls and 0's representing free-space.
+		:param floor_plan_path: The path to the floor-plan image to be loaded in.
+		:param dilatation_size: How much to dilate the image passed in for the grid. Larger value means less fine-detail.
+		:param downsmpl:				How much to downsample the resolution of the image. Every increment downsamples image by a factor of 2. Default is 4, so the
+		image's resolution is reduced by 2^4 times.
+		"""
+
+		# Check that the floor-plan image file path is valid.
+        if not os.path.exists(self.floorplan_path):
+            os.error("The specified floor plan image does not exist!")
+            raise FileNotFoundError
+
+		# Load the image
+        image = cv2.imread(self.floorplan_path)
+
+		# Dilate the image to remove clutter.
+        dilation_shape = cv2.MORPH_RECT
+        element = cv2.getStructuringElement(dilation_shape, (2 * dilatation_size + 1, 2 * dilatation_size + 1),
+																		(dilatation_size, dilatation_size))
+        dil_im = cv2.dilate(image, element)
+
+		# Convert image to gray-scale
+        gray = cv2.cvtColor(dil_im, cv2.COLOR_BGR2GRAY)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+		
+		# Downsample the image for compression purposes.
+        for i in range(downsmpl):
+            binary = cv2.pyrDown(binary)
+
+		# Just to check the shape of the binary grid.
+        print("Rows: " + str(np.shape(binary)[0]) + "\tCols: " + str(np.shape(binary)[1]))
+		
+		# Set values to 1 or 0 based on the grey-scaled pixel value
+        _, binary = cv2.threshold(binary, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        grid = [[int(binary[i][j] / 255) for j in range(np.shape(binary)[1])] for i in range(np.shape(binary)[0])]
+
+		# Convert grid to a numpy array, write it to a new image (for debugging), and return the new grid.
+        # grid = np.array(grid)
+        cv2.imwrite("./thrshold_dwnsmpl.png", binary)
+        return grid
+
+
+    def save_plan(self, filepath:str, grid:list) -> None:
+        """
+        Saves the given plan into a .layer txt file, which represents an obstacle grid.
+        :param filepath:    The file path to save the .layer file to.
+        :param grid:        The binary obstacle grid representing a floor-plan.     
+        """
+
+        # Extract directory by regex matching to split string until last '/'
+        dir = list(filter(None, re.split("^(.+)\/([^\/]+)$", filepath)))[0]
+
+        # Check that the specified directory is valid.
+        if not os.path.exists(dir):
+            os.error("The directory specified for saving obstacle grid file does not exist")
+            raise FileNotFoundError
+        
+        # Check that there is no file with filepath's name already.
+        if os.path.exists(filepath):
+            os.error("An obstacle grid layer file with this path already exists!")
+            raise FileExistsError
+        
+        # Write the grid to the .layer file.
+        with open(filepath, "w") as f:
+            for i in range(int(np.shape(grid)[0])):
+                for j in range(int(np.shape(grid)[1])):
+                    f.write(str(grid[i][j]))
+                f.write('\n')
+
+    def load_grid(self, filepath:str, delimiter=""):
+        """
+        Load a saved ObsGrid object.
+        """
+        if not os.path.exists(filepath):
+            logging.error("The directory specified for saving obstacle grid file does not exist")
+            raise FileNotFoundError
+
+        temp_grid = []
+
+        with open(filepath, "r") as f:
+            idx = 0
+            for line in f:
+                # num = 
+                split_line = line.split(" ")
+                int_line = [float(val) for val in split_line if val != '\n']
+                temp_grid.append(int_line)
+                idx += 1
+        
+        grid = deepcopy(temp_grid)
+        # self.y = len(self.grid) * self.grid_step
+        # self.x = len(self.grid[0]) * self.grid_step
+        return grid
+
 class LunarModel(mesa.Model):
     """
     A model that RouterAgents and ClientAgents exist within.
@@ -34,6 +148,16 @@ class LunarModel(mesa.Model):
         self.schedule = mesa.time.BaseScheduler(self)
         self.running = True
 
+        self.grid_step = 10
+        l = LoadLayers("./floor_plans/small_basement.png")
+        self.grid = l.convert_plan(downsmpl=3)
+        self.rssi_layer = (np.flipud(l.load_grid("./grid_layers/interpolate_rssi.layer"))).tolist()
+        # self.rssi_layer = (np.fliplr(self.rssi_layer)).tolist()
+
+        assert(np.shape(self.grid) == np.shape(self.rssi_layer))
+
+        # print(max(self.rssi_layer[154]))
+
         # Initialize agents
         for agent_options in initial_state["agents"]:
 
@@ -48,8 +172,14 @@ class LunarModel(mesa.Model):
                 else:
                     options["pos"] = (self.random.uniform(0, self.space.width),
                                       self.random.uniform(0, self.space.height))
+                
+                    
             if "id" not in options:
                 options["id"] = self.next_id()
+            elif "id" != 1:
+                while self.grid[math.floor(options["pos"][1] / self.grid_step)][math.floor(options["pos"][0] / self.grid_step)] == 1:
+                    options["pos"] = (self.random.uniform(0, self.space.width),
+                                      self.random.uniform(0, self.space.height))
 
             # Create the agent
             # Add it to the schedule to get stepped each model tick
@@ -85,12 +215,15 @@ class LunarModel(mesa.Model):
         # @Lyla, @Andrew: This function is what you could replace to bring in 
         #                 interpolated RSSI values.
 
-        distance = self.space.get_distance(agent.pos, other.pos)
-        if distance == 0:
-            return 0
-        clean_rssi = 10 * 2.5 * math.log10(1/distance)
-        noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
-        return clean_rssi + noise
+        # distance = self.space.get_distance(agent.pos, other.pos)
+        # if distance == 0:
+        #     return 0
+        # clean_rssi = 10 * 2.5 * math.log10(1/distance)
+        # noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
+        # return clean_rssi + noise
+        idx_y = math.floor(agent.pos[1] / self.grid_step)
+        idx_x = math.floor(agent.pos[0] / self.grid_step)
+        return self.rssi_layer[idx_y][idx_x]
 
     def estimate_distance_from_rssi(self, rssi):
         """
@@ -132,7 +265,8 @@ class LunarModel(mesa.Model):
         #         walls in your version, but this is probably a good
         #         place to put it.
 
-        return self.space.out_of_bounds(pos)
+        obs = self.grid[math.floor(pos[1] / self.grid_step)][math.floor(pos[0] / self.grid_step)]
+        return self.space.out_of_bounds(pos) or obs == 1
 
     def move_agent(self, agent, dx, dy):
         """Moves the agent by the given delta x and delta y"""
