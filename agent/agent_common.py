@@ -37,8 +37,8 @@ def least_squares_convergence(agent: mesa.Agent):
                     positions.append(h["pos"])
                     rssis.append(n["rssi"])
 
-    positions = np.array(positions[-100:])
-    rssis = np.array(rssis[-100:])
+    positions = np.array(positions[-30:])
+    rssis = np.array(rssis[-30:])
 
     if len(positions) < 10:
         agent.movement.step()
@@ -56,6 +56,8 @@ def least_squares_convergence(agent: mesa.Agent):
 
     # 3. Find the best fit for a potential target
     a, b, c = leastsq(rssi_error, (0, 0, 0))[0]
+
+    agent.movement.target_pos = (a, b)
 
     if agent.model.space.out_of_bounds((a, b)):
         agent.movement.step()

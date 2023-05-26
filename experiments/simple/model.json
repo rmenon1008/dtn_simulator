@@ -1,6 +1,8 @@
 {
     "scenario_name": "Simple demo scenario",
     "max_steps": null,
-    "rssi_noise_stdev": 2.0,
-    "model_speed_limit": 10
+    "rssi_noise_stdev": 0,
+    "rssi_source": "shadowing",
+    "enable_walls": true,
+    "model_speed_limit": 40
   }

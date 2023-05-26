@@ -249,6 +249,10 @@ const LunarVis = function (maxSimX, maxSimY) {
     var colorScale = d3.scaleSequential()
     .interpolator(d3.interpolateInferno)
     .domain([minValue, maxValue]);
+
+    var colorScale2 = d3.scaleSequential()
+    .interpolator(d3.interpolateRgb("#ff0000", "#00ff00"))
+    .domain([minValue, maxValue]);
     
     for (let i = 0; i < rssi_layer.length; i++) {
       for (let j = 0; j < rssi_layer[i].length; j++) {
@@ -276,17 +280,18 @@ const LunarVis = function (maxSimX, maxSimY) {
     // Draw the historical RSSI values
     nodes.forEach(node => {
       var transparency = 1;
-      if (node.history.reverse()) {
+      if (node.history) {
         for (let i = 0; i < node.history.length - 1; i++) {
           const entry = node.history[i];
           let color = "rgba(0, 0, 0, 0.1)";
           if (entry.radio.neighborhood) {
-            color = colorFromSignal(getMaxRssi(entry.radio.neighborhood), node.radio.estimated_detection_range, transparency);
+            // color = colorFromSignal(getMaxRssi(entry.radio.neighborhood), node.radio.estimated_detection_range, transparency);
+            color = colorScale2(getMaxRssi(entry.radio.neighborhood));
             if (historyFade) {
               transparency = Math.max(0, transparency * 0.995 - 0.001);
             }
           }
-          drawShape(entry.pos[0], entry.pos[1], 3 * SCALE, color, "circle");
+          drawShape(entry.pos[0], entry.pos[1], 10 * SCALE, color, "circle");
         }
       }
     });
@@ -308,16 +313,16 @@ const LunarVis = function (maxSimX, maxSimY) {
     }
 
     // Draw lines between nodes that have an RSSI
-    nodes.forEach(node => {
-      if (node.radio.neighborhood) {
-        node.radio.neighborhood.forEach(neighbor => {
-          if (neighbor.connected || showDetectionLines) {
-            const otherNode = getNode(neighbor.id);
-            drawLine(node.pos[0], node.pos[1], otherNode.pos[0], otherNode.pos[1], colorFromSignal(neighbor.rssi, node.radio.estimated_detection_range));
-          }
-        });
-      }
-    });
+    // nodes.forEach(node => {
+    //   if (node.radio.neighborhood) {
+    //     node.radio.neighborhood.forEach(neighbor => {
+    //       if (neighbor.connected || showDetectionLines) {
+    //         const otherNode = getNode(neighbor.id);
+    //         drawLine(node.pos[0], node.pos[1], otherNode.pos[0], otherNode.pos[1], colorScale2(neighbor.rssi));
+    //       }
+    //     });
+    //   }
+    // });
 
     // Draw all the nodes on top
     nodes.forEach(node => {
@@ -331,10 +336,22 @@ const LunarVis = function (maxSimX, maxSimY) {
       if (node.curr_num_payloads_received_for_client && node.curr_num_payloads_received_for_client > 0) {
         hasDataToDeliverToClientDirectly = true;
       }
-      const sigcolor = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
-      const shape = node.type === "client" ? "circle" : "square";
-      drawShape(x=node.pos[0], y=node.pos[1], size=8 * SCALE, color=sigcolor, shape, centerDot=hasData, gradientEdgeColor=null, outline=hasDataToDeliverToClientDirectly);
+      // const sigcolor = colorFromSignal(getMaxRssi(node.radio.neighborhood), node.radio.estimated_detection_range);
+      const sigcolor = colorScale2(getMaxRssi(node.radio.neighborhood));
+      let shape = "circle";
+      console.log(node.movement)
+      if (node.movement && node.movement.type === "fixed") {
+        shape = "square";
+      }
+      drawShape(x=node.pos[0], y=node.pos[1], size=20 * SCALE, color=sigcolor, shape, centerDot=hasData, gradientEdgeColor=null, outline=hasDataToDeliverToClientDirectly);
       addTooltip(node);
+    });
+
+    // Draw the target locations
+    nodes.forEach(node => {
+      if (node.movement.target_pos && node.movement.type !== "fixed") {
+        drawShape(node.movement.target_pos[0], node.movement.target_pos[1], 10 * SCALE, "rgba(255, 255, 255, 1)", "circle");
+      }
     });
   };
 

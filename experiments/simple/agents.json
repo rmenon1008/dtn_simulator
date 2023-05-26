@@ -2,11 +2,11 @@
   "agent_defaults": {
     "type": "simple",
     "radio": {
-      "detection_thresh": -80,
-      "connection_thresh": -10
+      "detection_thresh": -135,
+      "connection_thresh": -40
     },
     "movement": {
-      "speed": 4
+      "speed": 20
     }
   },
   "agents": [
@@ -16,7 +16,7 @@
       "movement": {
         "pattern": "fixed",
         "options": {
-          "pos": [200, 325]
+          "pos": [1950, 285]
         }
       }
     },
@@ -31,7 +31,7 @@
       "movement": {
         "pattern": "spiral",
         "options": {
-          "center": [800, 325],
+          "center": [720, 1000],
           "separation": 20
         }
       }

@@ -3,6 +3,7 @@ import mesa
 from agent.agent_common import try_getting, least_squares_convergence
 from peripherals.movement import Movement
 from peripherals.radio import Radio
+from peripherals.convergence import Convergence
 
 class SimpleAgent(mesa.Agent):
     # Maximum length of the history to keep. Prevents the simulation from slowing down.
@@ -11,7 +12,6 @@ class SimpleAgent(mesa.Agent):
     def __init__(self, model, node_options):
         super().__init__(node_options["id"], model)
         self.name = try_getting(node_options, "name", default=None)
-        self.history = []
         self.special_behavior = try_getting(node_options, "special_behavior", default={})
         
         # Peripherals
@@ -21,14 +21,8 @@ class SimpleAgent(mesa.Agent):
         self.movement = Movement(self, model, node_options["movement"])
         self.radio = Radio(self, model, node_options["radio"])
 
-    def update_history(self):
-        # Keep a list of past positions and radio states
-        # Used for least squares convergence right now
-        self.history.append({
-            "pos": self.pos,
-            "radio": self.radio.get_state(),
-        })
-        self.history = self.history[-self.MAX_HISTORY_LENGTH:]
+        target = try_getting(node_options, "special_behavior", "options", "target_id", default="all")
+        self.convergence = Convergence(self, model, target)
     
     def step(self):
         # @Everyone: This function gets called every step of the simulation by the model
@@ -36,31 +30,16 @@ class SimpleAgent(mesa.Agent):
 
         # Update our peripherals
         self.movement.refresh()
+        self.convergence.refresh()
         self.radio.refresh()
-        self.update_history()
 
         # Special behavior
         if self.special_behavior is not None:
             sb_type = try_getting(self.special_behavior, "type", default=None)
 
-            # @Alex @Andrew: "special behavior" is an agent parameter that gets run instead
-            #                of the normal movement pattern. Right now, the only implemented
-            #                special behavior is least squares convergence, but we can add
-            #                different convergence algorithms as well.
-
             if sb_type == "least_squares_convergence":
-                # Move towards a target based on RSSI
-
-                # We pass this method our entire agent, so it has access to 
-                # everything the agent has, including its peripherals.
-                least_squares_convergence(self)
-
-            elif sb_type == "other_alg":
-                # Do something else
-                pass
-            
+                self.convergence.step()
             else:
-                # Just move based on the movement pattern
                 self.movement.step()
 
     def get_state(self):
@@ -68,6 +47,7 @@ class SimpleAgent(mesa.Agent):
             "id": self.unique_id,
             "name": self.name,
             "pos": self.pos,
-            "history": self.history,
             "radio": self.radio.get_state(),
+            "movement": self.movement.get_state(),
+            "history": self.convergence.history,
         }

@@ -22,6 +22,43 @@ def merge(source, destination):
             destination.setdefault(key, value)
     return destination
 
+def bresenham(x0, y0, x1, y1):
+    """Yield integer coordinates on the line from (x0, y0) to (x1, y1).
+
+    Input coordinates should be integers.
+
+    The result will contain both the start and the end point.
+    """
+    dx = x1 - x0
+    dy = y1 - y0
+
+    xsign = 1 if dx > 0 else -1
+    ysign = 1 if dy > 0 else -1
+
+    dx = abs(dx)
+    dy = abs(dy)
+
+    if dx > dy:
+        xx, xy, yx, yy = xsign, 0, 0, ysign
+    else:
+        dx, dy = dy, dx
+        xx, xy, yx, yy = 0, ysign, xsign, 0
+
+    D = 2*dy - dx
+    y = 0
+
+    points = []
+
+    for x in range(dx + 1):
+        # yield x0 + x*xx + y*yx, y0 + x*xy + y*yy
+        points.append((x0 + x*xx + y*yx, y0 + x*xy + y*yy))
+        if D >= 0:
+            y += 1
+            D -= 2*dx
+        D += 2*dy
+
+    return points
+
 
 class LoadLayers():
     def __init__(self, floorplan_path:str) -> None:
@@ -150,9 +187,35 @@ class LunarModel(mesa.Model):
 
         self.grid_step = 10
         l = LoadLayers("./floor_plans/small_basement.png")
-        self.grid = l.convert_plan(downsmpl=3)
-        self.rssi_layer = (np.flipud(l.load_grid("./grid_layers/interpolate_rssi.layer"))).tolist()
-        # self.rssi_layer = (np.fliplr(self.rssi_layer)).tolist()
+        if self.model_params["enable_walls"]:
+            self.grid = l.convert_plan(downsmpl=3)
+        else:
+            self.grid = np.zeros(np.shape(l.convert_plan(downsmpl=3))).tolist()
+
+        if self.model_params["rssi_source"] == "real_data":
+            self.rssi_layer = (np.flipud(l.load_grid("./grid_layers/interpolate_rssi.layer"))).tolist()
+            
+        elif self.model_params["rssi_source"] == "shadowing":
+            self.rssi_layer = np.zeros(np.shape(self.grid)).tolist()
+            for y in range(len(self.grid)):
+                for x in range(len(self.grid[0])):
+                    # Find the number of grid pixels that are filled in between the agents
+                    # This is the number of walls that block the signal
+                    fixed_x = int(1950/ self.grid_step)
+                    fixed_y = int(285 / self.grid_step)
+
+                    walls = self.walls_in_between((x, y), (fixed_x, fixed_y))
+
+                    distance = math.sqrt((x - fixed_x)**2 + (y - fixed_y)**2)
+                    if distance == 0:
+                        self.rssi_layer[y][x] = 0
+                        continue
+
+                    # noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
+                    self.rssi_layer[y][x] =  10 * 2.5 * math.log10(1/(distance * self.grid_step + 100*walls)) #+ noise
+
+        else:
+            self.rssi_layer = np.zeros(np.shape(self.grid)).tolist()
 
         assert(np.shape(self.grid) == np.shape(self.rssi_layer))
 
@@ -196,6 +259,20 @@ class LunarModel(mesa.Model):
             self.schedule.add(a)
             self.space.place_agent(a, options["pos"])
 
+    def walls_in_between(self, pos1, pos2):
+        points = bresenham(pos1[0], pos1[1], pos2[0], pos2[1])
+
+        # Count the number of walls that block the signal
+        walls = 0
+        for p in points:
+            try:
+                if self.grid[p[1]][p[0]] == 1:
+                    walls += 1
+            except:
+                pass
+
+        return walls
+
     def step(self):
         # This calls step() on all the agents
         self.schedule.step()
@@ -221,9 +298,31 @@ class LunarModel(mesa.Model):
         # clean_rssi = 10 * 2.5 * math.log10(1/distance)
         # noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
         # return clean_rssi + noise
-        idx_y = math.floor(agent.pos[1] / self.grid_step)
-        idx_x = math.floor(agent.pos[0] / self.grid_step)
-        return self.rssi_layer[idx_y][idx_x]
+
+        # I created a new parameter to choose the source of the rssi values
+        rssi_source = self.model_params.get("rssi_source", "path_loss")
+
+        if rssi_source == "real_data":
+            idx_y = math.floor(agent.pos[1] / self.grid_step)
+            idx_x = math.floor(agent.pos[0] / self.grid_step)
+            return self.rssi_layer[idx_y][idx_x]
+        
+        elif rssi_source == "shadowing":
+            idx_y = math.floor(agent.pos[1] / self.grid_step)
+            idx_x = math.floor(agent.pos[0] / self.grid_step)
+            noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
+            return self.rssi_layer[idx_y][idx_x] + noise
+
+        else:
+            distance = self.space.get_distance(agent.pos, other.pos)
+            if distance == 0:
+                return 0
+            clean_rssi = 10 * 2.5 * math.log10(1/distance)
+            noise = self.random.gauss(0, self.model_params["rssi_noise_stdev"])
+            print(noise)
+            return clean_rssi + noise
+        
+
 
     def estimate_distance_from_rssi(self, rssi):
         """

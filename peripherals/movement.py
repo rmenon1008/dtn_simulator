@@ -11,6 +11,7 @@ class Movement():
     def __init__(self, agent, model, movement_options):
         self.agent = agent
         self.model = model
+        self.type = movement_options["pattern"]
         self.pattern = generate_pattern(movement_options)
         self.max_speed = movement_options["speed"]
 
@@ -44,6 +45,12 @@ class Movement():
     def is_close_to_point(self, pos, eps=0.01):
         pos2 = self.agent.pos
         return (pos[0] - pos2[0])**2 + (pos[1] - pos2[1])**2 < eps**2
+    
+    def get_state(self):
+        return {
+            "type": self.type,
+            "target_pos": self.target_pos,
+        }
 
     def step(self):
         if self.is_close_to_point(self.target_pos):
