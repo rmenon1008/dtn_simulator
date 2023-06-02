@@ -11,16 +11,20 @@
   },
   "agents": [
     {
-      "name": "Fixed agent",
+      "name": "base_station",
       "id": 1,
       "movement": {
         "pattern": "fixed",
         "options": {
-          "pos": [1950, 285]
+          "pos": [
+            1950,
+            285
+          ]
         }
       }
     },
     {
+      "name": "mobile_rover",
       "id": 2,
       "special_behavior": {
         "type": "least_squares_convergence",
@@ -31,7 +35,10 @@
       "movement": {
         "pattern": "spiral",
         "options": {
-          "center": [720, 1000],
+          "center": [
+            1520,
+            700
+          ],
           "separation": 20
         }
       }

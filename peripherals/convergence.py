@@ -31,9 +31,12 @@ class Convergence:
                             self.agent.special_behavior["type"] = None
                             self.agent.movement.stop()
 
-        positions = np.array(positions[-10:]) 
-        rssis = np.array(rssis[-10:])
+                        # if self.agent.model.space.get_distance(self.agent.pos, h["pos"]) < 10:
+                        #     self.agent.special_behavior["type"] = None
+                        #     self.agent.movement.stop()
 
+        positions = np.array(positions[-1000:]) 
+        rssis = np.array(rssis[-1000:])
 
         if len(positions) < 10:
             self.agent.movement.step()
@@ -59,11 +62,15 @@ class Convergence:
         int_pos = (int(self.agent.pos[0]), int(self.agent.pos[1]))
         int_target = (int(a), int(b))
 
-        if self.agent.model.space.out_of_bounds((a, b)) or self.agent.model.pos_invalid((a, b)) or self.agent.model.walls_in_between(int_pos, int_target) > 0:
-            # self.agent.movement.move_towards(self.agent.movement.target_pos)
-            self.agent.movement.step()
-            return
+        # if self.agent.model.space.out_of_bounds((a, b)):
+        #     # self.agent.movement.move_towards(self.agent.movement.target_pos)
+        #     # self.agent.movement.step()
+
+        #     # Move randomly
+        #     target_pos = (np.random.randint(-self.agent.movement.max_speed, self.agent.movement.max_speed), np.random.randint(-self.agent.movement.max_speed, self.agent.movement.max_speed))
+        #     self.agent.movement.move(*target_pos)
+        #     return
         
         self.agent.movement.target_pos = (a, b)
-        print(self.agent.model.walls_in_between(int_pos, int_target))
         self.agent.movement.move_towards((a, b))
+        print("Moving towards", (a, b))

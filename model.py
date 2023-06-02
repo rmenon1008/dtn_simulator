@@ -348,7 +348,7 @@ class LunarModel(mesa.Model):
             if other is not agent:
                 rssi = self.get_rssi(agent, other)
                 if rssi >= det_thresh:
-                    connected = rssi >= con_thresh
+                    connected = self.space.get_distance(agent.pos, other.pos) <= 20
                     neighbors.append({
                         "id": other.unique_id,
                         "rssi": rssi,
